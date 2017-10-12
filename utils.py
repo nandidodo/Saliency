@@ -13,4 +13,20 @@ def save(obj, fname):
 
 def load(fname):
 	return pickle.load(open(fname, 'rb'))
+
+def show_colour_splits(img, show_original = True):
+	#assumes img is 4d so we can split along the colour	
+	if show_original:
+		print "ORIGINAL:"
+		plt.imshow(img)
+		plt.show()
+	print "RED:"
+	plt.imshow(img[:,:,0])
+	plt.show()
+	print "GREEN:"
+	plt.imshow(img[:,:,1])
+	plt.show()
+	print "BLUE:"
+	plt.imshow(img[:,:,2])
+	plt.show()
 	

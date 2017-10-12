@@ -25,8 +25,8 @@ def collect_images(dirname,num_images,crop_size=None, mode='RGB'):
 	imglist = []
 	if crop_size is not None:
 		for i in xrange(num_images):
-			fname = dirname + 'i'+(i+1)+'.jpg'
-			img = imresize(imread(fname, mode=mode), crop_size))
+			fname = dirname + 'i'+str((i+1))+'.jpg'
+			img = imresize(imread(fname, mode=mode), crop_size)
 			imglist.append(img)
 	
 		#we turn imglist into a flat array and return it
@@ -39,6 +39,10 @@ def collect_images(dirname,num_images,crop_size=None, mode='RGB'):
 	
 	imglist = np.array(imglist)
 	return imglist
+
+def read_image(num, dirnme = dirname, mode='RGB'):
+	fname = dirname + 'i' + str(num) +'.jpg'
+	return imread(fname, mode=mode)
 	
 def save_images(imgarray, save_dir, save_name, N_splits = None):
 	if N_splits is None:
@@ -52,6 +56,14 @@ def save_images(imgarray, save_dir, save_name, N_splits = None):
 			fname = save_dir + save_name +'_'+i
 			save(arr, fname)
 
+def split_img_on_colour(img, mode='RGB'):
+	
+	if mode== 'RGB':
+		red = img[0,:,:]
+		blue = img[1,:,:]
+		green = img[2,:,:]
+		return [red, blue, green]
+	
 
 			
 
