@@ -10,7 +10,7 @@ from keras.datasets import cifar10
 from keras.layers import *
 from keras.models import Model
 from keras.constraints import maxnorm
-from keras.optimizers import SGD
+from keras import optimizers
 from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
 from keras.utils import np_utils
@@ -20,19 +20,20 @@ from file_reader import *
 from utils import *
 
 
+
 def plot_sample_results(inputs, preds, N = 10, start = 0):
 	plt.figure(figsize=(20,4))
 	for i in range(N):
 		#display original
 		ax = plt.subplot(2,N,i+1)
-		plt.imshow(inputs[start + i].reshape(28,28))
+		plt.imshow(inputs[start + i].reshape(32,32))
 		plt.gray()
 		ax.get_xaxis().set_visible(False)
 		ax.get_yaxis().set_visible(False)
 
 		#display reconstructoin
 		ax = plt.subplot(2, N, i+1+N)
-		plt.imshow(preds[start + i].reshape(28,28))
+		plt.imshow(preds[start + i].reshape(32,32))
 		plt.gray()
 		ax.get_xaxis().set_visible(False)
 		ax.get_yaxis().set_visible(False)
@@ -49,7 +50,7 @@ def plot_error_map(error_map):
 def plot_error_maps(error_maps, N= 10, start = 0):
 	for i in xrange(N):
 		#we get the index and reshape all in one!
-		plot_error_map(np.reshape(error_maps[start+i,:,:,:], [28,28]))
+		plot_error_map(np.reshape(error_maps[start+i,:,:,:], [32,32]))
 
 def generate_salience_trace(error_map, N = 255):
 	salience_arr = np.zeros(error_map.shape)
@@ -63,6 +64,26 @@ def generate_salience_trace(error_map, N = 255):
 		salience_arr[max_index] = N
 	
 	return salience_arr
+
+
+def salience_trace_with_gaussians(error_map, N = 5, std=4):
+	#first we get our gaussians
+	gauss_means = []
+	for i in range(N,0,-1):
+		map_index = np.argmax(error_map)
+		error_map[map_index] = 0
+		gauss_means.append(map_index)
+
+	sal_map = np.zeros(error_map.shape)
+	
+	for a in xrange(len(error_map[:,1]):
+		for b in xrange(len(error_map[1,:]):
+			for c in xrange(len(gauss_means)):
+				sal_map[a][b] += (1.0/index_distance([a,b], gauss_means[c]))* np.abs(np.random.normal(0, std))
+
+
+	#this i sa realy hacky and horrible way of doing it, but it might work! to produce something vaguelly gaussianly smoothed!
+	return sal_mal
 		
 
 def show_salience_traces(error_maps, N=10, start = 0):
@@ -84,7 +105,7 @@ def split_img_by_colour(img):
 	return [red, blue, green]
 
 #set image ordering
-K.set_image_dim_ordering('th')
+#K.set_image_dim_ordering('th')
 
 #load our data
 (xtrain, ytrain), (xtest, ytest) = cifar10.load_data()
@@ -101,13 +122,26 @@ xtest = xtest.astype('float32')
 xtrain = xtrain/255.0
 xtest = xtest/255.0 # 0 to make sure it's a floating point division
 
+print xtrain.shape
+print xtest.shape
+
 # reshape for mnist
-xtrain= np.reshape(xtrain, (len(xtrain), 32,32,1))
-xtest= np.reshape(xtest, (len(xtest), 32,32,1))
+#xtrain= np.reshape(xtrain, (len(xtrain), 3,32,32))
+#xtest= np.reshape(xtest, (len(xtest), 3,32,32))
 
 #split into red green blue
 redtrain, greentrain, bluetrain = split_dataset_by_colour(xtrain)
 redtest, greentest, bluetest = split_dataset_by_colour(xtest)
+
+print redtrain.shape
+print redtest.shape
+redtrain = np.reshape(redtrain, (len(redtrain), 32,32,1))
+greentrain = np.reshape(greentrain, (len(greentrain), 32,32,1))
+bluetrain = np.reshape(bluetrain, (len(bluetrain), 32,32,1))
+redtest = np.reshape(redtest, (len(redtest), 32,32,1))
+greentest = np.reshape(greentest, (len(greentest), 32,32,1))
+bluetest = np.reshape(bluetest, (len(bluetest), 32,32,1))
+
 
 #one hot encode outputs
 #ytrain = np_utils.to_categorical(ytrain)
@@ -122,52 +156,86 @@ activation = 'relu'
 
 #training params
 lrate = 0.01
-epochs = 1
+epochs = 20
 batch_size = 64
 shuffle = True
 
 
 
 # okay, our convolutional autoencoder for stuff
-input_img = Input(shape=(28,28,1))
+print "MODEL SHAPES: "
+print "  "
+input_img = Input(shape=(32,32,1))
+print input_img.shape
+print "  "
 
 x = Conv2D(16, (3, 3), activation='relu', padding='same')(input_img)
-x = MaxPooling2D((2, 2), padding='same')(x)
+print x.shape
+#x = MaxPooling2D((2, 2), padding='same')(x)
+#print x.shape
 x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-x = MaxPooling2D((2, 2), padding='same')(x)
+print x.shape
+#x = MaxPooling2D((2, 2), padding='same')(x)
+#print x.shape
 x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
+print x.shape
 encoded = MaxPooling2D((2, 2), padding='same')(x)
+print encoded.shape
+print "  "
 
 # at this point the representation is (4, 4, 8) i.e. 128-dimensional
 
 x = Conv2D(8, (3, 3), activation='relu', padding='same')(encoded)
+print x.shape
 x = UpSampling2D((2, 2))(x)
+print x.shape
 x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-x = UpSampling2D((2, 2))(x)
-x = Conv2D(16, (3, 3), activation='relu')(x)
-x = UpSampling2D((2, 2))(x)
+print x.shape
+#x = UpSampling2D((2, 2))(x)
+#print x.shape
+x = Conv2D(16, (3, 3), activation='relu', padding='same')(x)
+print x.shape
+#x = UpSampling2D((2, 2))(x)
+#print x.shape
 decoded = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
+print decoded.shape
+print "  "
+print redtrain.shape
+
+# like I mean this isn't functoinal because we're whacked out thing wrong, not probably having anything to do with the split brin idea, but smiply because it's just so bad. although to be perfeclty honest for all we know it could just not work. I honestly don't know. I could leave this running overnight to see if we get anything good. it doesn't seem - TOO deathly, but I don't know. I had to mess aroud really badly with the dimensions to get it to work, and I dno't really understand how the dimensions work, so it's probably me doing something horrible to the images which makes it impossible to learn vs anything in particular, but we can try!
 
 # now we define our model andcombine
 autoencoder = Model(input_img, decoded)
-autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
+optimizer = optimizers.SGD(lr = lrate, decay=1e-6, momentum=0.9, nesterov=True)
+autoencoder.compile(optimizer=optimizer, loss='binary_crossentropy')
 # we train
-autoencoder.fit(redtrain, greentrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(redtest, greentest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
+autoencoder.fit(redtrain, redtrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(redtest, redtest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
 
 
 # once trained we then move onto getting our predictions
-preds = autoencoder.predict(greentest)
+preds = autoencoder.predict(redtest)
+
+55.9648924  maps:52:9
+-3.1866092
 
 # we see our sample results
-plot_sample_results(xtest, preds)
+print "  "
+print "results: greentest, preds:"
+print greentest.shape
+print preds.shape
+plot_sample_results(redtest, preds)
 
 # we generate the error maps here
-error_maps = generate_error_maps(xtest, preds)
+error_maps = generate_error_maps(redtest, preds)
 print error_maps.shape
 
 # a quick save here
-##fname = "error_map_test"
-#save(error_maps, fname)
+fname = "cifar_error_map_preliminary_no_split"
+save(error_maps, fname)
+fname2 = "cifar_predictions_preliminary_no_split"
+save(preds, fname2)
+#fname3 = "cifar_greentest"
+#save(preds, greentest)
 
 #print error_maps[1,:,:,:].shape
 #print error_maps[1].shape

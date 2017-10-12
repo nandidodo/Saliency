@@ -29,4 +29,14 @@ def show_colour_splits(img, show_original = True):
 	print "BLUE:"
 	plt.imshow(img[:,:,2])
 	plt.show()
+
+
+def index_distance(indices1, indices2):
+	#this finds the euclidian distance. we probably don't realy want any other type tbh
+	assert len(indices1) == len(indices2),'indices must have same dimension'
+	total = 0
+	for i in xrange(len(indices1):
+		total += (indices1[i] - indices2[i]) **2
+	return np.sqrt(total)
+		
 	
