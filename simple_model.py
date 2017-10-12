@@ -14,6 +14,8 @@ from keras.layers.convolutional import MaxPooling2D
 from keras.utils import np_utils
 from keras import backend as K
 from keras.callbacks import TensorBoard
+from file_reader import *
+from utils import *
 
 
 def plot_sample_results(inputs, preds, N = 10, start = 0):
@@ -44,7 +46,8 @@ def plot_error_map(error_map):
 
 def plot_error_maps(error_maps, N= 10, start = 0):
 	for i in xrange(N):
-		plot_error_map(error_maps[start + i, :,:,:])
+		#we get the index and reshape all in one!
+		plot_error_map(np.reshape(error_maps[start+i,:,:,:], [28,28]))
 
 def generate_salience_trace(error_map, N = 255):
 	salience_arr = np.zeros(error_map.shape)
@@ -114,7 +117,7 @@ activation = 'relu'
 
 #training params
 lrate = 0.01
-epochs = 1
+epochs = 10
 batch_size = 64
 shuffle = True
 
@@ -156,6 +159,13 @@ plot_sample_results(xtest, preds)
 # we generate the error maps here
 error_maps = generate_error_maps(xtest, preds)
 print error_maps.shape
+
+# a quick save here
+##fname = "error_map_test"
+#save(error_maps, fname)
+
+#print error_maps[1,:,:,:].shape
+#print error_maps[1].shape
 
 # we lpot some error maps
 plot_error_maps(error_maps)
