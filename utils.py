@@ -35,8 +35,21 @@ def index_distance(indices1, indices2):
 	#this finds the euclidian distance. we probably don't realy want any other type tbh
 	assert len(indices1) == len(indices2),'indices must have same dimension'
 	total = 0
-	for i in xrange(len(indices1):
+	for i in xrange(len(indices1)):
 		total += (indices1[i] - indices2[i]) **2
 	return np.sqrt(total)
-		
+
+def max_index_in_array(arr):
+	#only works for 2d arrays atm
+	maxval = 0
+	shape = arr.shape
+	indices = [0,0]
+
+	for i in xrange(shape[0]):
+		for j in xrange(shape[1]):
+			if arr[i][j]>maxval:
+				maxval = arr[i][j]
+				indices=[i,j]
+	
+	return indices
 	

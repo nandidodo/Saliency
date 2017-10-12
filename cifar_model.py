@@ -20,20 +20,19 @@ from file_reader import *
 from utils import *
 
 
-
 def plot_sample_results(inputs, preds, N = 10, start = 0):
 	plt.figure(figsize=(20,4))
 	for i in range(N):
 		#display original
 		ax = plt.subplot(2,N,i+1)
-		plt.imshow(inputs[start + i].reshape(32,32))
+		plt.imshow(inputs[start + i].reshape(shape,shape))
 		plt.gray()
 		ax.get_xaxis().set_visible(False)
 		ax.get_yaxis().set_visible(False)
 
 		#display reconstructoin
 		ax = plt.subplot(2, N, i+1+N)
-		plt.imshow(preds[start + i].reshape(32,32))
+		plt.imshow(preds[start + i].reshape(shape,shape))
 		plt.gray()
 		ax.get_xaxis().set_visible(False)
 		ax.get_yaxis().set_visible(False)
@@ -50,18 +49,22 @@ def plot_error_map(error_map):
 def plot_error_maps(error_maps, N= 10, start = 0):
 	for i in xrange(N):
 		#we get the index and reshape all in one!
-		plot_error_map(np.reshape(error_maps[start+i,:,:,:], [32,32]))
+		plot_error_map(np.reshape(error_maps[start+i,:,:,:], [shape,shape]))
 
-def generate_salience_trace(error_map, N = 255):
+def generate_salience_trace(error_map, N = 15):
 	salience_arr = np.zeros(error_map.shape)
 	# we loop backwards because we want the first values to be the highest
 	for i in range(N, 0, -1):
 		#we get the max index
-		max_index = np.argmax(error_map)
+		#max_index = np.argmax(error_map)
 		#we set that point on the error map as 0
-		error_map[max_index] = 0
+		#error_map[max_index] = 0
 		# we set the new point on the salience map as the value
-		salience_arr[max_index] = N
+		#salience_arr[max_index] = N
+
+		indices = max_index_in_array(error_map)
+		error_map[indices[0]][indices[1]] = 0
+		salience_arr[indices[0]][indices[1]] = i
 	
 	return salience_arr
 
@@ -70,25 +73,28 @@ def salience_trace_with_gaussians(error_map, N = 5, std=4):
 	#first we get our gaussians
 	gauss_means = []
 	for i in range(N,0,-1):
-		map_index = np.argmax(error_map)
-		error_map[map_index] = 0
-		gauss_means.append(map_index)
+		indices = max_index_in_array(error_map)
+		error_map[indices[0]][indices[1]] = 0
+		gauss_means.append(indices)
 
 	sal_map = np.zeros(error_map.shape)
 	
-	for a in xrange(len(error_map[:,1]):
-		for b in xrange(len(error_map[1,:]):
+	for a in xrange(len(error_map[:,1])):
+		for b in xrange(len(error_map[1,:])):
 			for c in xrange(len(gauss_means)):
 				sal_map[a][b] += (1.0/index_distance([a,b], gauss_means[c]))* np.abs(np.random.normal(0, std))
 
 
 	#this i sa realy hacky and horrible way of doing it, but it might work! to produce something vaguelly gaussianly smoothed!
-	return sal_mal
+	return sal_map
 		
 
-def show_salience_traces(error_maps, N=10, start = 0):
+def show_salience_traces(error_maps, N=10, start = 0, salience_func=generate_salience_trace):
+	#we do the reshaping here for ease
+	N = len(error_maps)
+	error_maps = np.reshape(error_maps, (N, shape, shape))
 	for i in xrange(N):
-		plt.imshow(generate_salience_trace(error_maps[i]))
+		plt.imshow(salience_func(error_maps[i]))
 		plt.show()
 
 
@@ -154,9 +160,12 @@ conv_kernel = (3,3)
 pool_kernel = (2,2)
 activation = 'relu'
 
+#data params:
+shape = 32
+
 #training params
 lrate = 0.01
-epochs = 20
+epochs = 1
 batch_size = 64
 shuffle = True
 
@@ -209,30 +218,27 @@ autoencoder = Model(input_img, decoded)
 optimizer = optimizers.SGD(lr = lrate, decay=1e-6, momentum=0.9, nesterov=True)
 autoencoder.compile(optimizer=optimizer, loss='binary_crossentropy')
 # we train
-autoencoder.fit(redtrain, redtrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(redtest, redtest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
+autoencoder.fit(redtrain, greentrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(redtest, greentest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
 
 
 # once trained we then move onto getting our predictions
-preds = autoencoder.predict(redtest)
-
-55.9648924  maps:52:9
--3.1866092
+preds = autoencoder.predict(greentest)
 
 # we see our sample results
 print "  "
 print "results: greentest, preds:"
 print greentest.shape
 print preds.shape
-plot_sample_results(redtest, preds)
+plot_sample_results(greentest, preds)
 
 # we generate the error maps here
 error_maps = generate_error_maps(redtest, preds)
 print error_maps.shape
 
 # a quick save here
-fname = "cifar_error_map_preliminary_no_split"
+fname = "cifar_error_map_preliminary_split_test"
 save(error_maps, fname)
-fname2 = "cifar_predictions_preliminary_no_split"
+fname2 = "cifar_predictions_preliminary_split_test"
 save(preds, fname2)
 #fname3 = "cifar_greentest"
 #save(preds, greentest)
@@ -244,4 +250,7 @@ save(preds, fname2)
 plot_error_maps(error_maps)
 
 # we then generate some saliency maps off them and have a look
-#show_salience_traces(error_maps)
+show_salience_traces(error_maps)
+
+# and with the gaussians
+show_salience_traces(error_maps, salience_func=salience_trace_with_gaussians)
