@@ -17,19 +17,19 @@ from keras.utils import np_utils
 from keras import backend as K
 
 
-def plot_sample_results(N = 10, start = 0):
+def plot_sample_results(inputs, preds, N = 10, start = 0):
 	plt.figure(figsize=(20,4))
 	for i in range(N):
 		#display original
 		ax = plt.subplot(2,N,i+1)
-		plt.imshow(xtest[start + i].reshape(28,28))
+		plt.imshow(inputs[start + i].reshape(28,28))
 		plt.gray()
 		ax.get_xaxis().set_visible(False)
 		ax.get_yaxis().set_visible(False)
 
 		#display reconstructoin
 		ax = plt.subplot(2, N, i+1+N)
-		plt.imshow(decoded_imgs[start + i].reshape(28,28))
+		plt.imshow(preds[start + i].reshape(28,28))
 		plt.gray()
 		ax.get_xaxis().set_visible(False)
 		ax.get_yaxis().set_visible(False)
@@ -43,10 +43,29 @@ def plot_error_map(error_map):
 	plt.imshow(error_map)
 	plt.show()
 
+def plot_error_maps(error_maps, N= 10, start = 0):
+	for i in xrange(N):
+		plot_error_map(error_maps[start + i])
+
 def generate_salience_trace(error_map, N = 255):
 	salience_arr = np.zeros(error_map.shape)
-	for i in xrange(N):
+	# we loop backwards because we want the first values to be the highest
+	for i in range(N, 0, -1):
+		#we get the max index
+		max_index = np.argmax(error_map)
+		#we set that point on the error map as 0
+		error_map[max_index] = 0
+		# we set the new point on the salience map as the value
+		salience_arr[max_index] = N
+	
+	return salience_arr
 		
+
+def show_salience_traces(error_maps, N=10, start = 0):
+	for i in xrange(N):
+		plt.imshow(generate_salience_trace(error_maps[i])
+		plt.show()
+
 
 def split_dataset_by_colour(data):
 	red = data[:,:,:,0]
@@ -124,7 +143,17 @@ autoencoder.fit(xtrain, xtrain, epochs=epochs, batch_size=batch_size, shuffle=sh
 # once trained we then move onto getting our predictions
 preds = autoencoder.predict(xtest)
 
-# we then try to compare them to the thing
+# we see our sample results
+plot_sample_results(xtest, preds)
+
+# we generate the error maps here
+error_maps = generate_error_map(xtest, preds)
+
+# we lpot some error maps
+plot_error_maps(error_maps)
+
+# we then generate some saliency maps off them and have a look
+show_salience_traces(error_maps)
 
 
 
