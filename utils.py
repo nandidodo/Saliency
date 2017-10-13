@@ -52,4 +52,98 @@ def max_index_in_array(arr):
 				indices=[i,j]
 	
 	return indices
+
+def get_amplitude_spectrum(img, mult = 255, img_type = 'uint8', show = False, type_convert=True):
+	# first we get the fft of the image
+	img_amp = np.fft.fft2(img)
+	#then we turn it to the amplitude spectrum
+	img_amp = np.fft.fftshift(np.abs(img_amp))
+	#we ten take logarithms
+	img_amp = np.log(img_amp + 1e-8)
+	#we resscale to -1:+1 for displays
+	img_amp = (((img_amp - np.min(img_amp))*2)/np.ptp(img_amp)) -1
+	#we then multiply it out and cast it to type displayable in matplotlib
+	if type_convert:
+		img_amp = (img_amp * mult).astype(img_type)
+
+	else:
+		img_amp = img_amp * mult
+
+	#we then show if we want to
+	if show:
+		plt.imshow(img_amp)
+		plt.show()
+
+	#and then return
+	return img_amp
+
+def get_fft(img):
+	return np.fft.fft2(img)
+
+def get_magnitude_spectrum(img, show=False, type_convert=True, img_type='uint8'):
+	f = np.fft.fft2(img)
+	fshift = np.fft.fftshift(f)
+	magnitude_spectrum = 20*np.log(np.abs(fshift))
+	#print magnitude_spectrum
+	if type_convert:
+		magnitude_spectrum = magnitude_spectrum.astype(img_type)
+	
+	if show:
+		#we plot the original image
+		plt.subplot(121)
+		plt.imshow(img, cmap='gray')
+		plt.title('Original Image')
+		plt.xticks([])
+		plt.yticks([])
+	
+	#transformed image
+		plt.subplot(131)
+		plt.imshow(magnitude_spectrum, cmap='gray')
+		plt.title('Magnitude Spectrum')
+		plt.xticks([])
+		plt.yticks([])
+		plt.show()
+
+	#we then return the magnitude spectrum
+	return magnitude_spectrum
+
+def get_fft_shift(img):
+	f = np.fft.fft2(img)
+	return np.fft.fftshift(f)
+		
+
+
+def high_pass_filter(img, filter_width = 30, show = False):
+
+	fshift = get_fft_shift(img)
+
+
+	rows, cols, channels = img.shape
+	crow, ccol = rows/2, cols/2
+	#we remove low pass filters by simply dumping a masking window of 60 pixels width across the miage, fshift is the functiondefined to do tht
+	fshift[crow-filter_width: crow+filter_width, ccol-filter_width: ccol+filter_width] = 0
+	#we start to transform it back
+	f_ishift = np.fft.ifftshift(fshift)
+	img_back = np.fft.ifft2(f_ishift)
+	img_back = np.abs(img_back)
+
+	if show:
+		#get original image
+		plt.subplot(121)
+		plt.imshow(img, cmap='gray')
+		plt.title('Input Image')
+		plt.xticks([])
+		plt.yticks([])
+
+		#plot filtered image
+		plt.subplot(122)
+		plt.imshow(img_back, cmap='gray')
+		plt.title('Image after HPF')
+		plt.xticks([])
+		plt.yticks([])
+		
+		plt.show()
+
+	return img_back
+	
 	
