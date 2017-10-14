@@ -113,10 +113,9 @@ def get_fft_shift(img):
 		
 
 
-def high_pass_filter(img, filter_width = 30, show = False):
+def high_pass_filter(img, filter_width = 10, show = False):
 
 	fshift = get_fft_shift(img)
-
 
 	rows, cols, channels = img.shape
 	crow, ccol = rows/2, cols/2
@@ -145,5 +144,20 @@ def high_pass_filter(img, filter_width = 30, show = False):
 		plt.show()
 
 	return img_back
+
+
+
+def mean_error_map(err_map1, err_map2):
+	# this really gets the mean
+	#asserts
+	shape = err_map1.shape
+	assert shape == err_map2.shape, 'Error maps are not compatible'
+	avg_map = np.zeros(shape)
+	for i in xrange(shape[0]):
+		for j in xrange(shape[1]):
+			avg_map[i][j] = (err_map1[i][j] + err_map2[i][j])/2.
+
+	return avg_map
+	
 	
 	
