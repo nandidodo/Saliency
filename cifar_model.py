@@ -42,6 +42,15 @@ def plot_sample_results(inputs, preds, N = 10, start = 0):
 def generate_error_maps(inputs, predictions):
 	return np.absolute(inputs-predictions)
 
+
+def generate_mean_maps(error_maps1, error_maps2, N = 10):
+	mean_maps = []
+	for i in xrange(N):
+		mean_maps.append(mean_map(error_maps1[i], error_maps2[i]))
+	mean_maps = np.array(mean_maps)
+	return mean_maps
+		
+
 def plot_error_map(error_map):
 	plt.imshow(error_map)
 	plt.show()
@@ -50,6 +59,12 @@ def plot_error_maps(error_maps, N= 10, start = 0):
 	for i in xrange(N):
 		#we get the index and reshape all in one!
 		plot_error_map(np.reshape(error_maps[start+i,:,:,:], [shape,shape]))
+
+def plot_mean_error_maps(mean_maps, N = 10):
+	mean_maps = reshape_into_image(mean_maps)
+	for i in xrange(N):
+		plt.imshow(mean_maps[i])
+		plt.show()
 
 def generate_salience_trace(error_map, N = 15):
 	salience_arr = np.zeros(error_map.shape)
@@ -86,6 +101,8 @@ def salience_trace_with_gaussians(error_map, N = 5, std=4):
 
 
 	#this i sa realy hacky and horrible way of doing it, but it might work! to produce something vaguelly gaussianly smoothed!
+	print type(sal_map)
+	print sal_map.shape
 	return sal_map
 		
 
@@ -109,6 +126,9 @@ def split_img_by_colour(img):
 	blue = img[:,:,1]
 	green = img[:,:,2]
 	return [red, blue, green]
+
+def reshape_into_image(img):
+	return np.reshape(img, (len(img), shape, shape))
 
 #set image ordering
 #K.set_image_dim_ordering('th')
@@ -211,8 +231,6 @@ print decoded.shape
 print "  "
 print redtrain.shape
 
-# like I mean this isn't functoinal because we're whacked out thing wrong, not probably having anything to do with the split brin idea, but smiply because it's just so bad. although to be perfeclty honest for all we know it could just not work. I honestly don't know. I could leave this running overnight to see if we get anything good. it doesn't seem - TOO deathly, but I don't know. I had to mess aroud really badly with the dimensions to get it to work, and I dno't really understand how the dimensions work, so it's probably me doing something horrible to the images which makes it impossible to learn vs anything in particular, but we can try!
-
 # now we define our model andcombine
 autoencoder = Model(input_img, decoded)
 optimizer = optimizers.SGD(lr = lrate, decay=1e-6, momentum=0.9, nesterov=True)
@@ -220,9 +238,20 @@ autoencoder.compile(optimizer=optimizer, loss='binary_crossentropy')
 # we train
 autoencoder.fit(redtrain, greentrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(redtest, greentest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
 
+# let's try a second autoencoder here, see if it works... if it does, it would be really awesome, as it would be super easy
+autoencoder2 = Model(input_img, decoded)
+optimizer = optimizers.SGD(lr = lrate, decay=1e-6, momentum=0.9, nesterov=True)
+autoencoder2.compile(optimizer=optimizer, loss='binary_crossentropy')
+# we train
+autoencoder2.fit(greentrain, redtrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(greentest, redtest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
+
 
 # once trained we then move onto getting our predictions
 preds = autoencoder.predict(greentest)
+preds2 = autoencoder.predict(redtest)
+
+mean_preds = mean_map(preds, preds2)
+plot_sample_results(greentest, mean_preds)
 
 # we see our sample results
 print "  "
@@ -233,13 +262,17 @@ plot_sample_results(greentest, preds)
 
 # we generate the error maps here
 error_maps = generate_error_maps(redtest, preds)
+error_maps2 = generate_error_maps(greentest, preds2)
 print error_maps.shape
 
+mean_maps = generate_mean_maps(error_maps, error_maps2)
+plot_mean_error_maps(mean_maps)
+
 # a quick save here
-fname = "cifar_error_map_preliminary_split_test"
-save(error_maps, fname)
-fname2 = "cifar_predictions_preliminary_split_test"
-save(preds, fname2)
+#fname = "cifar_error_map_preliminary_split_test"
+#save(error_maps, fname)
+##fname2 = "cifar_predictions_preliminary_split_test
+#save(preds, fname2)
 #fname3 = "cifar_greentest"
 #save(preds, greentest)
 
@@ -247,10 +280,10 @@ save(preds, fname2)
 #print error_maps[1].shape
 
 # we lpot some error maps
-plot_error_maps(error_maps)
+#plot_error_maps(error_maps)
 
 # we then generate some saliency maps off them and have a look
-show_salience_traces(error_maps)
+#show_salience_traces(error_maps)
 
 # and with the gaussians
-show_salience_traces(error_maps, salience_func=salience_trace_with_gaussians)
+#show_salience_traces(error_maps, salience_func=salience_trace_with_gaussians)

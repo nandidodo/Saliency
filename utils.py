@@ -147,7 +147,7 @@ def high_pass_filter(img, filter_width = 10, show = False):
 
 
 
-def mean_error_map(err_map1, err_map2):
+def mean_map(err_map1, err_map2):
 	# this really gets the mean
 	#asserts
 	shape = err_map1.shape
