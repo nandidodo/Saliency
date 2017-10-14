@@ -9,6 +9,7 @@ import cPickle as pickle
 #import cv2
 import cPickle as pickle
 from utils import *
+import os
 
 #I think the max size is 1024x784
 
@@ -39,6 +40,28 @@ def collect_images(dirname,num_images,crop_size=None, mode='RGB'):
 	
 	imglist = np.array(imglist)
 	return imglist
+
+
+def collect_files_and_images(rootdir, crop_size = default_size, mode='RGB', save = True, save_dir = None):
+	filelist = []
+	for subdir, dirs, files in os.walk(rootdir):
+		# this will save them all in one enormous file, which makes sense, but is dire
+		for file in files:
+			fname = os.fsdecode(file)
+			if filename.endswith(".jpg"):
+				#if it's jpg then its an image, so we're sorced
+				if crop_size is not None:
+					img = imresize(imread(filename, mode=mode), crop_size)
+				if crop_size is None:
+					img = imread(filename, mode=mode)
+				filelist.append(img)
+
+	filelist = np.array(filelist)
+	if save and save_dir is not None:
+		# we save
+		save_images(filelist, save_dir, save_name = "_data")
+	return filelist
+	
 
 def read_image(num, dirnme = dirname, mode='RGB'):
 	fname = dirname + 'i' + str(num) +'.jpg'
