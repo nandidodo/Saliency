@@ -4,6 +4,7 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 import cPickle as pickle
+from skimage import exposure
 
 
 #pickle loading and saving functoinality
@@ -52,6 +53,21 @@ def max_index_in_array(arr):
 				indices=[i,j]
 	
 	return indices
+
+
+def mean_map(err_map1, err_map2):
+	# this really gets the mean
+	#asserts
+	shape = err_map1.shape
+	assert shape == err_map2.shape, 'Error maps are not compatible'
+	avg_map = np.zeros(shape)
+	for i in xrange(shape[0]):
+		for j in xrange(shape[1]):
+			avg_map[i][j] = (err_map1[i][j] + err_map2[i][j])/2.
+
+	return avg_map
+
+
 
 def get_amplitude_spectrum(img, mult = 255, img_type = 'uint8', show = False, type_convert=True):
 	# first we get the fft of the image
@@ -146,18 +162,120 @@ def high_pass_filter(img, filter_width = 10, show = False):
 	return img_back
 
 
+# I can't realy claim credit for any of this. This is all copied from somewhere I forgot. But whoever they were, they did good
 
-def mean_map(err_map1, err_map2):
-	# this really gets the mean
-	#asserts
-	shape = err_map1.shape
-	assert shape == err_map2.shape, 'Error maps are not compatible'
-	avg_map = np.zeros(shape)
-	for i in xrange(shape[0]):
-		for j in xrange(shape[1]):
-			avg_map[i][j] = (err_map1[i][j] + err_map2[i][j])/2.
-
-	return avg_map
+def butter2d_lp(shape, f, n, pxd=1):
+    """Designs an n-th order lowpass 2D Butterworth filter with cutoff
+   frequency f. pxd defines the number of pixels per unit of frequency (e.g.,
+   degrees of visual angle)."""
+    pxd = float(pxd)
+    rows, cols = shape
+    x = np.linspace(-0.5, 0.5, cols)  * cols / pxd
+    y = np.linspace(-0.5, 0.5, rows)  * rows / pxd
+    radius = np.sqrt((x**2)[np.newaxis] + (y**2)[:, np.newaxis])
+    filt = 1 / (1.0 + (radius / f)**(2*n))
+    return filt
+ 
+def butter2d_bp(shape, cutin, cutoff, n, pxd=1):
+    """Designs an n-th order bandpass 2D Butterworth filter with cutin and
+   cutoff frequencies. pxd defines the number of pixels per unit of frequency
+   (e.g., degrees of visual angle)."""
+    return butter2d_lp(shape,cutoff,n,pxd) - butter2d_lp(shape,cutin,n,pxd)
+ 
+def butter2d_hp(shape, f, n, pxd=1):
+    """Designs an n-th order highpass 2D Butterworth filter with cutin
+   frequency f. pxd defines the number of pixels per unit of frequency (e.g.,
+   degrees of visual angle)."""
+    return 1. - butter2d_lp(shape, f, n, pxd)
+ 
+def ideal2d_lp(shape, f, pxd=1):
+    """Designs an ideal filter with cutoff frequency f. pxd defines the number
+   of pixels per unit of frequency (e.g., degrees of visual angle)."""
+    pxd = float(pxd)
+    rows, cols = shape
+    x = np.linspace(-0.5, 0.5, cols)  * cols / pxd
+    y = np.linspace(-0.5, 0.5, rows)  * rows / pxd
+    radius = np.sqrt((x**2)[np.newaxis] + (y**2)[:, np.newaxis])
+    filt = np.ones(shape)
+    filt[radius>f] = 0
+    return filt
+ 
+def ideal2d_bp(shape, cutin, cutoff, pxd=1):
+    """Designs an ideal filter with cutin and cutoff frequencies. pxd defines
+   the number of pixels per unit of frequency (e.g., degrees of visual
+   angle)."""
+    return ideal2d_lp(shape,cutoff,pxd) - ideal2d_lp(shape,cutin,pxd)
+ 
+def ideal2d_hp(shape, f, n, pxd=1):
+    """Designs an ideal filter with cutin frequency f. pxd defines the number
+   of pixels per unit of frequency (e.g., degrees of visual angle)."""
+    return 1. - ideal2d_lp(shape, f, n, pxd)
+ 
+def bandpass(data, highpass, lowpass, n, pxd, eq='histogram'):
+    """Designs then applies a 2D bandpass filter to the data array. If n is
+   None, and ideal filter (with perfectly sharp transitions) is used
+   instead."""
+    fft = np.fft.fftshift(np.fft.fft2(data))
+    if n:
+        H = butter2d_bp(data.shape, highpass, lowpass, n, pxd)
+    else:
+        H = ideal2d_bp(data.shape, highpass, lowpass, pxd)
+    fft_new = fft * H
+    new_image = np.abs(np.fft.ifft2(np.fft.ifftshift(fft_new)))    
+    if eq == 'histogram':
+        new_image = exposure.equalize_hist(new_image)
+    return new_image
 	
+def log_transformed_fft(img, show= False):
+	fft = np.fft.fftshift(np.fft.fft2(img))
+	log = np.log(np.abs(fft))
+	if show:
+		plt.imshow(log)
+		plt.show()
+	return log
+
+def lowpass_filter(img, show = False):
+	# we get the fast fourier transform (shifted) of the original image
+	fft = np.fft.fftshift(np.fft.fft2(img))
+	# weget the low pass filter
+	filt = butter2d_lp(img.shape, 0.2, 2, pxd = 43) # these aprams we need to experiment with
+	# we get the lowpass by multiplyingfilter with fft image
+	fft_new = fft * filt
+	# we then reconstruct the image
+	new_img = np.abs(np.fft.ifft2(np.fft.ifftshift(fft_new)))
+	# I don't know what this does, but it might be important
+	new_img = exposure.equalize_hist(new_img)
+	if show;
+		plt.imshow(new_img)
+		plt.show()
+	return new_img
+
+def highpass_filter(img, show = False):
+	fft = np.fft.fftshift(np.fft.fft2(img))
+	filt = butter2d_hp(img.shape, 0.2,2, pxd=43)
+	fft_new = fft * filt
+	new_img = np.abs(np.fft.ifft2(np.fft.ifftshift(fft_new)))
+	new_img = exposure.equalize_hist(new_img)
+	if show:
+		plt.imshow(new_img)
+		plt.show()
+	return new_img
+
+def bandpass_filter(img, show = False):
+	fft = np.fft.fftshift(np.fft.fft2(img))
+	filt = butter2d_bp(img.shape, 0.2,2, pxd=43)
+	fft_new = fft * filt
+	new_img = np.abs(np.fft.ifft2(np.fft.ifftshift(fft_new)))
+	new_img = exposure.equalize_hist(new_img)
+	if show:
+		plt.imshow(new_img)
+		plt.show()
+	return new_img
+
+	
+
+
+
+
 	
 	
