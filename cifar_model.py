@@ -56,9 +56,12 @@ def plot_error_map(error_map):
 	plt.show()
 
 def plot_error_maps(error_maps, N= 10, start = 0):
+	if len(error_maps.shape) == 4:
+		error_maps = np.reshape(error_maps, (len(error_maps), [shape, shape]))
 	for i in xrange(N):
 		#we get the index and reshape all in one!
-		plot_error_map(np.reshape(error_maps[start+i,:,:,:], [shape,shape]))
+		#plot_error_map(np.reshape(error_maps[start+i,:,:,:], [shape,shape]))
+		plot_error_map(error_maps[start+i])
 
 def plot_mean_error_maps(mean_maps, N = 10):
 	mean_maps = reshape_into_image(mean_maps)
@@ -127,9 +130,12 @@ def split_img_by_colour(img):
 	green = img[:,:,2]
 	return [red, blue, green]
 
-def reshape_into_image(img):
-	return np.reshape(img, (len(img), shape, shape))
 
+def gaussian_filter(img, sigma = 2):
+	# just to be safe
+	img = reshape_into_image(img)
+	return scipy.ndimage.filters.gaussian_filter(img, sigma)
+	
 #set image ordering
 #K.set_image_dim_ordering('th')
 
@@ -239,19 +245,19 @@ autoencoder.compile(optimizer=optimizer, loss='binary_crossentropy')
 autoencoder.fit(redtrain, greentrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(redtest, greentest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
 
 # let's try a second autoencoder here, see if it works... if it does, it would be really awesome, as it would be super easy
-autoencoder2 = Model(input_img, decoded)
-optimizer = optimizers.SGD(lr = lrate, decay=1e-6, momentum=0.9, nesterov=True)
-autoencoder2.compile(optimizer=optimizer, loss='binary_crossentropy')
+#autoencoder2 = Model(input_img, decoded)
+#optimizer = optimizers.SGD(lr = lrate, decay=1e-6, momentum=0.9, nesterov=True)
+#autoencoder2.compile(optimizer=optimizer, loss='binary_crossentropy')
 # we train
-autoencoder2.fit(greentrain, redtrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(greentest, redtest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
+#autoencoder2.fit(greentrain, redtrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(greentest, redtest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
 
 
 # once trained we then move onto getting our predictions
 preds = autoencoder.predict(greentest)
-preds2 = autoencoder.predict(redtest)
+#preds2 = autoencoder.predict(redtest)
 
-mean_preds = mean_map(preds, preds2)
-plot_sample_results(greentest, mean_preds)
+#mean_preds = mean_map(preds, preds2)
+#plot_sample_results(greentest, mean_preds)
 
 # we see our sample results
 print "  "
@@ -262,11 +268,22 @@ plot_sample_results(greentest, preds)
 
 # we generate the error maps here
 error_maps = generate_error_maps(redtest, preds)
-error_maps2 = generate_error_maps(greentest, preds2)
+#error_maps2 = generate_error_maps(greentest, preds2)
 print error_maps.shape
 
-mean_maps = generate_mean_maps(error_maps, error_maps2)
-plot_mean_error_maps(mean_maps)
+gauss_maps = gaussian_filter(error_maps)
+print "error_maps"
+print "  "
+plot_error_maps(error_maps)
+print "gauss smoothed error maps"
+print gauss_maps.shape
+print "  "
+plot_error_maps(gauss_maps)
+
+#mean_maps = generate_mean_maps(error_maps, error_maps2)
+#plot_mean_error_maps(mean_maps)
+
+# okay great. that worked. I mean at least the code worked. the aactual idea didn't but that's the way of the things. I suppose I'll need to at least get the spatial frequency thing working if I can, well, I have the downloaded code which can do that, and then I'll be just wonderfully fine. And then I an tell richard that I've got that working as well, which would be cool. if only I could get the gaussian smotthing thing working, and we'd be much beter off tbh, I'll ahve to look into that. applying a gaussian filter to an image. I'm sure there's a way to do that!
 
 # a quick save here
 #fname = "cifar_error_map_preliminary_split_test"

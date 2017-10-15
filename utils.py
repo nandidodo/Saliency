@@ -55,6 +55,22 @@ def max_index_in_array(arr):
 	return indices
 
 
+def compare_two_images(img1, img2, title1 = "", title2 = ""):
+		plt.subplot(121)
+		plt.imshow(img1, cmap='gray', aspect='auto')
+		plt.title(title1)
+		plt.xticks([])
+		plt.yticks([])
+
+		#plot filtered image
+		plt.subplot(122)
+		plt.imshow(img2, cmap='gray', aspect='auto')
+		plt.title(title2)
+		plt.xticks([])
+		plt.yticks([])
+		
+		plt.show()
+
 def mean_map(err_map1, err_map2):
 	# this really gets the mean
 	#asserts
@@ -67,6 +83,24 @@ def mean_map(err_map1, err_map2):
 
 	return avg_map
 
+
+def reshape_into_image(img):
+	shape = img.shape
+	print shape
+	print len(img)
+	if len(shape) ==4:
+		return np.reshape(img, (len(img), shape[1], shape[2]))
+	if len(shape)==3:
+		if shape[2] > 3:
+			# we assume that it's that we've got too many channels or something so we just return the img
+			return img
+		if shape[2] >1 and shape[2] <=3:
+			return img
+		if shape[2] ==1:
+			# this means that it needs the channel conversion for a single img	
+			return np.reshape(img, (shape[0], shape[1]))
+	#return np.reshape(img, (len(img), shape, shape))
+	return img
 
 
 def get_amplitude_spectrum(img, mult = 255, img_type = 'uint8', show = False, type_convert=True):
@@ -133,7 +167,7 @@ def high_pass_filter(img, filter_width = 10, show = False):
 
 	fshift = get_fft_shift(img)
 
-	rows, cols, channels = img.shape
+	rows, cols = img.shape
 	crow, ccol = rows/2, cols/2
 	#we remove low pass filters by simply dumping a masking window of 60 pixels width across the miage, fshift is the functiondefined to do tht
 	fshift[crow-filter_width: crow+filter_width, ccol-filter_width: ccol+filter_width] = 0
@@ -230,7 +264,19 @@ def log_transformed_fft(img, show= False):
 	fft = np.fft.fftshift(np.fft.fft2(img))
 	log = np.log(np.abs(fft))
 	if show:
-		plt.imshow(log)
+		plt.subplot(121)
+		plt.imshow(img, cmap='gray')
+		plt.title('Input Image')
+		plt.xticks([])
+		plt.yticks([])
+
+		#plot filtered image
+		plt.subplot(122)
+		plt.imshow(new_img, cmap='gray')
+		plt.title('Image after Lowpass Filter')
+		plt.xticks([])
+		plt.yticks([])
+		
 		plt.show()
 	return log
 
@@ -245,8 +291,20 @@ def lowpass_filter(img, show = False):
 	new_img = np.abs(np.fft.ifft2(np.fft.ifftshift(fft_new)))
 	# I don't know what this does, but it might be important
 	new_img = exposure.equalize_hist(new_img)
-	if show;
-		plt.imshow(new_img)
+	if show:
+		plt.subplot(121)
+		plt.imshow(img, cmap='gray')
+		plt.title('Input Image')
+		plt.xticks([])
+		plt.yticks([])
+
+		#plot filtered image
+		plt.subplot(122)
+		plt.imshow(new_img, cmap='gray')
+		plt.title('Image after HPF')
+		plt.xticks([])
+		plt.yticks([])
+		
 		plt.show()
 	return new_img
 
@@ -257,18 +315,44 @@ def highpass_filter(img, show = False):
 	new_img = np.abs(np.fft.ifft2(np.fft.ifftshift(fft_new)))
 	new_img = exposure.equalize_hist(new_img)
 	if show:
-		plt.imshow(new_img)
+		
+		#get original image
+		plt.subplot(121)
+		plt.imshow(img, cmap='gray')
+		plt.title('Input Image')
+		plt.xticks([])
+		plt.yticks([])
+
+		#plot filtered image
+		plt.subplot(122)
+		plt.imshow(new_img, cmap='gray')
+		plt.title('Image after Highpass filter')
+		plt.xticks([])
+		plt.yticks([])
+		
 		plt.show()
 	return new_img
 
 def bandpass_filter(img, show = False):
 	fft = np.fft.fftshift(np.fft.fft2(img))
-	filt = butter2d_bp(img.shape, 0.2,2, pxd=43)
+	filt = butter2d_bp(img.shape, 1.50001, 1.50002,2, pxd=43)
 	fft_new = fft * filt
 	new_img = np.abs(np.fft.ifft2(np.fft.ifftshift(fft_new)))
 	new_img = exposure.equalize_hist(new_img)
 	if show:
-		plt.imshow(new_img)
+		plt.subplot(121)
+		plt.imshow(img, cmap='gray')
+		plt.title('Input Image')
+		plt.xticks([])
+		plt.yticks([])
+
+		#plot filtered image
+		plt.subplot(122)
+		plt.imshow(new_img, cmap='gray')
+		plt.title('Image after Bandpass Filter')
+		plt.xticks([])
+		plt.yticks([])
+		
 		plt.show()
 	return new_img
 
