@@ -102,6 +102,14 @@ def reshape_into_image(img):
 	#return np.reshape(img, (len(img), shape, shape))
 	return img
 
+def process_img_array(imgarray, f):
+	imglist = []
+	for i in xrange(len(imgarray)):
+		newimg = f(imgarray[i])
+		imglist.append(newimg)
+	imglist = np.array(imglist)
+	return imglist
+
 
 def get_amplitude_spectrum(img, mult = 255, img_type = 'uint8', show = False, type_convert=True):
 	# first we get the fft of the image
