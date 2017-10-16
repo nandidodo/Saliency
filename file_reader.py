@@ -20,6 +20,7 @@ num_images = 300
 
 save_dir=''
 save_name = 'MIT300_pickle'
+default_size = (1024, 1024)
 N_splits = num_images
 
 def collect_images(dirname,num_images,crop_size=None, mode='RGB'):
@@ -61,6 +62,59 @@ def collect_files_and_images(rootdir, crop_size = default_size, mode='RGB', save
 		# we save
 		save_images(filelist, save_dir, save_name = "_data")
 	return filelist
+
+def print_dirs_files(rootdir):
+	for subdir, dirs, files in os.walk(rootdir):
+		print subdir
+		print "  "
+		print dirs
+		print "  "
+		print files
+		print "  "
+
+def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', save=True, save_dir='./'):
+	# we walk the filepath
+	#subdirs, dirs, files = os.walk(rootdir)
+	print os.walk(rootdir)
+	if not save:
+		total_list = []
+	for subdir, dirs, files in os.walk(rootdir):
+		filelist = []
+		
+		for f in files:
+			#check it's actually a jpg incase we have random junk in there
+			fname = os.decode(f)
+			if f.endswith(".jpg"):
+				if crop_size is not None:
+					img = imresize(imread(filename, mode=mode), crop_size)
+				if crop_size is None:
+					img = imread(filename, mode=mode)
+				filelist.append(img)
+		# now we get the name # split on slash
+		
+		splits = subdir.split("/")
+		#get the last split
+		name = splits[-1]
+		#check if we have an output file
+		if len(dirs) ==0:
+			name = splits[-2]
+			name = name + "_output"
+		#turn filelist into array
+		filelist = np.array(filelist)
+		# and then save 
+		if save:
+			save(filelist, save_dir + name)
+			print "SAVED: " + name
+		# if not save we return all our lists
+		if not save:
+			total_list.append(filelist)
+	if not save:
+		total_list = np.array(total_list)
+		return total_list
+
+	#iterate through subdirs
+	#for subdir in subdirs:
+		#print subdir
 	
 
 def read_image(num, dirnme = dirname, mode='RGB'):

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import keras
 from keras.datasets import cifar10
 
+
 img = read_image(20)
 #print img.shape
 #show_colour_splits(img)
@@ -33,6 +34,8 @@ img_amp_display = img_amp_display *255
 img_amp_display =  img_amp_display.astype('uint8')
 plt.imshow(img_amp_display)
 plt.show()"""
+
+"""
 
 # let's test our high pass filtering
 #get_amplitude_spectrum(img, show=True)
@@ -61,6 +64,12 @@ bpf = bandpass_filter(img, show=True)
 
 print "both"
 compare_two_images(lpf, hpf)
+"""
+
+# okay, we're going to test the filesystem stuff here
+rootdir = './testSet/Stimuli'
+#print_dirs_files(rootdir)
+save_images_per_directory(rootdir, save=False)
 
 
 
