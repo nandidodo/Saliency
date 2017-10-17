@@ -400,7 +400,16 @@ def bandpass_filter(img, show = False):
 	return new_img
 
 	
+def filter_dataset(dataset, f, N = -1):
+	#we're going to do this in a horrendously inefficient for loop. I don't see how we can necessarily do this in a vectorisedfashion
+	if N == -1:
+		N = len(dataset)
 
+	fftlist = []
+	for i in xrange(N):
+		fftlist.append(f(dataset[i]))
+	fftlist = np.array(fftlist)
+	return fftlist
 
 
 

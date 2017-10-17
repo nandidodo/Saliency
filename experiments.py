@@ -66,6 +66,31 @@ def load_half_split_cifar(col = 1):
 	half1test, half2test = split_image_dataset_into_halves(redtest)
 	
 	return half1train, half2train, half1test, half2test
+
+def load_spatial_frequency_split_cifar():
+	(xtrain, ytrain), (xtest,ytest) = cifar10.load_data()
+	xtrain = normalise(xtrain)
+	xtest = normalise(xtest)
+	
+	redtrain, greentrain, bluetrain = split_dataset_by_colour(xtrain)
+	redtest, greentest, bluetest = split_dataset_by_colour(xtest)
+
+	redtrain = np.reshape(redtrain, (len(redtrain), 32,32,1))
+	greentrain = np.reshape(greentrain, (len(greentrain), 32,32,1))
+	bluetrain = np.reshape(bluetrain, (len(bluetrain), 32,32,1))
+	redtest = np.reshape(redtest, (len(redtest), 32,32,1))
+	greentest = np.reshape(greentest, (len(greentest), 32,32,1))
+	bluetest = np.reshape(bluetest, (len(bluetest), 32,32,1))
+
+	lptrain = filter_dataset(redtrain, lowpass_filter)
+	lptest = filter_dataset(redtest, lowpass_filter)
+	hptrain = filter_dataset(redtrain, highpass_filter)
+	hptest = filter_dataset(redtest, highpass_filter)
+
+	#bptrain = filter_dataset(redtrain, bandpass_filter)
+	#bptest = filter_dataset(redtest, bandpass_filter)
+
+	return lptrain, lptest, hptrain, hptest
 		
 	
 	
