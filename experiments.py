@@ -16,30 +16,62 @@ from keras import backend as K
 from keras.callbacks import TensorBoard
 from file_reader import *
 from utils import *
+from autoencoder import *
 
-
-def normalise(data):
-	return data.astype('float32')/255.0
 
 seed = 8
 np.random.seed(seed)
 
-# let's try something
+def normalise(data):
+	return data.astype('float32')/255.0
 
-(xtrain, ytrain), (xtest, ytest) = cifar10.load_data()
 
-xtrain = normalise(xtrain)
-xtest = normalise(xtest)
+def load_colour_split_cifar():
+	# let's try something
 
-redtrain, greentrain, bluetrain = split_dataset_by_colour(xtrain)
-redtest, grentest, bluetest = split_dataset_by_colour(xtest)
+	(xtrain, ytrain), (xtest, ytest) = cifar10.load_data()
 
-redtrain = np.reshape(redtrain, (len(redtrain), 32,32,1))
-greentrain = np.reshape(greentrain, (len(greentrain), 32,32,1))
-bluetrain = np.reshape(bluetrain, (len(bluetrain), 32,32,1))
-redtest = np.reshape(redtest, (len(redtest), 32,32,1))
-greentest = np.reshape(greentest, (len(greentest), 32,32,1))
-bluetest = np.reshape(bluetest, (len(bluetest), 32,32,1))
+	xtrain = normalise(xtrain)
+	xtest = normalise(xtest)
+
+	redtrain, greentrain, bluetrain = split_dataset_by_colour(xtrain)
+	redtest, greentest, bluetest = split_dataset_by_colour(xtest)
+
+	redtrain = np.reshape(redtrain, (len(redtrain), 32,32,1))
+	greentrain = np.reshape(greentrain, (len(greentrain), 32,32,1))
+	bluetrain = np.reshape(bluetrain, (len(bluetrain), 32,32,1))
+	redtest = np.reshape(redtest, (len(redtest), 32,32,1))
+	greentest = np.reshape(greentest, (len(greentest), 32,32,1))
+	bluetest = np.reshape(bluetest, (len(bluetest), 32,32,1))
+
+	return redtrain, greentrain, bluetrain, redtest, greentest, bluetest
+
+
+def load_half_split_cifar(col = 1):
+	(xtrain, ytrain), (xtest,ytest) = cifar10.load_data()
+	xtrain = normalise(xtrain)
+	xtest = normalise(xtest)
+	
+	redtrain, greentrain, bluetrain = split_dataset_by_colour(xtrain)
+	redtest, greentest, bluetest = split_dataset_by_colour(xtest)
+
+	redtrain = np.reshape(redtrain, (len(redtrain), 32,32,1))
+	greentrain = np.reshape(greentrain, (len(greentrain), 32,32,1))
+	bluetrain = np.reshape(bluetrain, (len(bluetrain), 32,32,1))
+	redtest = np.reshape(redtest, (len(redtest), 32,32,1))
+	greentest = np.reshape(greentest, (len(greentest), 32,32,1))
+	bluetest = np.reshape(bluetest, (len(bluetest), 32,32,1))
+
+	half1train, half2train = split_image_dataset_into_halves(redtrain)
+	half1test, half2test = split_image_dataset_into_halves(redtest)
+	
+	return half1train, half2train, half1test, half2test
+		
+	
+	
+
+
+redtrain, greentrani, bluetrain, redtest, greentest, bluetest = load_split_cifar()
 
 # okay, that sorts out our data, now let's get the model working
 
