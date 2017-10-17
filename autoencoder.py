@@ -128,16 +128,16 @@ class Hemisphere(object):
 		# we get all combinations of things here for behaviour
 		# we also reshape them here, for the rest of all time, so my functoins are easy
 		shape = (self.shape[0], self.shape[1], self.shape[2])
-		if input_data is None && predictions is None:
+		if input_data is None and predictions is None:
 			maps= np.absolute(self.test_input, self.test_output)
 			return np.reshape(maps, shape)
-		if input_data is None && predictions is not None:
+		if input_data is None and predictions is not None:
 			maps np.absolute(self.test_input - predictions)
 			return np.reshape(maps, shape)
-		if input_data is not None && predictions is None:
+		if input_data is not None and predictions is None:
 			maps np.absolute(input_data - self.test_output)
 			return np.reshape(maps, shape)
-		if input_data is not None && predictions is not None:
+		if input_data is not None and predictions is not None:
 			maps np.absolute(input_data - predictions)
 			return np.reshape(maps, shape)
 
