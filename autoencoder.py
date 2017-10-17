@@ -123,6 +123,35 @@ class Hemisphere(object):
 			return self.model.predict(test_data)
 		if test_data is None:
 			return self.model.predict(self.test_input)
+
+	def plot_results(self, preds = None, inputs=None, N = 10, start = 0):
+		shape = preds.shape[2]
+		if preds is None:
+			preds = predict()
+		if inputs is None:
+			inputs = self.test_output
+			
+		fig = plt.figure(figsize=(20,4))
+		for i in range(N):
+			#display original
+			ax = plt.subplot(2,N,i+1)
+			plt.imshow(inputs[start + i].reshape(shape,shape))
+			plt.gray()
+			plt.title('original')
+			ax.get_xaxis().set_visible(False)
+			ax.get_yaxis().set_visible(False)
+
+			#display reconstructoin
+			ax = plt.subplot(2, N, i+1+N)
+			plt.imshow(preds[start + i].reshape(shape,shape))
+			plt.gray()
+			plt.title('reconstruction')
+			ax.get_xaxis().set_visible(False)
+			ax.get_yaxis().set_visible(False)
+	
+		plt.show()
+		return fig
+		
 	
 	def get_error_maps(self, input_data = None, predictions= None):
 		# we get all combinations of things here for behaviour

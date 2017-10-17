@@ -57,14 +57,14 @@ def max_index_in_array(arr):
 
 def compare_two_images(img1, img2, title1 = "", title2 = ""):
 		plt.subplot(121)
-		plt.imshow(img1, cmap='gray', aspect='auto')
+		plt.imshow(img1, cmap='gray')
 		plt.title(title1)
 		plt.xticks([])
 		plt.yticks([])
 
 		#plot filtered image
 		plt.subplot(122)
-		plt.imshow(img2, cmap='gray', aspect='auto')
+		plt.imshow(img2, cmap='gray')
 		plt.title(title2)
 		plt.xticks([])
 		plt.yticks([])
@@ -109,6 +109,41 @@ def process_img_array(imgarray, f):
 		imglist.append(newimg)
 	imglist = np.array(imglist)
 	return imglist
+
+
+def split_image_dataset_into_halves(imgs):
+	shape = imgs.shape
+	if len(shape) == 4:
+		width = shape[2]
+		half1 = imgs[:,:,0:width/2,:]
+		half2 = imgs[:,:,width/2:width,:]
+		return half1, half2
+
+	if len(shape)==3:
+		width = shape[2]
+		half1 = imgs[:,:,0:width/2]
+		half2 = imgs[:,:,width/2:width]
+		return half1, half2
+
+
+def split_dataset_by_colour(data):
+	red = data[:,:,:,0]
+	blue = data[:,:,:,1]
+	green = data[:,:,:,2]
+	return [red, blue, green]
+
+def split_img_by_colour(img):
+	red = img[:,:,0]
+	blue = img[:,:,1]
+	green = img[:,:,2]
+	return [red, blue, green]
+
+
+def gaussian_filter(img, sigma = 2):
+	# just to be safe
+	img = reshape_into_image(img)
+	return scipy.ndimage.filters.gaussian_filter(img, sigma)
+	
 
 
 def get_amplitude_spectrum(img, mult = 255, img_type = 'uint8', show = False, type_convert=True):
@@ -309,7 +344,7 @@ def lowpass_filter(img, show = False):
 		#plot filtered image
 		plt.subplot(122)
 		plt.imshow(new_img, cmap='gray')
-		plt.title('Image after HPF')
+		plt.title('Image after Low pass filter')
 		plt.xticks([])
 		plt.yticks([])
 		
