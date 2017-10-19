@@ -96,22 +96,90 @@ def load_spatial_frequency_split_cifar():
 	
 
 
-redtrain, greentrani, bluetrain, redtest, greentest, bluetest = load_split_cifar()
-
 # okay, that sorts out our data, now let's get the model working
 
-a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
-a2 = Hemisphere(greentrain, redtrain, greentest, redtest)
+def run_colour_experiments(epochs = 1, save=True):
 
-a1.train(epochs=1)
-a2.train(epochs=1)
+	redtrain, greentrain, bluetrain, redtest, greentest, bluetest = load_colour_split_cifar()
 
-a1.plot_results()
-a2.plot_results()
+	#for really fast training, for debugging
+	#redtrain = redtrain[0:10,:,:,:]
+	#greentrain = greentrain[0:10,:,:,:]
 
-errmap1 = a1.get_error_maps()
-errmap2 = a2.get_error_maps()
+	print "REDTRAIN"
+	print redtrain.shape
 
-a1.plot_error_maps(errmap1)
-a2.plot_error_maps(errmap2)
+	a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
+	a2 = Hemisphere(greentrain, redtrain, greentest, redtest)
+
+	a1.train(epochs=epochs)
+	a2.train(epochs=epochs)
+
+	a1.plot_results()
+	a2.plot_results()
+
+	errmap1 = a1.get_error_maps()
+	errmap2 = a2.get_error_maps()
+
+	a1.plot_error_maps(errmap1)
+	a2.plot_error_maps(errmap2)
+
+	errmaps = [errmap1, errmap2]
+
+	#saving functionality
+	if save:
+		save(errmaps, 'colour_red_green_errormaps')
+
+	return errmaps
+
+def run_half_split_experiments(epochs = 1, save=True):
+	
+	half1train, half2train, half1test, half2test = load_half_split_cifar()
+
+	a1 = Hemisphere(half1train, half2train, half1test, half2test)
+	a2 = Hemisphere(half2train, half1train, half2test, half1test)
+
+	a1.plot_results()
+	a2.plot_results()
+
+	errmap1 = a1.get_error_maps()
+	errmap2 = a2.get_error_maps()
+
+	a1.plot_error_maps(errmap1)
+	a2.plot_error_maps(errmap2)
+
+	errmaps = [errmap1, errmap2]
+
+	#saving functionality
+	if save:
+		save(errmaps, 'colour_red_green_errormaps')
+
+	return errmaps
+
+def run_spatial_frequency_split_experiments(epochs=1, save=True):
+	
+	lptrain, lptest, hptrain, hptest = load_spatial_frequency_split_cifar()
+
+	a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
+	a2 = Hemisphere(greentrain, redtrain, greentest, redtest)
+
+	a1.train(epochs=epochs)
+	a2.train(epochs=epochs)
+
+	a1.plot_results()
+	a2.plot_results()
+
+	errmap1 = a1.get_error_maps()
+	errmap2 = a2.get_error_maps()
+
+	a1.plot_error_maps(errmap1)
+	a2.plot_error_maps(errmap2)
+
+	errmaps = [errmap1, errmap2]
+
+	#saving functionality
+	if save:
+		save(errmaps, 'colour_red_green_errormaps')
+
+	return errmaps
 
