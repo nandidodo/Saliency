@@ -143,6 +143,41 @@ def gaussian_filter(img, sigma = 2):
 	# just to be safe
 	img = reshape_into_image(img)
 	return scipy.ndimage.filters.gaussian_filter(img, sigma)
+
+
+def compare_saliences(smaps1, smaps2, maps=True, verbose = True, save=False,save_name=None):
+	#this will generate both accuracies and a list of images
+	#they must be parrallel arrays
+	shape = smaps1.shape
+	if verbose:
+		print "Shape smap1: " + str(shape)
+		print "Shape smap2: " + str(smaps2.shape)
+	assert shape== smaps2.shape, 'saliency maps must be same shape'
+
+	errslist = []
+	if maps:
+		maplist = []
+	for i in xrange(len(smaps1)):
+		errmap = np.absolute(smaps1[i] -smaps2[i])
+		#the error here is just the sum over the array. this will be large and ugly, but hopefully it will give us some idea of the kind of things we are doing wrong. also won't really scale with the image. we could probably rescale it by image size, 
+		err = np.sum(errmap) / (shape[1] * shape[2])
+		if maps:
+			maplist.append(errmap)
+		errslist.append(err)
+
+	#errslist = np.array(errslist)
+	if maps:
+		mapslist = np.array(mapslist)
+			if save and save_name is not None:
+				save(mapslist, save_name + '_maps')
+				save(errslist, save_name+'_errors')
+		return errslist, mapslist
+
+	if save and save_name is not None:
+		save(mapslist, save_name + '_maps')
+		save(errslist, save_name+'_errors')
+	
+	return errslist
 	
 
 
