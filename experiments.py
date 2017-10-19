@@ -183,3 +183,7 @@ def run_spatial_frequency_split_experiments(epochs=1, save=True):
 
 	return errmaps
 
+
+if __name__ == '__main__':
+	run_colour_experiments(epochs=50, save=True)
+
