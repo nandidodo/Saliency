@@ -132,24 +132,54 @@ def split_image_dataset_into_halves(imgs):
 		return half1, half2
 
 
-def split_dataset_by_colour(data):
+def split_dataset_by_colour(data, reshape=True):
 	red = data[:,:,:,0]
 	blue = data[:,:,:,1]
 	green = data[:,:,:,2]
+	if reshape:
+		red = np.reshape(red, (red.shape[0], red.shape[1], red.shape[2], 1))
+		blue = np.reshape(blue, (blue.shape[0], blue.shape[1], blue.shape[2], 1))
+		green = np.reshape(green, (green.shape[0], green.shape[1], green.shape[2],1))
+	print red.shape
 	return [red, blue, green]
 
-def split_img_by_colour(img):
+def split_img_by_colour(img, reshape = False):
 	red = img[:,:,0]
 	blue = img[:,:,1]
 	green = img[:,:,2]
+	if reshape:
+		red = np.reshape(red, (red.shape[0], red.shape[1], red.shape[2], 1))
+		blue = np.reshape(blue, (blue.shape[0], blue.shape[1], blue.shape[2], 1))
+		green = np.reshape(green, (green.shape[0], green.shape[1], green.shape[2],1))
+	print red.shape
 	return [red, blue, green]
 
 def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
 	assert frac_train + frac_test == 1, 'fractions must add up to one'
 	length = len(data)
-	train = data[0:frac_train*length]
-	test = data[frac_train*length: length]
+	#print length
+	#print frac_train*length
+	train = data[0:int(frac_train*length)]
+	test = data[int(frac_train*length): length]
 	return train, test
+
+def get_error(err_map, sal_map, accuracy = True, verbose = True):
+	# so thi is just a simple way of getting the accuracy, as we simply sum the abs of it and divide by the shape of them both, so it's pretty simple tbh
+	salience_error_map = np.abs(err_map - sal_map)
+	error = np.sum(salience_error_map)
+	print "ERROR: " + str(error)
+	if accuracy: 
+		shape = salience_error_map.shape
+		#should be 2d
+		assert len(shape) == 2, ' salience error map should be two dimensional'
+		dim = shape[0] * shape[1]
+		acc = float(error) / float(dim)
+		print "Accuracy (normalised error): " + str(accuracy)
+		return error, accuracy
+	
+	return error
+
+	
 	
 
 

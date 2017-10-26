@@ -193,6 +193,8 @@ def run_benchmark_image_set_experiments(epochs=10, save=True):
 	red, green,blue = split_dataset_by_colour(imgs)
 	redtrain, redtest = split_into_test_train(red)
 	greentrain, greentest = split_into_test_train(green)
+	print redtrain.shape
+	print redtest.shape
 
 	a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
 	a2 = Hemisphere(greentrain, redtrain, greentest, redtest)

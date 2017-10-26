@@ -32,14 +32,15 @@ decay = 1e-6
 momentum = 0.9
 nesterov = True
 shuffle = True
+loss = 'binary_crossentropy'
 
-optimizer = optimizers.SGD(lrate =lrate, decay=decay, momentum = momentum, nesterov = nesterov)
+optimizer = optimizers.SGD(lr =lrate, decay=decay, momentum = momentum, nesterov = nesterov)
 
 
 
 class Hemisphere(object):
 	
-	def __init__(input_data, output_data,test_input, test_output, batch_size = batch_size, dropout = dropout, verbose = verbose, architecture = architecture, activation = activation, padding = padding, optimizer = optimizer, epochs = epochs):
+	def __init__(self,input_data, output_data,test_input, test_output, batch_size = batch_size, dropout = dropout, verbose = verbose, architecture = architecture, activation = activation, padding = padding, optimizer = optimizer, epochs = epochs, loss=loss):
 		#init our paramaters
 		self.input_data = input_data
 		self.output_data = output_data
@@ -53,10 +54,11 @@ class Hemisphere(object):
 		self.padding = padding
 		self.optimizer = optimizer
 		self.epochs = epochs
+		self.loss = loss
 
 		#next we do some asserts
 		self.shape = input_data.shape
-		assert shape == output_data.shape, 'input and output data do not have the same shape'
+		assert self.shape == output_data.shape, 'input and output data do not have the same shape'
 
 		#next we define our model, we will normally do something with architecture here, but we're not going o do that yet, so we'll have a placeholder
 		if architecture is not None:
@@ -65,7 +67,7 @@ class Hemisphere(object):
 			pass
 		if architecture is None:
 
-			input_img = Input(shape=(self.shape[1], self.shape[2], self.shape[3])
+			input_img = Input(shape=(self.shape[1], self.shape[2], self.shape[3]))
 
 			x = Conv2D(16, (3, 3), activation=self.activation, padding=self.padding)(input_img)
 			if verbose:
@@ -109,14 +111,17 @@ class Hemisphere(object):
 
 			#we then define our model
 			self.model = Model(input_img, decoded)
+			self.model.compile(optimizer = self.optimizer, loss = self.loss)
 
 
 
 	# okay, so we begin the functions here
-	def train(self, epochs = self.epochs, optimizer = self.optimizer, shuffle=True, callbacks = None)
+	def train(self, epochs = None, shuffle=True, callbacks = None):
+		if epochs is None:
+			epochs = self.epochs
 		print "Model training:"
-		self.model.fit(self.input_data, self.output_data, epochs=epochs, optimizer = optimizer, shuffle = shuffle, callbacks = callbacks)
-		print "Training complete
+		self.model.fit(self.input_data, self.output_data, epochs=epochs, shuffle = shuffle, callbacks = callbacks)
+		print "Training complete"
 
 	def predict(self, test_data = None):
 		if test_data is not None:
@@ -125,17 +130,19 @@ class Hemisphere(object):
 			return self.model.predict(self.test_input)
 
 	def plot_results(self, preds = None, inputs=None, N = 10, start = 0):
-		shape = preds.shape[2]
 		if preds is None:
-			preds = predict()
+			preds = self.predict()
 		if inputs is None:
 			inputs = self.test_output
+
+		print preds.shape
+		shape = (preds.shape[1],preds.shape[2])
 			
 		fig = plt.figure(figsize=(20,4))
 		for i in range(N):
 			#display original
 			ax = plt.subplot(2,N,i+1)
-			plt.imshow(inputs[start + i].reshape(shape,shape))
+			plt.imshow(inputs[start + i].reshape(shape))
 			plt.gray()
 			plt.title('original')
 			ax.get_xaxis().set_visible(False)
@@ -143,7 +150,7 @@ class Hemisphere(object):
 
 			#display reconstructoin
 			ax = plt.subplot(2, N, i+1+N)
-			plt.imshow(preds[start + i].reshape(shape,shape))
+			plt.imshow(preds[start + i].reshape(shape))
 			plt.gray()
 			plt.title('reconstruction')
 			ax.get_xaxis().set_visible(False)
@@ -156,19 +163,29 @@ class Hemisphere(object):
 	def get_error_maps(self, input_data = None, predictions= None):
 		# we get all combinations of things here for behaviour
 		# we also reshape them here, for the rest of all time, so my functoins are easy
-		shape = (self.shape[0], self.shape[1], self.shape[2])
+		
+		#shape = (self.shape[0], self.shape[1], self.shape[2])
 		if input_data is None and predictions is None:
-			maps= np.absolute(self.test_input, self.test_output)
-			return np.reshape(maps, shape)
+			maps= np.absolute(self.test_input - self.test_output)
+			#print "test input"
+			##print self.test_input.shape
+			#print "test output"
+			##print self.test_output.shape
+			shape = self.test_input.shape
+			#print "shape!" + str(shape)
+			return np.reshape(maps, (shape[0], shape[1], shape[2]))
 		if input_data is None and predictions is not None:
-			maps np.absolute(self.test_input - predictions)
-			return np.reshape(maps, shape)
+			maps = np.absolute(self.test_input - predictions)
+			shape = self.test_input.shape
+			return np.reshape(maps, (shape[0], shape[1], shape[2]))
 		if input_data is not None and predictions is None:
-			maps np.absolute(input_data - self.test_output)
-			return np.reshape(maps, shape)
+			maps = np.absolute(input_data - self.test_output)
+			shape = self.test_input.shape
+			return np.reshape(maps, (shape[0], shape[1], shape[2]))
 		if input_data is not None and predictions is not None:
-			maps np.absolute(input_data - predictions)
-			return np.reshape(maps, shape)
+			maps = np.absolute(input_data - predictions)
+			shape = self.test_input.shape
+			return np.reshape(maps, (shape[0], shape[1], shape[2]))
 
 	
 
@@ -177,7 +194,8 @@ class Hemisphere(object):
 		if error_maps is None:
 			error_maps = get_error_maps()
 		if original_images is None:
-			original_images = np.reshape(self.test_output, (self.shape[0], self.shape[1], self.shape[2]))
+			shape = self.test_input.shape
+			original_images = np.reshape(self.test_output, (shape[0], shape[1], shape[2]))
 		for i in xrange(N):
 			compare_two_images(original_images[i], error_maps[i], 'Original', 'Error Map')
 
@@ -196,7 +214,7 @@ class Hemisphere(object):
 	def plot_mean_error_maps(self,mean_maps, N = 10):
 		if N == -1:
 			N = len(mean_maps)
-		plot_error_maps(mean_maps, N)
+		self.plot_error_maps(mean_maps, N)
 		
 
 		
