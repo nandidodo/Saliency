@@ -15,6 +15,12 @@ def save(obj, fname):
 def load(fname):
 	return pickle.load(open(fname, 'rb'))
 
+def save_array(obj, fname):
+	pickle.dump(obj, open(fname, 'wb'))
+
+def load_array(fname):
+	return pickle.load(open(fname, 'rb'))
+
 def show_colour_splits(img, show_original = True):
 	#assumes img is 4d so we can split along the colour	
 	if show_original:
@@ -138,6 +144,14 @@ def split_img_by_colour(img):
 	green = img[:,:,2]
 	return [red, blue, green]
 
+def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
+	assert frac_train + frac_test == 1, 'fractions must add up to one'
+	length = len(data)
+	train = data[0:frac_train*length]
+	test = data[frac_train*length: length]
+	return train, test
+	
+
 
 def gaussian_filter(img, sigma = 2):
 	# just to be safe
@@ -168,9 +182,9 @@ def compare_saliences(smaps1, smaps2, maps=True, verbose = True, save=False,save
 	#errslist = np.array(errslist)
 	if maps:
 		mapslist = np.array(mapslist)
-			if save and save_name is not None:
-				save(mapslist, save_name + '_maps')
-				save(errslist, save_name+'_errors')
+		if save and save_name is not None:
+			save(mapslist, save_name + '_maps')
+			save(errslist, save_name+'_errors')
 		return errslist, mapslist
 
 	if save and save_name is not None:

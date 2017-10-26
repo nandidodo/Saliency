@@ -13,7 +13,7 @@ import os
 
 #I think the max size is 1024x784
 
-dirname = './BenchmarkIMAGES/'
+dirname = 'BenchmarkIMAGES/'
 crop_size = (1024,1024)
 mode = 'RGB'
 num_images = 300
@@ -45,9 +45,13 @@ def collect_images(dirname,num_images,crop_size=None, mode='RGB'):
 
 def collect_files_and_images(rootdir, crop_size = default_size, mode='RGB', save = True, save_dir = None):
 	filelist = []
+	print "IN FUCNTION"
 	for subdir, dirs, files in os.walk(rootdir):
 		# this will save them all in one enormous file, which makes sense, but is dire
+		print subdir
+		print dirs
 		for file in files:
+			print file
 			fname = os.fsdecode(file)
 			if filename.endswith(".jpg"):
 				#if it's jpg then its an image, so we're sorced
@@ -81,12 +85,16 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 	for subdir, dirs, files in os.walk(rootdir):
 		filelist = []
 		
-		for f in files:
+		for file in files:
 			#check it's actually a jpg incase we have random junk in there
-			fname = os.decode(f)
-			if f.endswith(".jpg"):
+			print file
+			print dirs
+			print subdir
+			filename = os.path.basename(file)
+			if file.endswith(".jpg"):
 				if crop_size is not None:
-					img = imresize(imread(filename, mode=mode), crop_size)
+					print filename
+					img = imresize(imread(rootdir + filename, mode=mode), crop_size)
 				if crop_size is None:
 					img = imread(filename, mode=mode)
 				filelist.append(img)
@@ -95,6 +103,10 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 		splits = subdir.split("/")
 		#get the last split
 		name = splits[-1]
+		#this is just a dire hack, but it mightwork
+		if name=="":
+			name = splits[0]
+		name += "_images"
 		#check if we have an output file
 		if len(dirs) ==0:
 			name = splits[-2]
@@ -103,11 +115,14 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 		filelist = np.array(filelist)
 		# and then save 
 		if save:
-			save(filelist, save_dir + name)
+			print name
+			save_array(filelist,save_dir + name)
 			print "SAVED: " + name
+			print save_dir+name
 		# if not save we return all our lists
 		if not save:
 			total_list.append(filelist)
+			print "PROCESSED: " + name
 	if not save:
 		total_list = np.array(total_list)
 		return total_list
@@ -116,6 +131,7 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 	#for subdir in subdirs:
 		#print subdir
 	
+#save_images_per_directory(dirname, save=True)
 
 def read_image(num, dirnme = dirname, mode='RGB'):
 	fname = dirname + 'i' + str(num) +'.jpg'

@@ -139,6 +139,9 @@ def run_half_split_experiments(epochs = 1, save=True):
 	a1 = Hemisphere(half1train, half2train, half1test, half2test)
 	a2 = Hemisphere(half2train, half1train, half2test, half1test)
 
+	a1.train(epochs=10)
+	a2.train(epochs=10)
+
 	a1.plot_results()
 	a2.plot_results()
 
@@ -160,11 +163,11 @@ def run_spatial_frequency_split_experiments(epochs=1, save=True):
 	
 	lptrain, lptest, hptrain, hptest = load_spatial_frequency_split_cifar()
 
-	a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
-	a2 = Hemisphere(greentrain, redtrain, greentest, redtest)
+	a1 = Hemisphere(lptrain, hptrain, lptest, hptest)
+	a2 = Hemisphere(hptrain, lptrain, hptest, lptest)
 
-	a1.train(epochs=epochs)
-	a2.train(epochs=epochs)
+	a1.train(epochs=10)
+	a2.train(epochs=10)
 
 	a1.plot_results()
 	a2.plot_results()
@@ -184,6 +187,38 @@ def run_spatial_frequency_split_experiments(epochs=1, save=True):
 	return errmaps
 
 
+def run_benchmark_image_set_experiments(epochs=10, save=True):
+	imgs = load('BenchmarkIMAGES_images')
+	print imgs.shape
+	red, green,blue = split_dataset_by_colour(imgs)
+	redtrain, redtest = split_into_test_train(red)
+	greentrain, greentest = split_into_test_train(green)
+
+	a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
+	a2 = Hemisphere(greentrain, redtrain, greentest, redtest)
+
+	a1.train(epochs=epochs)
+	a2.train(epochs=epochs)
+
+	a1.plot_results()
+	a2.plot_results()
+
+	errmap1 = a1.get_error_maps()
+	errmap2 = a2.get_error_maps()
+	
+	a1.plot_error_maps(errmap1)
+	a2.plot_error_maps(errmap2)
+	
+	mean_maps = mean_map(errmap1, errmap2)
+	a1.plot_error_maps(mean_maps)
+
+	if save:
+		save_array(mean_maps, 'benchmark_red_green_error_maps')
+	return mean_maps
+
 if __name__ == '__main__':
-	run_colour_experiments(epochs=50, save=True)
+	#run_colour_experiments(epochs=1, save=False)
+	#run_spatial_frequency_split_experiments(epochs=1, save=False)
+	#run_half_split_experiments(epochs=1, save=False)
+	run_benchmark_image_set_experiments(1)
 
