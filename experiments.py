@@ -191,16 +191,25 @@ def run_benchmark_image_set_experiments(epochs=10, save=True):
 	imgs = load('BenchmarkIMAGES_images')
 	print imgs.shape
 	red, green,blue = split_dataset_by_colour(imgs)
+	print red.shape
 	redtrain, redtest = split_into_test_train(red)
+	print redtrain.shape
 	greentrain, greentest = split_into_test_train(green)
 	print redtrain.shape
 	print redtest.shape
 
 	a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
+	print "hemisphere initialised"
+	
 	a2 = Hemisphere(greentrain, redtrain, greentest, redtest)
+	print "second hemisphere initialised"
+	
 
 	a1.train(epochs=epochs)
+	print "a1 trained"
+	"""
 	a2.train(epochs=epochs)
+	print "a2 trained"
 
 	a1.plot_results()
 	a2.plot_results()
@@ -217,10 +226,13 @@ def run_benchmark_image_set_experiments(epochs=10, save=True):
 	if save:
 		save_array(mean_maps, 'benchmark_red_green_error_maps')
 	return mean_maps
+	"""
 
 if __name__ == '__main__':
 	#run_colour_experiments(epochs=1, save=False)
 	#run_spatial_frequency_split_experiments(epochs=1, save=False)
 	#run_half_split_experiments(epochs=1, save=False)
+	#okay, for whatever reason this thing just massively overloads my computer, nd I don't know why, so let' sbreak it down to be honest
+# I think the problem is that when we'er splitting it everything remains in memory, so it's completely crazy tbh, we can fix that, but it will be annoying af
 	run_benchmark_image_set_experiments(1)
 
