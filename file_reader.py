@@ -79,6 +79,8 @@ def print_dirs_files(rootdir):
 def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', save=True, save_dir='./', make_dir_name = None):
 	#first we check if we want to make a new dir, 
 	if make_dir_name is not None:
+		assert type(make_dir_name) == str, 'make directory name must be a string'
+		save_dir = save_dir +  make_dirname + '/'
 		if not os.path.exists(make_dir_name):
 			try:
 				os.makedirs(make_dir_name)
@@ -147,11 +149,11 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 		#print subdir
 
 
-def combine_arrays_into_one(rootdir, save=True, add_name="_combined", make_dir_name='', name=''):
+def combine_arrays_into_one(rootdir, save=True, add_name="combined", make_dir_name='', verbose=True):
 	if make_dir_name != '':
-		if not os.path.exists(make_dir_name):
+		if not os.path.exists(rootdir + make_dir_name):
 			try:
-				os.makedirs(make_dir_name)
+				os.makedirs(rootdir + make_dir_name)
 			except OSError as e:
 				if e.errno!= errno.EEXIST:
 					print "error found: " + str(e)
@@ -162,17 +164,38 @@ def combine_arrays_into_one(rootdir, save=True, add_name="_combined", make_dir_n
 		
 	#we now walk the directory
 	for subdir, dirs, files in os.walk(rootdir):
-		big_arr  []
+		img_arr = []
+		out_arr = []
 		for file in files:
 			filename = os.path.basename(file)
 			if '.' not in filename:	#this checks for all files without an extension, which should be our saved files
-				arr = load(filename)
-				big_arr.append(arr)
-		
-		big_arr = np.array(big_arr)
+				if verbose:
+					print "combined: " + str(rootdir+'/'+filename)
+				arr = load(rootdir + '/' + filename)
+				img_type = filename.split('_')[-1] # get the last bit
+				if img_type == 'images':
+					img_arr.append(arr)
+					if verbose:
+						print "added to images"
+				if img_type == 'output':
+					out_arr.append(arr)
+					if verbose:
+						print "added to outputs"
+		#concatenate list of arrays into single mega array
+		img_arr = np.concatenate(img_arr)
+		out_arr = np.concatenate(out_arr)
+		if verbose:
+			print "images shape" + str(img_arr.shape)
+			print "outputs shape" + str(out_arr.shape)
 		if save:
-			save_array(name+ add_name)
-		return big_arr
+			if make_dir_name == '':
+				save_array(img_arr, rootdir + 'images_'+ add_name)
+				save_array(out_arr, rootdir + 'ouputs_'+ add_name)
+			
+			if make_dir_name !='':
+				save_array(img_arr, rootdir + make_dir_name + '/' + 'images_' + add_name)
+				save_array(out_arr, rootdir + make_dir_name + '/' + 'outputs_' + add_name)
+		return img_arr, out_arr
 
 
 

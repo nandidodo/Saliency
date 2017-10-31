@@ -131,13 +131,17 @@ def run_colour_experiments(epochs = 1, save=True, test_up_to=None):
 	#redtrain = redtrain[0:10,:,:,:]
 	#greentrain = greentrain[0:10,:,:,:]
 
-	print "REDTRAIN"
-	print redtrain.shape
+	#compare images here
+	#for i in xrange(10):
+	#	compare_two_images(redtrain[i], greentrain[i], reshape=True)
 
-	a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
+	
+
+	a1 = Hemisphere(redtrain, greentrain, redtest, greentest,verbose=True)
 	a2 = Hemisphere(greentrain, redtrain, greentest, redtest)
 
-	a1.train(epochs=epochs)
+	
+	a1.train(epochs=epochs, get_weights=True)
 	a2.train(epochs=epochs)
 
 	a1.plot_results()
@@ -156,6 +160,7 @@ def run_colour_experiments(epochs = 1, save=True, test_up_to=None):
 		save(errmaps, 'colour_red_green_errormaps')
 
 	return errmaps
+	
 
 def run_half_split_experiments(epochs = 1, save=True,test_up_to=None):
 	
@@ -214,6 +219,7 @@ def run_spatial_frequency_split_experiments(epochs=1, save=True, test_up_to=None
 
 def run_benchmark_image_set_experiments(epochs=100, save=True, test_up_to=None):
 	imgs = load('BenchmarkIMAGES_images')
+	imgs= normalise(imgs)
 	print imgs.shape
 	red, green,blue = split_dataset_by_colour(imgs)
 	print red.shape
@@ -263,6 +269,6 @@ if __name__ == '__main__':
 	#run_half_split_experiments(epochs=1, save=False)
 	#okay, for whatever reason this thing just massively overloads my computer, nd I don't know why, so let' sbreak it down to be honest
 # I think the problem is that when we'er splitting it everything remains in memory, so it's completely crazy tbh, we can fix that, but it will be annoying af
-	#run_benchmark_image_set_experiments(100)
-	run_colour_split_experiments(100, save=False, test_up_to=500)
+	run_benchmark_image_set_experiments(100)
+	#run_colour_experiments(5, save=False, test_up_to=10)
 
