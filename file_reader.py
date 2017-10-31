@@ -147,10 +147,38 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 		#print subdir
 
 
+def combine_arrays_into_one(rootdir, save=True, add_name="_combined", make_dir_name='', name=''):
+	if make_dir_name != '':
+		if not os.path.exists(make_dir_name):
+			try:
+				os.makedirs(make_dir_name)
+			except OSError as e:
+				if e.errno!= errno.EEXIST:
+					print "error found: " + str(e)
+					raise
+				else:
+					print "directory probably already exists despite check"
+					raise
+		
+	#we now walk the directory
+	for subdir, dirs, files in os.walk(rootdir):
+		big_arr  []
+		for file in files:
+			filename = os.path.basename(file)
+			if '.' not in filename:	#this checks for all files without an extension, which should be our saved files
+				arr = load(filename)
+				big_arr.append(arr)
+		
+		big_arr = np.array(big_arr)
+		if save:
+			save_array(name+ add_name)
+		return big_arr
+
+
 
 #print "doing file-reader"
 #dirname = 'BenchmarkIMAGES/'	
-#save_images_per_directory(dirname, save=True, crop_size=(100, 100))
+#save_images_per_directory(dirname, save=True, crop_size=(32, 32))
 #
 def read_image(num, dirnme = dirname, mode='RGB'):
 	fname = dirname + 'i' + str(num) +'.jpg'
