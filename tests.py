@@ -8,11 +8,11 @@ import matplotlib.pyplot as plt
 import keras
 from keras.datasets import cifar10
 
-
-img = read_image(20)
+"""
+img = read_image(50)
 #print img.shape
 #show_colour_splits(img)
-"""
+
 # okay, let's try out the fft stuff
 img_freq = np.fft.fft2(img)
 #calculate amplitude spectum
@@ -33,10 +33,10 @@ print img_amp_display
 img_amp_display = img_amp_display *255
 img_amp_display =  img_amp_display.astype('uint8')
 plt.imshow(img_amp_display)
-plt.show()"""
+plt.show()
 
 """
-
+"""
 # let's test our high pass filtering
 #get_amplitude_spectrum(img, show=True)
 #get_magnitude_spectrum(img, show=True)
@@ -47,7 +47,7 @@ img = img[:,:,0]
 img = reshape_into_image(img)
 print img.shape
 
-hpf = high_pass_filter(img, show=True)
+#hpf = high_pass_filter(img, show=True)
 #print hpf
 
 # okay, other band tests here:
@@ -63,13 +63,67 @@ print "Bandpass"
 bpf = bandpass_filter(img, show=True)
 
 print "both"
-compare_two_images(lpf, hpf)
+compare_two_images(lpf, hpf, 'Low Pass Filter', 'High Pass Filter')
 """
-
+"""
 # okay, we're going to test the filesystem stuff here
 rootdir = './testSet/Stimuli'
 #print_dirs_files(rootdir)
 save_images_per_directory(rootdir, save=False)
+
+"""
+"""
+# okay, tests on image splitting
+
+(xtrain, ytrain), (xtest, ytest)  = cifar10.load_data()
+redtrain = xtrain[:,:,:,0]
+print redtrain.shape
+redtrain = np.reshape(redtrain,(len(redtrain), 32,32))
+print redtrain.shape
+half1, half2 = split_image_dataset_into_halves(redtrain)
+for i in xrange(10):
+	compare_two_images(half1[i], half2[i])
+
+"""
+
+# tests get files saved
+"""
+rootdir = './BenchmarkIMAGES/SM'
+cropsize = (200,200)
+save_images_per_directory(rootdir, cropsize)"""
+
+# now let's check this actuallt works, we can load them and get images, and so forth, that seems rather important to me
+def load_file_test(fname):
+	imgs = load(fname)
+	print type(imgs)
+	print imgs.shape
+	plt.imshow(imgs[3])
+	plt.show()
+
+#load_file_test('BenchmarkIMAGES_images')
+#load_file_test('BenchmarkIMAGES_output')
+
+#rootdir = 'testSet/Stimuli/'
+#make_dir = 'testSet_Arrays'
+#save_images_per_directory(rootdir, save=True, crop_size=(100,100), make_dir_name=make_dir)
+
+
+rootdir = 'BenchmarkIMAGES/'
+make_dir = 'BenchmarkDATA'
+save_images_per_directory(rootdir, save=True, crop_size=(200,200), make_dir_name=make_dir)
+
+
+#rootdir = 'testSet_Arrays'
+#make_dir = 'combined'
+#combine_arrays_into_one(rootdir, make_dir_name=make_dir)
+
+#load_file_test('testSet_Arrayscombined/_combined')
+
+#imgs = load('testSet_Arrayscombined/images_combined')
+#for i in xrange(20):	
+#	plt.imshow(imgs[200+i])
+#	plt.show()
+
 
 
 
