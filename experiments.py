@@ -47,13 +47,21 @@ def load_colour_split_cifar():
 	return redtrain, greentrain, bluetrain, redtest, greentest, bluetest
 
 
-def load_half_split_cifar(col = 1):
+def load_half_split_cifar(col = 1, test_up_to = None):
 	(xtrain, ytrain), (xtest,ytest) = cifar10.load_data()
 	xtrain = normalise(xtrain)
 	xtest = normalise(xtest)
 	
 	redtrain, greentrain, bluetrain = split_dataset_by_colour(xtrain)
 	redtest, greentest, bluetest = split_dataset_by_colour(xtest)
+
+	if test_up_to is not None:
+		redtrain = redtrain[0:test_up_to,:,:,:]
+		greentrain = greentrain[0:test_up_to,:,:,:]
+		bluetrain = bluetrain[0:test_up_to,:,:,:]
+		redtest = redtest[test_up_to:test_up_to*2,:,:,:]
+		bluetest = bluetest[test_up_to:test_up_to*2,:,:,:]
+		greentest = greentest[test_up_to:test_up_to*2,:,:,:]
 
 	redtrain = np.reshape(redtrain, (len(redtrain), 32,32,1))
 	greentrain = np.reshape(greentrain, (len(greentrain), 32,32,1))
@@ -187,7 +195,7 @@ def run_spatial_frequency_split_experiments(epochs=1, save=True):
 	return errmaps
 
 
-def run_benchmark_image_set_experiments(epochs=10, save=True):
+def run_benchmark_image_set_experiments(epochs=100, save=True):
 	imgs = load('BenchmarkIMAGES_images')
 	print imgs.shape
 	red, green,blue = split_dataset_by_colour(imgs)
@@ -198,16 +206,20 @@ def run_benchmark_image_set_experiments(epochs=10, save=True):
 	print redtrain.shape
 	print redtest.shape
 
-	a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
+	#compare images here
+	for i in xrange(10):
+		compare_two_images(redtrain[i], greentrain[i], reshape=True)
+
+	a1 = Hemisphere(redtrain, redtrain, redtest, redtest)
 	print "hemisphere initialised"
 	
-	a2 = Hemisphere(greentrain, redtrain, greentest, redtest)
+	a2 = Hemisphere(greentrain, greentrain, greentest, greentest)
 	print "second hemisphere initialised"
 	
 
 	a1.train(epochs=epochs)
 	print "a1 trained"
-	"""
+	
 	a2.train(epochs=epochs)
 	print "a2 trained"
 
@@ -226,7 +238,7 @@ def run_benchmark_image_set_experiments(epochs=10, save=True):
 	if save:
 		save_array(mean_maps, 'benchmark_red_green_error_maps')
 	return mean_maps
-	"""
+	
 
 if __name__ == '__main__':
 	#run_colour_experiments(epochs=1, save=False)
@@ -234,5 +246,5 @@ if __name__ == '__main__':
 	#run_half_split_experiments(epochs=1, save=False)
 	#okay, for whatever reason this thing just massively overloads my computer, nd I don't know why, so let' sbreak it down to be honest
 # I think the problem is that when we'er splitting it everything remains in memory, so it's completely crazy tbh, we can fix that, but it will be annoying af
-	run_benchmark_image_set_experiments(1)
+	run_benchmark_image_set_experiments(100)
 

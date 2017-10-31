@@ -61,7 +61,15 @@ def max_index_in_array(arr):
 	return indices
 
 
-def compare_two_images(img1, img2, title1 = "", title2 = ""):
+def compare_two_images(img1, img2, title1 = "", title2 = "", reshape=False):
+
+
+		if reshape:
+			assert img1.shape == img2.shape, 'images are not of same shape'
+			shape=img1.shape
+			img1 = np.reshape(img1, (shape[0], shape[1]))
+			img2 = np.reshape(img2, (shape[0], shape[1]))		
+
 		plt.subplot(121)
 		plt.imshow(img1, cmap='gray')
 		plt.title(title1)

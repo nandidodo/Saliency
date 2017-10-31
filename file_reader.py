@@ -148,9 +148,9 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 
 
 
-print "doing file-reader"
-dirname = 'BenchmarkIMAGES/'	
-save_images_per_directory(dirname, save=True, crop_size=(200, 200))
+#print "doing file-reader"
+#dirname = 'BenchmarkIMAGES/'	
+#save_images_per_directory(dirname, save=True, crop_size=(100, 100))
 #
 def read_image(num, dirnme = dirname, mode='RGB'):
 	fname = dirname + 'i' + str(num) +'.jpg'
