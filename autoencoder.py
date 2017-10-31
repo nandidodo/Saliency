@@ -41,6 +41,7 @@ optimizer = optimizers.SGD(lr =lrate, decay=decay, momentum = momentum, nesterov
 class Hemisphere(object):
 	
 	def __init__(self,input_data, output_data,test_input, test_output, batch_size = batch_size, dropout = dropout, verbose = verbose, architecture = architecture, activation = activation, padding = padding, optimizer = optimizer, epochs = epochs, loss=loss):
+
 		#init our paramaters
 		self.input_data = input_data
 		self.output_data = output_data
@@ -116,12 +117,17 @@ class Hemisphere(object):
 
 
 	# okay, so we begin the functions here
-	def train(self, epochs = None, shuffle=True, callbacks = None):
+	def train(self, epochs = None, shuffle=True, callbacks = None, get_weights=False):
 		if epochs is None:
 			epochs = self.epochs
 		print "Model training:"
 		self.model.fit(self.input_data, self.output_data, epochs=epochs, shuffle = shuffle, callbacks = callbacks)
 		print "Training complete"
+		if get_weights:
+			weights, biases= self.model.layers[-2].get_weights()
+			print weights
+			print biases
+			
 
 	def predict(self, test_data = None):
 		if test_data is not None:
@@ -160,9 +166,24 @@ class Hemisphere(object):
 		return fig
 		
 	
-	def get_error_maps(self, input_data = None, predictions= None):
+	def get_error_maps(self, input_data = None, predictions= None, return_preds = False):
 		# we get all combinations of things here for behaviour
 		# we also reshape them here, for the rest of all time, so my functoins are easy
+
+	#okay, this function at the moment is just totally wrong. let's rewrite
+		if input_data is None:
+			input_data = self.test_input
+		if predictions is None:
+			predictions = self.predict(test_data = input_data)
+		maps = np.absolute(predictions - self.test_output)
+		assert input_data.shape == predictions.shape, 'predictoins and input data must have same dimensions'
+		shape = predictions.shape
+
+		if return_preds:
+			return predictions, np.reshape(maps,(shape[0], shape[1], shape[2]))
+		return np.reshape(maps, (shape[0], shape[1], shape[2]))
+
+		"""
 		
 		#shape = (self.shape[0], self.shape[1], self.shape[2])
 		if input_data is None and predictions is None:
@@ -186,18 +207,27 @@ class Hemisphere(object):
 			maps = np.absolute(input_data - predictions)
 			shape = self.test_input.shape
 			return np.reshape(maps, (shape[0], shape[1], shape[2]))
+		"""
 
 	
 
 
-	def plot_error_maps(self, error_maps = None, N = 10, original_images = None):
+	def plot_error_maps(self, error_maps = None, N = 10, original_images = None, predictions = None):
 		if error_maps is None:
 			error_maps = get_error_maps()
 		if original_images is None:
 			shape = self.test_input.shape
 			original_images = np.reshape(self.test_output, (shape[0], shape[1], shape[2]))
-		for i in xrange(N):
-			compare_two_images(original_images[i], error_maps[i], 'Original', 'Error Map')
+		
+		if predictions is None:
+			for i in xrange(N):
+				compare_two_images(original_images[i], error_maps[i], 'Original', 'Error Map')
+		if predictions is not None:
+			for i in xrange(N):
+				imgs = (originam_images[i], predictions[i], error_maps[i])
+				titles = ('Original','Prediction','Error Map')
+				compare_images(imgs, titles)
+
 
 	def generate_mean_maps(self, error_maps1, error_maps2, N = -1):
 		n = len(error_maps1)

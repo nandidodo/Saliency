@@ -82,8 +82,39 @@ def compare_two_images(img1, img2, title1 = "", title2 = "", reshape=False):
 		plt.title(title2)
 		plt.xticks([])
 		plt.yticks([])
-		
-		plt.show()
+
+
+def compare_images(imgs, titles = None, break_num = 10):
+	N = len(imgs)
+	if titles is not None: 
+		assert N == len(titles), 'images and titles must be of same length'
+	if reshape:
+		shape = imgs[0].shape
+		for i in xrange(N):
+			assert imgs[i].shape == shape, 'not all images are of same shape'
+			imgs[i] = np.reshape(imgs[i],(shape[0], shape[1]))
+
+	if N<break_num:
+		for i in xrange(N):
+			plt.subplot(1,N, i+1)
+			plt.imshow(imgs[i], cmap='gray')
+			plt.title(titles[i])
+			plt.xticks([])
+			plt.yticks([])
+	if N>break_num:
+		div = N/break_num
+		for n in xrange(div):
+			for i in xrange(N):
+				plt.subplot(1,N,i+1)
+				plt.imshow(imgs[(div*n)+i], cmap='gray')
+				plt.title(titles[(div*n)+i])
+				plt.xticks([])
+				plt.yticks([])
+				plt.show()
+
+	plt.show()
+	
+			
 
 def mean_map(err_map1, err_map2):
 	# this really gets the mean
@@ -197,7 +228,7 @@ def gaussian_filter(img, sigma = 2):
 	return scipy.ndimage.filters.gaussian_filter(img, sigma)
 
 
-def compare_saliences(smaps1, smaps2, maps=True, verbose = True, save=False,save_name=None):
+def compare_saliences(smaps1, smaps2, maps=True, verbose = True, save=False,save_name=None, show=False, N = 10, start =0):
 	#this will generate both accuracies and a list of images
 	#they must be parrallel arrays
 	shape = smaps1.shape
@@ -228,6 +259,10 @@ def compare_saliences(smaps1, smaps2, maps=True, verbose = True, save=False,save
 	if save and save_name is not None:
 		save(mapslist, save_name + '_maps')
 		save(errslist, save_name+'_errors')
+
+	if show:
+		for i in xrange(N):
+			compare_two_images(smaps1[start+i], smaps2[start+i],'predicted','actual')
 	
 	return errslist
 	

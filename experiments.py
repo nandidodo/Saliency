@@ -218,7 +218,7 @@ def run_spatial_frequency_split_experiments(epochs=1, save=True, test_up_to=None
 
 
 def run_benchmark_image_set_experiments(epochs=100, save=True, test_up_to=None):
-	imgs = load('BenchmarkIMAGES_images')
+	imgs = load('BenchmarkDATA/BenchmarkIMAGES_images')
 	imgs= normalise(imgs)
 	print imgs.shape
 	red, green,blue = split_dataset_by_colour(imgs)
@@ -230,8 +230,8 @@ def run_benchmark_image_set_experiments(epochs=100, save=True, test_up_to=None):
 	print redtest.shape
 
 	#compare images here
-	for i in xrange(10):
-		compare_two_images(redtrain[i], greentrain[i], reshape=True)
+	#for i in xrange(10):
+	#	compare_two_images(redtrain[i], greentrain[i], reshape=True)
 
 	a1 = Hemisphere(redtrain, redtrain, redtest, redtest)
 	print "hemisphere initialised"
@@ -251,6 +251,8 @@ def run_benchmark_image_set_experiments(epochs=100, save=True, test_up_to=None):
 
 	errmap1 = a1.get_error_maps()
 	errmap2 = a2.get_error_maps()
+
+	print errmap1[0]
 	
 	a1.plot_error_maps(errmap1)
 	a2.plot_error_maps(errmap2)
@@ -269,6 +271,10 @@ if __name__ == '__main__':
 	#run_half_split_experiments(epochs=1, save=False)
 	#okay, for whatever reason this thing just massively overloads my computer, nd I don't know why, so let' sbreak it down to be honest
 # I think the problem is that when we'er splitting it everything remains in memory, so it's completely crazy tbh, we can fix that, but it will be annoying af
-	run_benchmark_image_set_experiments(100)
+	run_benchmark_image_set_experiments(1)
 	#run_colour_experiments(5, save=False, test_up_to=10)
+
+
+
+# so basically we have found that the things it has trouble predicting, and thus the most "informative" parts of the picture are basically the edges, nwo this is actually quite interesting, and if I'mfeeling pretty dodgy, I could write a paper on this lol, as it would be quite interesting, and could see why we do edges, and then we would do a fucking thing where we see edges and perhaps try to integrate it with gestalts, and so forth, and that could be really really interesting, but Ithink it's quite unlikely to be honest but at least that's something cool we've found. one thing we need to do is to improve the plot error map functoin to show all three, so let's do that, and then lets work on other stuff - i.e. we'll perhaps, I do't know what the next step is - doing gaussian smoothing seems to be important, also training on the huge image corpus and then cross validating, with the actual responses. so let's work on that and get that done today, then we can do some smiple html and css which could be fun. tomorrow we'll prepare what we're actually going to say to richard!
 
