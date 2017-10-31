@@ -26,7 +26,7 @@ def normalise(data):
 	return data.astype('float32')/255.0
 
 
-def load_colour_split_cifar():
+def load_colour_split_cifar(test_up_to = None):
 	# let's try something
 
 	(xtrain, ytrain), (xtest, ytest) = cifar10.load_data()
@@ -37,12 +37,21 @@ def load_colour_split_cifar():
 	redtrain, greentrain, bluetrain = split_dataset_by_colour(xtrain)
 	redtest, greentest, bluetest = split_dataset_by_colour(xtest)
 
+
 	redtrain = np.reshape(redtrain, (len(redtrain), 32,32,1))
 	greentrain = np.reshape(greentrain, (len(greentrain), 32,32,1))
 	bluetrain = np.reshape(bluetrain, (len(bluetrain), 32,32,1))
 	redtest = np.reshape(redtest, (len(redtest), 32,32,1))
 	greentest = np.reshape(greentest, (len(greentest), 32,32,1))
 	bluetest = np.reshape(bluetest, (len(bluetest), 32,32,1))
+
+	if test_up_to is not None:
+		redtrain = redtrain[0:test_up_to,:,:,:]
+		greentrain = greentrain[0:test_up_to,:,:,:]
+		bluetrain = bluetrain[0:test_up_to,:,:,:]
+		redtest = redtest[test_up_to:test_up_to*2,:,:,:]
+		bluetest = bluetest[test_up_to:test_up_to*2,:,:,:]
+		greentest = greentest[test_up_to:test_up_to*2,:,:,:]
 
 	return redtrain, greentrain, bluetrain, redtest, greentest, bluetest
 
@@ -55,6 +64,13 @@ def load_half_split_cifar(col = 1, test_up_to = None):
 	redtrain, greentrain, bluetrain = split_dataset_by_colour(xtrain)
 	redtest, greentest, bluetest = split_dataset_by_colour(xtest)
 
+	redtrain = np.reshape(redtrain, (len(redtrain), 32,32,1))
+	greentrain = np.reshape(greentrain, (len(greentrain), 32,32,1))
+	bluetrain = np.reshape(bluetrain, (len(bluetrain), 32,32,1))
+	redtest = np.reshape(redtest, (len(redtest), 32,32,1))
+	greentest = np.reshape(greentest, (len(greentest), 32,32,1))
+	bluetest = np.reshape(bluetest, (len(bluetest), 32,32,1))
+
 	if test_up_to is not None:
 		redtrain = redtrain[0:test_up_to,:,:,:]
 		greentrain = greentrain[0:test_up_to,:,:,:]
@@ -63,19 +79,12 @@ def load_half_split_cifar(col = 1, test_up_to = None):
 		bluetest = bluetest[test_up_to:test_up_to*2,:,:,:]
 		greentest = greentest[test_up_to:test_up_to*2,:,:,:]
 
-	redtrain = np.reshape(redtrain, (len(redtrain), 32,32,1))
-	greentrain = np.reshape(greentrain, (len(greentrain), 32,32,1))
-	bluetrain = np.reshape(bluetrain, (len(bluetrain), 32,32,1))
-	redtest = np.reshape(redtest, (len(redtest), 32,32,1))
-	greentest = np.reshape(greentest, (len(greentest), 32,32,1))
-	bluetest = np.reshape(bluetest, (len(bluetest), 32,32,1))
-
 	half1train, half2train = split_image_dataset_into_halves(redtrain)
 	half1test, half2test = split_image_dataset_into_halves(redtest)
 	
 	return half1train, half2train, half1test, half2test
 
-def load_spatial_frequency_split_cifar():
+def load_spatial_frequency_split_cifar(test_up_to=None):
 	(xtrain, ytrain), (xtest,ytest) = cifar10.load_data()
 	xtrain = normalise(xtrain)
 	xtest = normalise(xtest)
@@ -89,6 +98,14 @@ def load_spatial_frequency_split_cifar():
 	redtest = np.reshape(redtest, (len(redtest), 32,32,1))
 	greentest = np.reshape(greentest, (len(greentest), 32,32,1))
 	bluetest = np.reshape(bluetest, (len(bluetest), 32,32,1))
+
+	if test_up_to is not None:
+		redtrain = redtrain[0:test_up_to,:,:,:]
+		greentrain = greentrain[0:test_up_to,:,:,:]
+		bluetrain = bluetrain[0:test_up_to,:,:,:]
+		redtest = redtest[test_up_to:test_up_to*2,:,:,:]
+		bluetest = bluetest[test_up_to:test_up_to*2,:,:,:]
+		greentest = greentest[test_up_to:test_up_to*2,:,:,:]
 
 	lptrain = filter_dataset(redtrain, lowpass_filter)
 	lptest = filter_dataset(redtest, lowpass_filter)
@@ -106,9 +123,9 @@ def load_spatial_frequency_split_cifar():
 
 # okay, that sorts out our data, now let's get the model working
 
-def run_colour_experiments(epochs = 1, save=True):
+def run_colour_experiments(epochs = 1, save=True, test_up_to=None):
 
-	redtrain, greentrain, bluetrain, redtest, greentest, bluetest = load_colour_split_cifar()
+	redtrain, greentrain, bluetrain, redtest, greentest, bluetest = load_colour_split_cifar(test_up_to=test_up_to)
 
 	#for really fast training, for debugging
 	#redtrain = redtrain[0:10,:,:,:]
@@ -140,9 +157,9 @@ def run_colour_experiments(epochs = 1, save=True):
 
 	return errmaps
 
-def run_half_split_experiments(epochs = 1, save=True):
+def run_half_split_experiments(epochs = 1, save=True,test_up_to=None):
 	
-	half1train, half2train, half1test, half2test = load_half_split_cifar()
+	half1train, half2train, half1test, half2test = load_half_split_cifar(test_up_to=test_up_to)
 
 	a1 = Hemisphere(half1train, half2train, half1test, half2test)
 	a2 = Hemisphere(half2train, half1train, half2test, half1test)
@@ -167,9 +184,9 @@ def run_half_split_experiments(epochs = 1, save=True):
 
 	return errmaps
 
-def run_spatial_frequency_split_experiments(epochs=1, save=True):
+def run_spatial_frequency_split_experiments(epochs=1, save=True, test_up_to=None):
 	
-	lptrain, lptest, hptrain, hptest = load_spatial_frequency_split_cifar()
+	lptrain, lptest, hptrain, hptest = load_spatial_frequency_split_cifar(test_up_to=test_up_to)
 
 	a1 = Hemisphere(lptrain, hptrain, lptest, hptest)
 	a2 = Hemisphere(hptrain, lptrain, hptest, lptest)
@@ -195,7 +212,7 @@ def run_spatial_frequency_split_experiments(epochs=1, save=True):
 	return errmaps
 
 
-def run_benchmark_image_set_experiments(epochs=100, save=True):
+def run_benchmark_image_set_experiments(epochs=100, save=True, test_up_to=None):
 	imgs = load('BenchmarkIMAGES_images')
 	print imgs.shape
 	red, green,blue = split_dataset_by_colour(imgs)
@@ -246,5 +263,6 @@ if __name__ == '__main__':
 	#run_half_split_experiments(epochs=1, save=False)
 	#okay, for whatever reason this thing just massively overloads my computer, nd I don't know why, so let' sbreak it down to be honest
 # I think the problem is that when we'er splitting it everything remains in memory, so it's completely crazy tbh, we can fix that, but it will be annoying af
-	run_benchmark_image_set_experiments(100)
+	#run_benchmark_image_set_experiments(100)
+	run_colour_split_experiments(100, save=False, test_up_to=500)
 
