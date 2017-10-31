@@ -76,7 +76,20 @@ def print_dirs_files(rootdir):
 		print files
 		print "  "
 
-def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', save=True, save_dir='./'):
+def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', save=True, save_dir='./', make_dir_name = None):
+	#first we check if we want to make a new dir, 
+	if make_dir_name is not None:
+		if not os.path.exists(make_dir_name):
+			try:
+				os.makedirs(make_dir_name)
+			except OSError as e:
+				if e.errno!= errno.EEXIST:
+					print "error found: " + str(e)
+					raise
+				else:
+					print "directory probably already exists despite check"
+					raise
+
 	# we walk the filepath
 	#subdirs, dirs, files = os.walk(rootdir)
 	print os.walk(rootdir)
@@ -93,8 +106,10 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 			filename = os.path.basename(file)
 			if file.endswith(".jpg"):
 				if crop_size is not None:
+					print "IN IMAGE LOOP"
+					print subdir
 					print filename
-					img = imresize(imread(rootdir + filename, mode=mode), crop_size)
+					img = imresize(imread(subdir + '/' + filename, mode=mode), crop_size)
 				if crop_size is None:
 					img = imread(filename, mode=mode)
 				filelist.append(img)
@@ -130,9 +145,13 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 	#iterate through subdirs
 	#for subdir in subdirs:
 		#print subdir
-	
-#save_images_per_directory(dirname, save=True)
 
+
+
+print "doing file-reader"
+dirname = 'BenchmarkIMAGES/'	
+save_images_per_directory(dirname, save=True, crop_size=(200, 200))
+#
 def read_image(num, dirnme = dirname, mode='RGB'):
 	fname = dirname + 'i' + str(num) +'.jpg'
 	return imread(fname, mode=mode)
