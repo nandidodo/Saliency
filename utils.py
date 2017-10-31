@@ -84,14 +84,16 @@ def compare_two_images(img1, img2, title1 = "", title2 = "", reshape=False):
 		plt.yticks([])
 
 
-def compare_images(imgs, titles = None, break_num = 10):
+def compare_images(imgs, titles = None, break_num = 10, reshape=True):
 	N = len(imgs)
+	#we convert imgs from a tuple to a list, so it will be mutable
+	imgs = list(imgs)
 	if titles is not None: 
 		assert N == len(titles), 'images and titles must be of same length'
 	if reshape:
 		shape = imgs[0].shape
 		for i in xrange(N):
-			assert imgs[i].shape == shape, 'not all images are of same shape'
+			print imgs[i].shape
 			imgs[i] = np.reshape(imgs[i],(shape[0], shape[1]))
 
 	if N<break_num:

@@ -249,13 +249,13 @@ def run_benchmark_image_set_experiments(epochs=100, save=True, test_up_to=None):
 	a1.plot_results()
 	a2.plot_results()
 
-	errmap1 = a1.get_error_maps()
-	errmap2 = a2.get_error_maps()
+	preds1, errmap1 = a1.get_error_maps(return_preds = True)
+	preds2, errmap2 = a2.get_error_maps(return_preds=True)
 
 	print errmap1[0]
 	
-	a1.plot_error_maps(errmap1)
-	a2.plot_error_maps(errmap2)
+	a1.plot_error_maps(errmap1, predictions=preds1)
+	a2.plot_error_maps(errmap2,predictions=preds2)
 	
 	mean_maps = mean_map(errmap1, errmap2)
 	a1.plot_error_maps(mean_maps)
@@ -263,6 +263,82 @@ def run_benchmark_image_set_experiments(epochs=100, save=True, test_up_to=None):
 	if save:
 		save_array(mean_maps, 'benchmark_red_green_error_maps')
 	return mean_maps
+
+
+
+def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, test_up_to=None, preview = False, verbose = False):
+	imgs = load(fname)
+	imgs= normalise(imgs)
+	red, green,blue = split_dataset_by_colour(imgs)
+	redtrain, redtest = split_into_test_train(red)
+	greentrain, greentest = split_into_test_train(green)
+
+	if preview:
+		for i in xrange(10):
+			compare_two_images(redtrain[i], greentrain[i], reshape=True)
+
+	a1 = Hemisphere(redtrain, redtrain, redtest, redtest)
+	if verbose:
+		print "hemisphere initialised"
+	
+	a2 = Hemisphere(greentrain, greentrain, greentest, greentest)
+	if verbose:
+		print "second hemisphere initialised"
+	
+
+	a1.train(epochs=epochs)
+	if verbose:
+		print "a1 trained"
+	
+	a2.train(epochs=epochs)
+	if verbose:
+		print "a2 trained"
+
+	a1.plot_results()
+	a2.plot_results()
+
+	preds1, errmap1 = a1.get_error_maps(return_preds = True)
+	preds2, errmap2 = a2.get_error_maps(return_preds=True)
+
+	if save:
+		save_array((redtest, preds1, errmap1),fname+'_imgs_preds_errmaps')
+
+	if verbose:
+		print errmap1[0]
+	
+	a1.plot_error_maps(errmap1, predictions=preds1)
+	a2.plot_error_maps(errmap2,predictions=preds2)
+	
+	mean_maps = mean_map(errmap1, errmap2)
+	a1.plot_error_maps(mean_maps)
+
+	if save:
+		save_array(mean_maps, 'benchmark_red_green_error_maps')
+	return mean_maps
+
+
+def compare_error_map_to_salience_map(err_fname, sal_fname):
+	tup = load(err_fname)
+	errmap = tup[2]
+	print "ERRMAP:"
+	print errmap.shape
+	salmap = load(sal_fname)
+	N = int(len(salmap)/10)
+	salmap=salmap[1710:1900,:,:,0]
+	shape = salmap.shape
+	salmap = np.reshape(salmap, (shape[0], shape[1], shape[2])) 
+	print "SALMAP:"
+	print salmap.shape
+	preds = tup[1]
+	test = tup[0]
+	preds = np.reshape(preds, (shape[0], shape[1], shape[2]))
+	test = np.reshape(test,(shape[0], shape[1], shape[2]))
+	
+	for i in xrange(50):
+		imgs = (test[i], preds[i], errmap[i], salmap[i])
+		titles=('test image', 'prediction', 'error map', 'target salience map')
+		compare_images(imgs, titles)
+	compare_saliences(errmap, salmap)
 	
 
 if __name__ == '__main__':
@@ -271,8 +347,10 @@ if __name__ == '__main__':
 	#run_half_split_experiments(epochs=1, save=False)
 	#okay, for whatever reason this thing just massively overloads my computer, nd I don't know why, so let' sbreak it down to be honest
 # I think the problem is that when we'er splitting it everything remains in memory, so it's completely crazy tbh, we can fix that, but it will be annoying af
-	run_benchmark_image_set_experiments(1)
+	#run_benchmark_image_set_experiments(20)
 	#run_colour_experiments(5, save=False, test_up_to=10)
+	#run_colour_split_experiments_images_from_file('testSet_Arrayscombined/images_combined', epochs=20)
+	compare_error_map_to_salience_map('testSet_Arrayscombined/images_combined_imgs_preds_errmaps', 'testSet_Arrayscombined/outputs_combined')
 
 
 

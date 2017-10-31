@@ -224,7 +224,7 @@ class Hemisphere(object):
 				compare_two_images(original_images[i], error_maps[i], 'Original', 'Error Map')
 		if predictions is not None:
 			for i in xrange(N):
-				imgs = (originam_images[i], predictions[i], error_maps[i])
+				imgs = (original_images[i], predictions[i], error_maps[i])
 				titles = ('Original','Prediction','Error Map')
 				compare_images(imgs, titles)
 
