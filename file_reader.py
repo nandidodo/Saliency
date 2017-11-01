@@ -80,7 +80,7 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 	#first we check if we want to make a new dir, 
 	if make_dir_name is not None:
 		assert type(make_dir_name) == str, 'make directory name must be a string'
-		save_dir = save_dir +  make_dirname + '/'
+		save_dir = save_dir +  make_dir_name + '/'
 		if not os.path.exists(make_dir_name):
 			try:
 				os.makedirs(make_dir_name)

@@ -103,14 +103,16 @@ def load_file_test(fname):
 #load_file_test('BenchmarkIMAGES_images')
 #load_file_test('BenchmarkIMAGES_output')
 
-#rootdir = 'testSet/Stimuli/'
-#make_dir = 'testSet_Arrays'
+#rootdir = 'testSet/Stimuli/Action/'
+#make_dir = 'testSet_Arrays_Action'
 #save_images_per_directory(rootdir, save=True, crop_size=(100,100), make_dir_name=make_dir)
 
+#load_file_test(make_dir + '/testSet_images')
+#load_file_test(make_dir + '/Action_output')
 
-rootdir = 'BenchmarkIMAGES/'
-make_dir = 'BenchmarkDATA'
-save_images_per_directory(rootdir, save=True, crop_size=(200,200), make_dir_name=make_dir)
+#rootdir = 'BenchmarkIMAGES/'
+#make_dir = 'BenchmarkDATA'
+#save_images_per_directory(rootdir, save=True, crop_size=(200,200), make_dir_name=make_dir)
 
 
 #rootdir = 'testSet_Arrays'
@@ -124,6 +126,78 @@ save_images_per_directory(rootdir, save=True, crop_size=(200,200), make_dir_name
 #	plt.imshow(imgs[200+i])
 #	plt.show()
 
+def get_files_in_directory(dirname):
+	filelist = []
+	for fname in sorted(os.listdir(dirname)):
+		filelist.append(fname)
+		print fname
+	return filelist
+
+def get_dirs_from_rootdir(rootdir, mode='RGB', crop_size = None, save=True, save_dir=None):
+
+	if save:
+		assert save_dir is not None and type(save_dir) == str, 'save directory must exist and be a string'
+
+	for dirs, subdirs, files in os.walk(rootdir):
+		print dirs
+		filelist = get_files_in_directory(dirs)
+		arr = []
+		for f in filelist:
+			#first we check it's a file
+			if '.' in f:
+				#tehn we get rid of the jpg
+				fname = f.split('.')[0]
+				#next we check if it's output or not
+				# it's output
+				if crop_size is not None:
+					img = imresize(imread(dirs+ '/'+f, mode=mode), crop_size)
+				if crop_size is None:
+					img = imread(dirs+'/'+fname, mode=mode)
+				arr.append(img)
+
+		arr = np.array(arr)
+		splits = dirs.split('/')
+		name='default'
+		if len(splits) == 3:
+			# i.e. normal file
+			name= splits[-1]
+		if len(splits) == 4:
+			name= splits[-2] + '_' + splits[-1]
+		if save:
+			save_array(arr, save_dir + '/' + name)
+			print "SAVING AS: " + str(save_dir + '/' + name)
+				
+				
+
+
+# okay, the sorted is the key, without that it just breaks terribly. So we need to fix this in our functoins before it works, which should hopefully help, so let's work at that! now at least we nkow the problem. hopefully we can get some reasonable results tomorrow to show to richard, for thursday
+
+#dirname = 'testSet/Stimuli/Action'
+#get_files_in_directory(dirname)
+
+#rootdir = 'testSet/Stimuli'
+#get_dirs_from_rootdir(rootdir, crop_size = (100, 100), save_dir = 'testSet/Data/test')
+
+#load_file_test('testSet/Data/test/Action')
+#load_file_test('testSet/Data/test/Action_Output')
+
+def compare_image_and_salience(dirname, N=20, start=0):
+	for i in xrange(N):
+		imgs = load(dirname)
+		imgs = imgs[:,:,:,0]
+		shape = imgs.shape
+		imgs = np.reshape(imgs, (shape[0], shape[1], shape[2]))
+		print "IMGS:"
+		print imgs.shape
+		outputs = load(dirname+'_Output')
+		shape = outputs.shape
+		outputs = outputs[:,:,:,0]
+		outputs = np.reshape(outputs, (shape[0], shape[1], shape[2]))
+		print "OUTPUTS:"
+		print outputs.shape
+		compare_images((imgs[start+i], outputs[start+i]), ('image', 'salience map'))
+
+compare_image_and_salience('testSet/Data/test/Action')
 
 
 
@@ -170,7 +244,6 @@ print np.argmax(a)
 print np.argmax(a, axis=0)
 print np.argmax(a, axis=1)"""
 
-# okay, fuck it. I'm going to search the entire array.this is going to take for fucking ever, and be totally terrible, but I'm going to do it, because I don't understnad what the fuck numpy argmax is actually doing?
 
 
 
