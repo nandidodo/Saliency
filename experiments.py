@@ -356,7 +356,7 @@ def compare_error_map_to_salience_map(err_fname, sal_fname, start = 100, gauss=F
 			imgs = (test[start + i], preds[start + i],errm, salmap[start + i])
 			titles=('test image', 'prediction', 'error map', 'target salience map')
 			compare_images(imgs, titles)
-	compare_saliences(errmap, salmap)
+	#compare_saliences(errmap, salmap)
 
 def compare_mean_map_to_salience_map(mmap_fname, sal_fname, start = 100, gauss=False, N = 50):
 	mmap = load(mmap_fname)
@@ -380,11 +380,21 @@ def compare_mean_map_to_salience_map(mmap_fname, sal_fname, start = 100, gauss=F
 
 
 	
-def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epochs=100):
+def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epochs=100, error=True, error_list = False, sal_map_fname = 'testsaliences_combined'):
 	N = len(param_list)
 	for i in xrange(N):
 		save_name = save_base + '_' + param_name + '_test_'+str(i)
-		run_colour_split_experiment(input_fname, epochs=epochs, param_name = param_name, param = param_list[i],save_name = save_name)
+		mean_maps = run_colour_split_experiment(input_fname, epochs=epochs, param_name = param_name, param = param_list[i],save_name = save_name)
+		if error:
+			#we load and process the sal maps
+			salmaps = load(sal_map_fname)
+			salmaps = salmaps[:,:,:,0]
+			shape = salmaps.shape
+			salmaps = np.reshape(salmaps,(shape[0], shape[1], shape[2]))
+			if error_list:
+				err, errlist = get_errors(mean_maps, salmaps, error, error_list, save_name='save_base' + '_' + str(param) + '_'+str(param_list[i]) + '_errors')
+				if not error_list:
+				err = get_errors(mean_maps, salmaps, error, error_list, save_name='save_base' + '_' + str(param) + '_'+str(param_list[i]) + '_errors')
 
 
 #we need a way to get the error and accuracies or whatever, but we'll have to add that in a bit, so I don't know!
