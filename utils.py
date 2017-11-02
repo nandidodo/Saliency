@@ -83,6 +83,8 @@ def compare_two_images(img1, img2, title1 = "", title2 = "", reshape=False):
 		plt.xticks([])
 		plt.yticks([])
 
+		plt.show()
+
 
 def compare_images(imgs, titles = None, break_num = 10, reshape=True):
 	N = len(imgs)

@@ -317,7 +317,7 @@ def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, t
 	return mean_maps
 
 
-def compare_error_map_to_salience_map(err_fname, sal_fname):
+def compare_error_map_to_salience_map(err_fname, sal_fname, start = 100, gauss=False):
 	tup = load(err_fname)
 	errmap = tup[2]
 	print "ERRMAP:"
@@ -335,10 +335,36 @@ def compare_error_map_to_salience_map(err_fname, sal_fname):
 	test = np.reshape(test,(shape[0], shape[1], shape[2]))
 	
 	for i in xrange(50):
-		imgs = (test[i], preds[i], errmap[i], salmap[i])
-		titles=('test image', 'prediction', 'error map', 'target salience map')
-		compare_images(imgs, titles)
+		if not gauss:
+			imgs = (test[start + i], preds[start + i], errmap[start + i], salmap[start + i])
+			titles=('test image', 'prediction', 'error map', 'target salience map')
+			compare_images(imgs, titles)
+		if gauss:
+			sigma=2
+			errm = gaussian_filter(errmap[start+i],sigma)
+			imgs = (test[start + i], preds[start + i],errm, salmap[start + i])
+			titles=('test image', 'prediction', 'error map', 'target salience map')
+			compare_images(imgs, titles)
 	compare_saliences(errmap, salmap)
+
+def compare_mean_map_to_salience_map(mmap_fname, sal_fname, start = 100, gauss=False, N = 50):
+	mmap = load(mmap_fname)
+	print "MEAN MAP:"
+	print mmap.shape
+	salmap = load(sal_fname)
+	salmap=salmap[1710:1900,:,:,0]
+	shape = salmap.shape
+	salmap = np.reshape(salmap, (shape[0], shape[1], shape[2])) 
+	print "SALMAP:"
+	print salmap.shape
+	for i in xrange(N):
+		if not gauss:
+			compare_two_images(mmap[start + i], salmap[start+i], 'mean error map', 'target salience map')
+		if gauss:
+			sigma = 2
+			errm = gaussian_filter(mmap[start+i])
+			compare_two_images(errm, salmap[start+i], 'mean error map', 'target salience map')
+	
 	
 
 if __name__ == '__main__':
@@ -349,10 +375,33 @@ if __name__ == '__main__':
 # I think the problem is that when we'er splitting it everything remains in memory, so it's completely crazy tbh, we can fix that, but it will be annoying af
 	#run_benchmark_image_set_experiments(20)
 	#run_colour_experiments(5, save=False, test_up_to=10)
-	#run_colour_split_experiments_images_from_file('testSet_Arrayscombined/images_combined', epochs=20)
-	compare_error_map_to_salience_map('testSet_Arrayscombined/images_combined_imgs_preds_errmaps', 'testSet_Arrayscombined/outputs_combined')
+	#run_colour_split_experiments_images_from_file('testimages_combined', epochs=50)
+	#compare_error_map_to_salience_map('testimages_combined_imgs_preds_errmaps', 'testsaliences_combined', gauss=False)
 
+	compare_mean_map_to_salience_map('benchmark_red_green_error_maps', 'testsaliences_combined', gauss=True)
+
+# one very simpel thing we we don't actually compare the mean maps to the saliecne traces. maybe if we did that would help. that's pretty trivial to do all things considered, so we should look at making that work!
+
+# first we're going to run this and then test it by hand. we're going to have to have some eval scripts to evaluate differences for us, and then test different smoothing methods, such as gaussian smoothing or whatever to see if there's anything useful there. furthermore, and we are kind of doomed here, we'll need to figure out just hwt exactly we're doing re hyperparameters and stuff,  but a lot of that is incremental and boring. We could also start writign stuff up, but basiclaly just talk to richard. that seems to be the way. okay, now I'ev got stuff going I think I'm going to go to my desk and start working through the react-yelp tutorial to see if there's anything cool or useful there... should be fun!
+
+
+# okay, so what are our plans for today wrt the phd stuff? This is actually going okay, because the saliences do often seem to track the error differences, which is cool
+# so, what are we going to do? well, there are two stories we can tell, one is just about the hemispheres generating edge detection kind of automatically, whic his really awesome, we should definitely show richard thatand tie that into predictive processing and biological models, as it's really cool. could be a minimum publishable unit (as well as the autism!?). second we would try to recreate the salienec patterns by testing them with our thing. that's really what we needto get done now, I feel so let's get on that
+# the other trouble is that the current collect dirs doesn't actually do stuff in order either, which is unfortuante, I think so we'll need to rewrite that one to do so also, and then we just need to train the model and compare which is fair enoguh. at some later point we'll need to start wriging plotting functions so we can compare training performance over time, and start seriosuly consdiering optimisations and scripts for hyperparameter search. moreoever, we'll need to start trying the different ones. that's where I'll just need to go into the office and get some serious computatoinal power
+# but yeah, I think today the aim is just to find this and get it running while we actually work on the other important stuff, which is greater importance re Enyo, such as figuring out how to do a react application. that seems very important, and must be done
+
+# right, that means I actually need to start working at stuff. so let's do that?
+# okay, we emailed richard, next step is generating the function that combines the data into a big array, andthen training with it, so let's do that
 
 
 # so basically we have found that the things it has trouble predicting, and thus the most "informative" parts of the picture are basically the edges, nwo this is actually quite interesting, and if I'mfeeling pretty dodgy, I could write a paper on this lol, as it would be quite interesting, and could see why we do edges, and then we would do a fucking thing where we see edges and perhaps try to integrate it with gestalts, and so forth, and that could be really really interesting, but Ithink it's quite unlikely to be honest but at least that's something cool we've found. one thing we need to do is to improve the plot error map functoin to show all three, so let's do that, and then lets work on other stuff - i.e. we'll perhaps, I do't know what the next step is - doing gaussian smoothing seems to be important, also training on the huge image corpus and then cross validating, with the actual responses. so let's work on that and get that done today, then we can do some smiple html and css which could be fun. tomorrow we'll prepare what we're actually going to say to richard!
 
+
+# we should actually talk to richard about that... what are our next steps, however? I'm not actually sure of any of this, so I should have a look to see what we've got
+# we could perhaps try to write a paper about it - could be interesting. next steps are trying it out, trying to actually properly cmopare the images to the things. let's have a look at that now
+
+# I think I know what the issue is, actually, which is interesting. I'm pretty sure it relates to the fact that python dictionaries aren't ordered, and when we do our file system, it parses a dictoinary, which is going to be really really irritating. We're going to have to have a better unciton
+# OTOH the salience maps often actually look kind of like the outlines which we see with the reconstructions, so that's really promising. we should try to solev these issues, I feel
+
+# yeah, there aretwo problems. firstly, it apparently completely ignores each file, secodnly it actually doesn't read them in in the right order AT ALL, so I'm really not sure how I should do this to be perfectly honest. I really don't know. the trouble is they come in directories, so I'm not sure how to maintain the order. let's go on stackoverflow to have a look!
+# okay, there are only 100, it just orders them in even numbers for whatever dumb reason. okay, we can solve this, let's get to it!

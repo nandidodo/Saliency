@@ -197,8 +197,70 @@ def compare_image_and_salience(dirname, N=20, start=0):
 		print outputs.shape
 		compare_images((imgs[start+i], outputs[start+i]), ('image', 'salience map'))
 
-compare_image_and_salience('testSet/Data/test/Action')
+def compare_image_and_salience_from_known_files(fname1, fname2, N=20, start=0):
+	imgs = load(fname1)
+	imgs = imgs[:,:,:,0]
+	shape = imgs.shape
+	imgs = np.reshape(imgs, (shape[0], shape[1], shape[2]))
+	print "IMGS:"
+	print imgs.shape
+	outputs = load(fname2)
+	shape = outputs.shape
+	outputs = outputs[:,:,:,0]
+	outputs = np.reshape(outputs, (shape[0], shape[1], shape[2]))
+	print "OUTPUTS:"
+	print outputs.shape
+	for i in xrange(N):
+		compare_images((imgs[start+i], outputs[start+i]), ('image', 'salience map'))
 
+#compare_image_and_salience('testSet/Data/test/Action')
+
+compare_image_and_salience_from_known_files('testimages_combined', 'testsaliences_combined')
+
+def combine_images_into_big_array(dirname, makedir = '', save=True, verbose=True):	
+
+	if makedir != '':
+		if not os.path.exists(rootdir + makedir):
+			try:
+				os.makedirs(rootdir + makedir)
+			except OSError as e:
+				if e.errno!= errno.EEXIST:
+					print "error found: " + str(e)
+					raise
+				else:
+					print "directory probably already exists despite check"
+					raise
+		
+
+	filelist =  sorted(os.listdir(dirname))
+	imgs = []
+	outputs = []
+	for f in filelist:
+		arr = load(dirname + '/' + f)
+		if '_' in f: #i.e. it's an output
+			outputs.append(arr)
+			print "OUTPUT: " + f
+			print arr.shape
+		if '_' not in f: # so it's an image
+			imgs.append(arr)
+			print "IMAGE: " + f
+			print arr.shape
+	#we now stack them
+
+	imgs = np.concatenate(imgs)
+	outputs = np.concatenate(outputs)
+	if verbose:
+		print "images shape: " + str(imgs.shape)
+		print "outputs shape: " + str(outputs.shape)
+
+	if save: 
+		save_array(imgs, dirname + makedir + 'images_combined')
+		save_array(outputs, dirname + makedir + 'saliences_combined')
+
+	return imgs, outputs
+
+#dirname = 'testSet/Data/test'
+#combine_images_into_big_array(dirname)
 
 
 
