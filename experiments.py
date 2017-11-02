@@ -266,7 +266,7 @@ def run_benchmark_image_set_experiments(epochs=100, save=True, test_up_to=None):
 
 
 
-def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, test_up_to=None, preview = False, verbose = False):
+def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, test_up_to=None, preview = False, verbose = False, param_name= None, param = None, save_name = None):
 	imgs = load(fname)
 	imgs= normalise(imgs)
 	red, green,blue = split_dataset_by_colour(imgs)
@@ -277,11 +277,16 @@ def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, t
 		for i in xrange(10):
 			compare_two_images(redtrain[i], greentrain[i], reshape=True)
 
-	a1 = Hemisphere(redtrain, redtrain, redtest, redtest)
+	if param_name is None or param is None:
+		a1 = Hemisphere(redtrain, redtrain, redtest, redtest)
+	if param_name is not None and param is not None:
+		a1 = Hemisphere(redtrain, greentrain, redtest, greentest, param_name=param)
 	if verbose:
 		print "hemisphere initialised"
-	
-	a2 = Hemisphere(greentrain, greentrain, greentest, greentest)
+	if param_name is None or param is None:
+		a2 = Hemisphere(greentrain, greentrain, greentest, greentest)
+	if param_name is not None and param is not None:
+		a1 = Hemisphere(redtrain, greentrain, redtest, greentest, param_name=param)
 	if verbose:
 		print "second hemisphere initialised"
 	
@@ -301,7 +306,10 @@ def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, t
 	preds2, errmap2 = a2.get_error_maps(return_preds=True)
 
 	if save:
-		save_array((redtest, preds1, errmap1),fname+'_imgs_preds_errmaps')
+		if save_name is None:
+			save_array((redtest, preds1, errmap1),fname+'_imgs_preds_errmaps')
+		if save_name is not None:
+			save_array((redtest, preds1, errmap1), save_name + '_imgs_preds_errmaps')
 
 	if verbose:
 		print errmap1[0]
@@ -313,7 +321,10 @@ def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, t
 	a1.plot_error_maps(mean_maps)
 
 	if save:
-		save_array(mean_maps, 'benchmark_red_green_error_maps')
+		if save_name is None:
+			save_array(mean_maps, 'benchmark_red_green_error_maps')
+		if save_nane is not None:
+			save_array(mean_maps, save_name + '_mean_maps')
 	return mean_maps
 
 
@@ -365,7 +376,21 @@ def compare_mean_map_to_salience_map(mmap_fname, sal_fname, start = 100, gauss=F
 			errm = gaussian_filter(mmap[start+i])
 			compare_two_images(errm, salmap[start+i], 'mean error map', 'target salience map')
 	
+
+
+
 	
+def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epochs=100):
+	N = len(param_list)
+	for i in xrange(N):
+		save_name = save_base + '_' + param_name + '_test_'+str(i)
+		run_colour_split_experiment(input_fname, epochs=epochs, param_name = param_name, param = param_list[i],save_name = save_name)
+
+
+#we need a way to get the error and accuracies or whatever, but we'll have to add that in a bit, so I don't know!
+		
+
+
 
 if __name__ == '__main__':
 	#run_colour_experiments(epochs=1, save=False)
@@ -379,6 +404,21 @@ if __name__ == '__main__':
 	#compare_error_map_to_salience_map('testimages_combined_imgs_preds_errmaps', 'testsaliences_combined', gauss=False)
 
 	compare_mean_map_to_salience_map('benchmark_red_green_error_maps', 'testsaliences_combined', gauss=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# the next step, depending on what we say to richard, is the hyperparam search. that isn't that difficult, but that's the default step. we can write something to dothat, and to be hoenst I should probably just do it now, as I'm not realistically going to be able to do any significantly useful other stuff in like the half an hour I've got now. I'll upload my react/vue stuff to github, and then see where i stand, I think. Getting hyperparam search working andthe save files set up, so Ican just run it tonight while doing stuff with mycah would be the ideal, so I shuold look at it and see how it's going and where we get up to... so let's do that!
 
 # one very simpel thing we we don't actually compare the mean maps to the saliecne traces. maybe if we did that would help. that's pretty trivial to do all things considered, so we should look at making that work!
 
