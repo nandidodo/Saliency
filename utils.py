@@ -222,6 +222,27 @@ def get_error(err_map, sal_map, accuracy = True, verbose = True):
 	
 	return error
 
+
+def get_errors(mean_maps, sal_maps total_error = True, verbose = False, save=True, save_name = '_errors'):
+	errmaps = np.abs(mean_maps, sal_maps)
+	N = len(errmaps)
+	if total_error:
+		total_err = float(np.sum(errmaps))/float(N)
+
+	errslist = []
+	for i in xrange(N):
+		err = float(np.sum(errmaps[i]))
+		errslist.append(err)
+
+	errslist = np.array(errslist)
+	ret = errslist
+	if total_error:
+		ret = (total_err, errslist)
+	if save:
+		save_array(ret, save_name)
+	return ret
+
+
 	
 	
 
