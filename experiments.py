@@ -393,7 +393,7 @@ def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epoch
 			salmaps = np.reshape(salmaps,(shape[0], shape[1], shape[2]))
 			if error_list:
 				err, errlist = get_errors(mean_maps, salmaps, error, error_list, save_name='save_base' + '_' + str(param) + '_'+str(param_list[i]) + '_errors')
-				if not error_list:
+			if not error_list:
 				err = get_errors(mean_maps, salmaps, error, error_list, save_name='save_base' + '_' + str(param) + '_'+str(param_list[i]) + '_errors')
 
 
@@ -411,9 +411,16 @@ if __name__ == '__main__':
 	#run_benchmark_image_set_experiments(20)
 	#run_colour_experiments(5, save=False, test_up_to=10)
 	#run_colour_split_experiments_images_from_file('testimages_combined', epochs=50)
-	#compare_error_map_to_salience_map('testimages_combined_imgs_preds_errmaps', 'testsaliences_combined', gauss=False)
+	#compare_error_map_to_salience_map('BenchmarkIMAGES_images', 'BenchmarkIMAGES_output')
+	#compare_error_map_to_salience_map('testimages_combined_imgs_preds_errmaps', 'testsaliences_combined', gauss=True)
 
 	compare_mean_map_to_salience_map('benchmark_red_green_error_maps', 'testsaliences_combined', gauss=True)
+
+
+
+
+
+
 
 
 

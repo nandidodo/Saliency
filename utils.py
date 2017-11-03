@@ -223,7 +223,7 @@ def get_error(err_map, sal_map, accuracy = True, verbose = True):
 	return error
 
 
-def get_errors(mean_maps, sal_maps total_error = True, verbose = False, save=True, save_name = '_errors'):
+def get_errors(mean_maps, sal_maps, total_error = True, verbose = False, save=True, save_name = '_errors'):
 	errmaps = np.abs(mean_maps, sal_maps)
 	N = len(errmaps)
 	if total_error:
