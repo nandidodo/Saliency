@@ -215,8 +215,8 @@ def compare_image_and_salience_from_known_files(fname1, fname2, N=20, start=0):
 
 #compare_image_and_salience('testSet/Data/test/Action')
 
-compare_image_and_salience_from_known_files('testimages_combined', 'testsaliences_combined')
-
+#compare_image_and_salience_from_known_files('testimages_combined', 'testsaliences_combined')
+#
 def combine_images_into_big_array(dirname, makedir = '', save=True, verbose=True):	
 
 	if makedir != '':
@@ -262,6 +262,54 @@ def combine_images_into_big_array(dirname, makedir = '', save=True, verbose=True
 #dirname = 'testSet/Data/test'
 #combine_images_into_big_array(dirname)
 
+#arr = load_array('testimages_combined_imgs_preds_errmaps')
+
+"""
+print type(arr)
+print len(arr)
+print arr.shape
+maps = arr[2]
+print maps.shape
+maps = np.reshape(maps,(maps.shape[0], maps.shape[1]))
+plt.imshow(maps)
+plt.show()"""
+
+#arr = load_array('error_map_test')
+#maps = np.reshape(arr, (arr.shape[0], arr.shape[1], arr.shape[2]))
+
+
+arr = load_array('cifar_error_map_preliminary')
+print type(arr)
+print len(arr)
+print arr.shape
+maps = np.reshape(arr, (arr.shape[0], arr.shape[1], arr.shape[2]))
+
+def sum_normalise_err_maps(errmaps):
+	N = len(errmaps)
+	basemap = np.zeros(errmaps[0].shape)
+	print "basemap shape"
+	print basemap.shape
+	for i in xrange(N):
+		errmap = errmaps[i]
+		shape=errmap.shape
+		print shape
+		for j in xrange(shape[0]):
+			for k in xrange(shape[1]):
+				basemap[j][k] += errmap[j][k]
+	
+	basemap = basemap/float(N)
+	basemap = np.array(basemap)
+	return basemap
+
+basemap = sum_normalise_err_maps(maps)
+print type(basemap)
+print basemap.shape
+plt.imshow(basemap)
+plt.show()
+
+#plt.imshow(errmaps[2])
+		
+		
 
 
 #plt.imshow(img_amp_display)
