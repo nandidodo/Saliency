@@ -278,11 +278,24 @@ plt.show()"""
 #maps = np.reshape(arr, (arr.shape[0], arr.shape[1], arr.shape[2]))
 
 
-arr = load_array('cifar_error_map_preliminary')
+#arr = load_array('cifar_error_map_preliminary')
+#print type(arr)
+#print len(arr)
+#print arr.shape
+#maps = np.reshape(arr, (arr.shape[0], arr.shape[1], arr.shape[2]))
+
+"""
+arr = load_array('all_errmaps_imgs_preds_errmaps')
 print type(arr)
 print len(arr)
-print arr.shape
-maps = np.reshape(arr, (arr.shape[0], arr.shape[1], arr.shape[2]))
+maps = arr[2]
+print type(maps)
+print maps.shape
+
+#for i in xrange(1):
+#	plt.imshow(maps[i])
+#	plt.show()
+		
 
 def sum_normalise_err_maps(errmaps):
 	N = len(errmaps)
@@ -297,18 +310,79 @@ def sum_normalise_err_maps(errmaps):
 			for k in xrange(shape[1]):
 				basemap[j][k] += errmap[j][k]
 	
-	basemap = basemap/float(N)
+	#basemap = basemap/float(N)
 	basemap = np.array(basemap)
 	return basemap
 
 basemap = sum_normalise_err_maps(maps)
+basemap = basemap[30:70, 30:70]
 print type(basemap)
 print basemap.shape
 plt.imshow(basemap)
 plt.show()
 
 #plt.imshow(errmaps[2])
-		
+print basemap
+"""
+
+#get and save the dataset split by spatial frequency
+"""
+arr = load_array('testimages_combined')
+# I think this only works with a single colour, so we're going to arbitrarily choose red
+# which is probably bad
+arr = arr[:,:,:,0]
+shape=arr.shape
+arr = np.reshape(arr, (shape[0], shape[1], shape[2]))
+print arr.shape
+# now we filter
+lp,hp,bp = split_dataset_spatial_frequency(arr, save_name='benchmark_images_spatial_frequency_split')
+"""
+def split_by_spatial_frequency(name, save_name):
+	arr = load_array(name)
+	arr = arr[:,:,:,0]
+	shape = arr.shape
+	arr = np.reshape(arr, (shape[0], shape[1], shape[2]))
+	lp,hp,bp = split_dataset_spatial_frequency(arr, save_name=save_name)
+	return (lp, hp, bp)
+
+# okay, let's test it
+test = load_array('benchmark_images_spatial_frequency_split')
+print type(test)
+print len(test)
+lp, hp, bp = test
+print lp.shape
+print hp.shape
+for i in xrange(10):
+	compare_two_images(lp[i], hp[i], 'lp', 'hp')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# okay, yay, if we crop it sufficiently, we can get an okay looking centre bias heatmap, but it seems like a bit of a scam that w need to crop it sufficiently, but nevertheless, it kind of works. i don't know what other solutions i'm meant to get. so that's good. at least we are sorted now, which is great. but anyhow, how are we actually going to get this sorted? let's go and look up and catalogue a whole bunch of centre bias papers, and also figure out just what we're doing here, let's do that until mycah finishes work. from there, the next step is to have lunch and finish this stuff off. hopefully we can present richard, perhaps even with a draft paper next thursday on the centre bias, of a thousand words or so, plus our stuff and an exlpanation of the results. thiscould be very reasonable indeed. and we'll take the best things and compare them, although we have no actual accuracy/ROC calculation metrics here, which is unfortuante, but that's still quitemiportant, so we should seriously look at that and see what's up, and we also need to perform hyperparameter optimisation and stuff on our models, to get it significantly better, and like use the ADAM optimiser and so forth, so we shuold look at that and also at other people's approaches. so let's get on with that then right now!
+
 		
 
 
