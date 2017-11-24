@@ -559,6 +559,18 @@ def filter_dataset(dataset, f, N = -1):
 	return fftlist
 
 
+def split_dataset_spatial_frequency(dataset, save=True, save_name=None):
+	lp = filter_dataset(dataset, lowpass_filter)
+	hp = filter_dataset(dataset, highpass_filter)
+	bp = filter_dataset(dataset, bandpass_filter)
+	res = (lp, hp, bp)
+	if save:
+		if save_name is None:
+			save_name = 'spatial_frequency_split_lp_hp_bp'
+		save_array(res, save_name)
+	return res
+
+
 
 	
 	
