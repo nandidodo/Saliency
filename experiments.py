@@ -265,8 +265,75 @@ def run_benchmark_image_set_experiments(epochs=100, save=True, test_up_to=None):
 	return mean_maps
 
 
+def run_spatial_frequency_split_experiments_images_from_file(fname, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
+	imgs = load_array(fname)
+	imgs = normalise(imgs)
+	lp,hp,bp = imgs
+	lptrain, lptest=  split_into_test_train(lp)
+	hptrain, hptest = split_into_test_train(hp)
 
-def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, test_up_to=None, preview = False, verbose = False, param_name= None, param = None, save_name = None):
+	if preview:
+		for i in xrange(10):
+			compare_two_images(lptrain[i], hptrain[i], reshape=True)
+
+	if param_name is None or param is None:
+		a1 = Hemisphere(lptrain, hptrain, lptest, hptest)
+	if param_name is not None and param is not None:
+		a1 = Hemisphere(lptrain, hptrain, lptest, hptest, param_name=param)
+	if verbose:
+		print "hemisphere initialised"
+	if param_name is None or param is None:
+		a2 = Hemisphere(lptrain, hptrain, lptest, hptest)
+	if param_name is not None and param is not None:
+		a2 = Hemisphere(lptrain, hptrain, lptest, hptest, param_name=param)
+	if verbose:
+		print "second hemisphere initialised"
+
+	if test_all:
+		a1=Hemisphere(lp, hp, lp, hp)
+		a2=Hemisphere(hp,lp,hp,lp)
+	
+
+	a1.train(epochs=epochs)
+	if verbose:
+		print "a1 trained"
+	
+	a2.train(epochs=epochs)
+	if verbose:
+		print "a2 trained"
+
+	a1.plot_results()
+	a2.plot_results()
+
+	preds1, errmap1 = a1.get_error_maps(return_preds = True)
+	preds2, errmap2 = a2.get_error_maps(return_preds=True)
+
+	if save:
+		if save_name is None:
+			save_array((redtest, preds1, errmap1),fname+'spfreq_imgs_preds_errmaps')
+		if save_name is not None:
+			save_array((redtest, preds1, errmap1), save_name + 'spfreq_imgs_preds_errmaps')
+
+	if verbose:
+		print errmap1[0]
+	
+	a1.plot_error_maps(errmap1, predictions=preds1)
+	a2.plot_error_maps(errmap2,predictions=preds2)
+	
+	mean_maps = mean_map(errmap1, errmap2)
+	a1.plot_error_maps(mean_maps)
+
+	if save:
+		if save_name is None:
+			save_array(mean_maps, 'benchmark_spfreq_red_green_error_maps')
+		if save_name is not None:
+			save_array(mean_maps, save_name + '_mean_maps')
+	return mean_maps
+
+
+
+
+def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, test_up_to=None, preview = False, verbose = False, param_name= None, param = None, save_name = None, test_all=False):
 	imgs = load(fname)
 	imgs= normalise(imgs)
 	red, green,blue = split_dataset_by_colour(imgs)
@@ -278,7 +345,7 @@ def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, t
 			compare_two_images(redtrain[i], greentrain[i], reshape=True)
 
 	if param_name is None or param is None:
-		a1 = Hemisphere(redtrain, redtrain, redtest, redtest)
+		a1 = Hemisphere(redtrain, greentrain, redtest, greentest)
 	if param_name is not None and param is not None:
 		a1 = Hemisphere(redtrain, greentrain, redtest, greentest, param_name=param)
 	if verbose:
@@ -286,9 +353,13 @@ def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, t
 	if param_name is None or param is None:
 		a2 = Hemisphere(greentrain, greentrain, greentest, greentest)
 	if param_name is not None and param is not None:
-		a1 = Hemisphere(redtrain, greentrain, redtest, greentest, param_name=param)
+		a2 = Hemisphere(redtrain, greentrain, redtest, greentest, param_name=param)
 	if verbose:
 		print "second hemisphere initialised"
+
+	if test_all:
+		a1=Hemisphere(red, green, red, green)
+		a2=Hemisphere(green,red,green,red)
 	
 
 	a1.train(epochs=epochs)
@@ -323,7 +394,7 @@ def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, t
 	if save:
 		if save_name is None:
 			save_array(mean_maps, 'benchmark_red_green_error_maps')
-		if save_nane is not None:
+		if save_name is not None:
 			save_array(mean_maps, save_name + '_mean_maps')
 	return mean_maps
 
@@ -414,7 +485,9 @@ if __name__ == '__main__':
 	#compare_error_map_to_salience_map('BenchmarkIMAGES_images', 'BenchmarkIMAGES_output')
 	#compare_error_map_to_salience_map('testimages_combined_imgs_preds_errmaps', 'testsaliences_combined', gauss=True)
 
-	compare_mean_map_to_salience_map('benchmark_red_green_error_maps', 'testsaliences_combined', gauss=True)
+	#compare_mean_map_to_salience_map('benchmark_red_green_error_maps', 'testsaliences_combined', gauss=True)
+
+	run_colour_split_experiments_images_from_file('testimages_combined', epochs=50, test_all=True, save_name="all_errmaps")
 
 
 
