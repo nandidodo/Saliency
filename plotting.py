@@ -9,13 +9,6 @@ from utils import *
 from experiments import *
 from tests import *
 
-#first we load the file so it makes sense
-img_fname = 'testimages_combined'
-
-imgs = load_array(img_fname)
-print imgs.shape
-
-
 def show_img_red_green(img_fname, indices):
 	#get imgs
 	imgs = load_array(img_fname)
@@ -53,6 +46,9 @@ def show_img_red_green(img_fname, indices):
 		plt.yticks([])
 	plt.show()
 		
+
 	
-	
-		
+if __name__ == 'main':
+	img_fname='testimages_combined'
+	indices = (40,41)
+	show_img_red_green(img_fname, indices)
