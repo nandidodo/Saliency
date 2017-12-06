@@ -39,16 +39,20 @@ def show_img_red_green(img_fname, indices):
 		plt.xticks([])
 		plt.yticks([])
 		#green image
-		plt.subplit(k+1, 3,3)
+		plt.subplot(k+1, 3,3)
 		plt.imshow(greens[k], cmap='gray')
 		plt.title('green component')
 		plt.xticks([])
 		plt.yticks([])
+
+	print "finished function!?"
 	plt.show()
+	# I don't know how this works, and it kind of doesn't atm, but we can't really fix it.
+	#dagnabbit we don't really have anything to show for anything. we need to do more work, but we have no time a swe've frittered it away stressing... dagnabbt!
 		
 
 	
-if __name__ == 'main':
+if __name__ == '__main__':
 	img_fname='testimages_combined'
-	indices = (40,41)
+	indices = (40,45,56)
 	show_img_red_green(img_fname, indices)
