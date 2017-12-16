@@ -1,0 +1,1 @@
+# so the aim of this is to do some brief work on gestalts, i.e. for our model we would then split an image in half and try to show some standard gestalt effects from this, whcih seems very reasonable indeed to be honest, but I honestly do not even knwo. we're probably going to majorly focus on this after the first paper is over, but we've got this to do first, so let's look at it
