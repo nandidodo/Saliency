@@ -6,6 +6,9 @@
 # i.e. we can check what networks are available for it to see how it works
 # but I honestly just really don't know lol... so idk
 
+#our saved file name
+fname="ip_addresses.txt"
+
 
 #initialise our set of ip addresses
 ip_addresses=()
@@ -15,10 +18,12 @@ echo "starting script"
 for ip in $(seq 1 254); do
 	ip_addr=192.168.1.$ip
 	ping -c 1 $ip_addr>/dev/null; 
-	echo "pinging $ip_addr";
+	#echo "pinging $ip_addr";
     [ $? -eq 0 ] && echo "$ip_addr UP" && ip_addresses+=($ip_addr) || echo "$ip_addr down"
 	#ip_addresses+=("in loop")
-	echo "${ip_addresses[@]}"
+	#echo "${ip_addresses[@]}"
 done
+echo "saving to file"
+echo "${ip_addresses[@]}" > $fname 
 echo "script finished"
 #echo "$ip_addresses"
