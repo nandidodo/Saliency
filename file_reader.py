@@ -76,6 +76,7 @@ def print_dirs_files(rootdir):
 		print files
 		print "  "
 
+
 def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', save=True, save_dir='./', make_dir_name = None):
 	#first we check if we want to make a new dir, 
 	if make_dir_name is not None:
@@ -102,14 +103,14 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 		
 		for file in files:
 			#check it's actually a jpg incase we have random junk in there
-			print file
-			print dirs
-			print subdir
+			#print file
+			#print dirs
+			#print subdir
 			filename = os.path.basename(file)
-			if file.endswith(".jpg"):
+			if file.endswith(".jpg") or file.endswith(".jpeg"):
 				if crop_size is not None:
 					print "IN IMAGE LOOP"
-					print subdir
+					#print subdir
 					print filename
 					img = imresize(imread(subdir + '/' + filename, mode=mode), crop_size)
 				if crop_size is None:
@@ -133,6 +134,7 @@ def save_images_per_directory(rootdir, crop_size = default_size, mode='RGB', sav
 		# and then save 
 		if save:
 			print name
+			print filelist.shape
 			save_array(filelist,save_dir + name)
 			print "SAVED: " + name
 			print save_dir+name
