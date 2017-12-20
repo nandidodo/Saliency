@@ -25,7 +25,31 @@ run_num = sys.argv[1]
 # we can then use this globally for the thing when we do our hyperparam grid search
 
 
-def split_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False)::
+def split_dataset_half_small_section(dataset,split_width):
+	#we do this with three dimensions at first, I think, because there's no particular reason to do it with less as we're trying to imitate across the cortex
+	#I think horizontal is just the thing
+	#we assume all images in the dataset are cropped to the same width - a big assumption, so we need that preprocessing step for this to work really
+	img_width = len(dataset[0])
+	leftsplit = dataset[:,0:img_width/2,:,:]
+	rightsplit = dataset[:,(img_width/2):img_width, :,:]
+	leftslice = dataset[:,(img_width-split_width):img_width,:,:]
+	rightslice = dataset[:,img_width:(img_width+split_width),:,:]
+	return leftsplit, rightsplit, leftslice, rightslice
+
+def split_dataset_center_slice(dataset, split_width):
+
+	#this just returns the equivalent of the leftslpit and the rightsplit
+	#also assumes three dimensional images and four d dataset
+	#also all images are cropped to the same width
+
+	img_width = len(dataset[0])
+	leftslice = dataset[:,(img_width-split_width):img_width,:,:]
+	rightslice = dataset[:,img_width:(img_width+split_width),:,:]
+	return leftslice, rightslice
+	
+
+
+def split_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
 	#we'll do this in the three dimensional test
 	imgs = load_array(fname)
 	train, test = imgs
