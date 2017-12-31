@@ -339,8 +339,8 @@ def iterate_through_cmaps_and_save(basemap):
 
 	cmaps = cmap_string.split(",")
 	for i in xrange(len(cmaps)):
-		print cmaps[i]
-		plot_basemap(basemap,cmap=cmaps[i], save=True, fname=cmaps[i])
+		cmap = cmaps[i].strip()
+		plot_basemap(basemap,cmap=cmap, save=True, fname=cmap)
 
 
 
