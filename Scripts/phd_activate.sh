@@ -6,4 +6,7 @@ cd work/
 cd dlenv/
 source ./bin/activate
 echo "activated"
-
+cd ..
+cd phd
+cd saliency
+echo "in correct directory"
