@@ -65,7 +65,7 @@ def first_fixations_max(err_map, N, gauss_smooth=True, sigma=2):
 	fix_map = np.zeros(err_map.shape)
 	for i in xrange(N):
 		j,k = max_index_in_array(err_map)
-		fix_map[j,k] = 255
+		fix_map[j][k] = 255
 		err_map[j][k] = 0
 	if gauss_smooth:
 		fix_map = gaussian_filter(fix_map, sigma)
