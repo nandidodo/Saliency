@@ -49,7 +49,7 @@ def split_dataset_center_slice(dataset, split_width):
 	
 
 
-def split_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
+def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
 	#we'll do this in the three dimensional test
 	imgs = load_array(fname)
 	train, test = imgs
@@ -59,7 +59,7 @@ def split_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=N
 	#okay, now we've got our train and test we run the actual experiment
 	if preview:
 		for i in xrange(10):
-			compare_two_images(lptrain[i], hptrain[i], reshape=True)
+			compare_two_images(halftrain1[i], halftrain2[i], reshape=True)
 
 	if param_name is None or param is None:
 		a1 = Hemisphere(halftrain1, halftrain2, halftrain1, halftrain2)
@@ -114,4 +114,67 @@ def split_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=N
 		if save_name is not None:
 			save_array(mean_maps, save_name + '_mean_maps')
 	return mean_maps
+
+
+def split_predict_slice_from_half_from_file((fname,slice_pix=30, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
+	#we'll do this in the three dimensional test
+	imgs = load_array(fname)
+	train, test = imgs
+	lefthalftrain, righthalftrain, leftslicetrain, rightslicetrain = split_dataset_half_small_section(train, slice_pix)
+	lefthalftest, righthalftest, leftslicetest, rightslicetest = split_dataset_half_small_section(test, slice_pix)
+
+	if param_name is None or param is None:
+		a1 = Hemisphere(lefthalftrain, rightslicetrain, lefthalftest, rightslicetest)
+	if param_name is not None and param is not None:
+		a1 = Hemisphere(lefthalftrain, rightslicetrain, lefthalftest, rightslicetest, param_name=param)
+	if verbose:
+		print "hemisphere initialised"
+	if param_name is None or param is None:
+		a2 = Hemisphere(righthalftrain, leftslicetrain, righthalftest, leftslicetest)
+	if param_name is not None and param is not None:
+		a2 = Hemisphere(righthalftrain, leftslicetrain, righthalftest, leftslicetest, param_name=param)
+	if verbose:
+		print "second hemisphere initialised"
+
+	a1.train(epochs=epochs)
+	if verbose:
+		print "a1 trained"
+	
+	a2.train(epochs=epochs)
+	if verbose:
+		print "a2 trained"
+
+	a1.plot_results()
+	a2.plot_results()
+
+	preds1, errmap1 = a1.get_error_maps(return_preds = True)
+	preds2, errmap2 = a2.get_error_maps(return_preds=True)
+
+	if save:
+		if save_name is None:
+			save_array((redtest, preds1, errmap1),fname+'gestalt_slice_predict_imgs_preds_errmaps')
+		if save_name is not None:
+			save_array((redtest, preds1, errmap1), save_name + 'gestalt_slice_predict_imgs_preds_errmaps')
+
+	if verbose:
+		print errmap1[0]
+	
+	a1.plot_error_maps(errmap1, predictions=preds1)
+	a2.plot_error_maps(errmap2,predictions=preds2)
+	
+	mean_maps = mean_map(errmap1, errmap2)
+	a1.plot_error_maps(mean_maps)
+
+	if save:
+		if save_name is None:
+			save_array(mean_maps, 'gestalt_slice_predict_mean_maps')
+		if save_name is not None:
+			save_array(mean_maps, save_name + '_gestalt_slice_predict_mean_maps')
+	return mean_maps
+
+
+
+
+if __name__ == '__main__':
+	split_predict_slice_from_half_from_file('testimages_combined', slice_pix=30)
 
