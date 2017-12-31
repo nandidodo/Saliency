@@ -571,7 +571,8 @@ if __name__ == '__main__':
 
 	#run_colour_split_experiments_images_from_file('testimages_combined', epochs=50, test_all=True, save_name="all_errmaps")
 	#run_spatial_frequency_split_experiments_images_from_file('benchmark_images_spatial_frequency_split', epochs=50,test_all=True, save_name='spfreq_errmaps')
-	run_half_split_experiments()
+	#run_half_split_experiments()
+	run_all_colour_split_experiments_from_file('testimages_combined', epochs=50, test_all=True, save_name="all_errmaps_all_colour_combinations")
 
 
 
