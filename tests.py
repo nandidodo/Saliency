@@ -284,7 +284,7 @@ plt.show()"""
 #print arr.shape
 #maps = np.reshape(arr, (arr.shape[0], arr.shape[1], arr.shape[2]))
 
-"""
+
 arr = load_array('all_errmaps_imgs_preds_errmaps')
 print type(arr)
 print len(arr)
@@ -318,12 +318,20 @@ basemap = sum_normalise_err_maps(maps)
 basemap = basemap[30:70, 30:70]
 print type(basemap)
 print basemap.shape
-plt.imshow(basemap)
-plt.show()
+#plt.imshow(basemap)
+#plt.show()
 
+def plot_basemap(basemap):
+	plt.imshow(basemap, cmap='gist_gray')
+	plt.title("Average of all error maps")
+	plt.xticks([])
+	plt.yticks([])
+	plt.show()
 #plt.imshow(errmaps[2])
-print basemap
-"""
+#print basemap
+
+plot_basemap(basemap)
+save_array(basemap, "center_bias_base_error_map")
 
 #get and save the dataset split by spatial frequency
 """
@@ -336,6 +344,8 @@ arr = np.reshape(arr, (shape[0], shape[1], shape[2]))
 print arr.shape
 # now we filter
 lp,hp,bp = split_dataset_spatial_frequency(arr, save_name='benchmark_images_spatial_frequency_split')
+"""
+
 """
 def split_by_spatial_frequency(name, save_name):
 	arr = load_array(name)
@@ -354,6 +364,8 @@ print lp.shape
 print hp.shape
 for i in xrange(10):
 	compare_two_images(lp[i], hp[i], 'lp', 'hp')
+
+"""
 
 
 
