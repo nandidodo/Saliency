@@ -61,6 +61,17 @@ def max_index_in_array(arr):
 	return indices
 
 
+def first_fixations_max(err_map, N, gauss_smooth=True, sigma=2):
+	fix_map = np.zeros(err_map.shape)
+	for i in xrange(N):
+		j,k = max_index_in_array(err_map)
+		fix_map[j,k] = 255
+		err_map[j][k] = 0
+	if gauss_smooth:
+		fix_map = gaussian_filter(fix_map, sigma)
+	return fix_map
+		
+
 def compare_two_images(img1, img2, title1 = "", title2 = "", reshape=False):
 
 
@@ -157,6 +168,8 @@ def mean_maps(err_maps):
 	return avg_map
 
 	#this algorithm is horrendously inefficient. hopefully it doesn't really matter that much!
+
+
 
 def reshape_into_image(img):
 	shape = img.shape
@@ -267,9 +280,6 @@ def get_errors(mean_maps, sal_maps, total_error = True, verbose = False, save=Tr
 		save_array(ret, save_name)
 	return ret
 
-
-	
-	
 
 
 def gaussian_filter(img, sigma = 2):
