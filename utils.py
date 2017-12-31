@@ -133,6 +133,31 @@ def mean_map(err_map1, err_map2):
 	return avg_map
 
 
+
+# this is a generic function for all mean maps given as a tuple or list of error maps
+def mean_maps(err_maps):
+	shape = err_maps[0].shape
+	assert len(shape) ==2, 'error maps must be two dimensional!'
+	N = len(err_maps)
+	for z in xrange(N):
+		assert shape==err_maps[i].shape, 'Error map ' + str(z+1) + ' is not compatible'
+
+	#init avg map
+	#assumes 
+	avg_map = np.zeros(shape)
+	for i in xrange(shape[0]):
+		for j in xrange(shape[1]):
+			for k in xrange(N):
+				err_map = err_maps[k]
+				avg_map[i][j] += err_map[i][j]
+	# now we divide
+	for n in xrange(shape[0]):
+		for m in xrange(shape[1]):
+			avg_map[n][m] = avg_map[n][m]/N
+	return avg_map
+
+	#this algorithm is horrendously inefficient. hopefully it doesn't really matter that much!
+
 def reshape_into_image(img):
 	shape = img.shape
 	print shape
