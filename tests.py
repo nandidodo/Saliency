@@ -5,8 +5,8 @@ import scipy
 from file_reader import *
 from utils import *
 import matplotlib.pyplot as plt
-import keras
-from keras.datasets import cifar10
+#import keras#
+#from keras.datasets import cifar10
 
 """
 img = read_image(50)
@@ -472,10 +472,78 @@ def load_and_show_colour_split_images(fname):
 
 	
 
+def show_all_error_maps_with_original_imgs(fname="testimages_combined_imgs_preds_errmaps", sal_fname="testsaliences_combined",img_nums=(180,181,182)):
+	arr = load_array(fname)
+	imgs, preds, errmaps = arr
+	print imgs.shape
+	imgshape = imgs.shape
+	imgs = np.reshape(imgs, (imgshape[0], imgshape[1], imgshape[2]))
+	print errmaps.shape
+	#plt.imshow(imgs[180])
+	#plt.show()
+	sals = load_array(sal_fname)
+	#print sals.shape
+	#plt.imshow(sals[2])
+	#plt.show()
+	testsals = sals[1710:1900,:,:,:]
+	print testsals.shape
+	#plt.imshow(testsals[2])
+	#plt.show()
+	num = 151
+	num2 = 152
+	
+	#now we plot to test if it works
+	fig = plt.figure()
+	
+	ax1 = fig.add_subplot(231)
+	plt.imshow(imgs[num], cmap='gray')
+	plt.title('Original Image')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax2 = fig.add_subplot(232)
+	plt.imshow(gaussian_filter(errmaps[num]), cmap='gray')
+	plt.title('Predicted Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax3 = fig.add_subplot(233)
+	plt.imshow(testsals[num],cmap='gray')
+	plt.title('Actual Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax4 = fig.add_subplot(234)
+	plt.imshow(imgs[num2], cmap='gray')
+	plt.title('Original Image')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax5 = fig.add_subplot(235)
+	plt.imshow(gaussian_filter(errmaps[num2]), cmap='gray')
+	plt.title('Predicted Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax6 = fig.add_subplot(236)
+	plt.imshow(testsals[num2],cmap='gray')
+	plt.title('Actual Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+	
+	plt.tight_layout()
+	plt.show(fig)
+
+	
+
+
+show_all_error_maps_with_original_imgs()
+	
+
 
 #load_show_colour_split_images()
 #show_colour_split_images()
-load_and_show_colour_split_images("BenchmarkIMAGES/i5.jpg")
+#load_and_show_colour_split_images("BenchmarkIMAGES/i5.jpg")
 
 
 
