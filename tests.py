@@ -396,9 +396,86 @@ def load_show_colour_split_images(fname="testimages_combined"):
 		showimgs = (img, red,green,blue)
 		compare_images(showimgs, titles,reshape=False)
 
+def show_colour_split_images(fname="benchmarkIMAGES_images"):
+	imgs = load_array(fname)
+	for i in xrange(len(imgs)):
+		img = imgs[i]
+		red = img[:,:,0]
+		green = img[:,:,1]
+		blue = img[:,:,2]
+		
+		compare_two_images(img, red)
 
-load_show_colour_split_images()
+def load_and_show_colour_split_images(fname):
+	img = plt.imread(fname)
+	red = img[:,:,0]
+	green = img[:,:,1]
+	blue=img[:,:,2]
+	
+	"""
+	#colour img
+	plt.subplot(111)
+	plt.imshow(img)
+	plt.title('Original Colour Image')
+	
+	#red
+	plt.subplot(212)
+	plt.imshow(red)
+	plt.title('Red Channel')
+	
+	#green
+	plt.subplot(221)
+	plt.imshow(green)
+	plt.title('Green Channel')
+	
+	#blue
+	plt.subplot(222)
+	plt.imshow(blue)
+	plt.title('Blue Channel')
+	
+	#show
+	plt.show()
+	"""
+	fig = plt.figure()
 
+	#originalcolour
+	ax1 = fig.add_subplot(221)
+	plt.imshow(img)
+	plt.title('Original Colour Image')
+	plt.xticks([])
+	plt.yticks([])
+
+	#red
+	ax2 = fig.add_subplot(222)
+	plt.imshow(red)
+	plt.title('Red Channel')
+	plt.xticks([])
+	plt.yticks([])
+
+	#green
+	ax3 = fig.add_subplot(223)
+	plt.imshow(green)
+	plt.title('Green Channel')
+	plt.xticks([])
+	plt.yticks([])
+
+	##blue
+	ax4 = fig.add_subplot(224)
+	plt.imshow(blue)
+	plt.title('Blue Channel')
+	plt.xticks([])
+	plt.yticks([])
+
+	plt.tight_layout()
+	plt.show(fig)
+	
+
+	
+
+
+#load_show_colour_split_images()
+#show_colour_split_images()
+load_and_show_colour_split_images("BenchmarkIMAGES/i5.jpg")
 
 
 
