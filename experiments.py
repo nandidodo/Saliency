@@ -470,15 +470,15 @@ def run_all_colour_split_experiments_images_from_file(fname,epochs=100, save=Tru
 	#a2.plot_error_maps(errmap2,predictions=preds2)
 	
 	err_maps=(errmap1, errmap2, errmap3, errmap4, errmap5, errmap6)
-	mean_maps = mean_maps(err_maps)
-	a1.plot_error_maps(mean_maps)
+	mean_map = mean_maps(err_maps)
+	a1.plot_error_maps(mean_map)
 
 	if save:
 		if save_name is None:
-			save_array(mean_maps, 'benchmark_red_green_error_maps_all')
+			save_array(mean_map, 'benchmark_red_green_error_maps_all')
 		if save_name is not None:
-			save_array(mean_maps, save_name + '_mean_maps')
-	return mean_maps
+			save_array(mean_map, save_name + '_mean_maps')
+	return mean_map
 
 
 def compare_error_map_to_salience_map(err_fname, sal_fname, start = 100, gauss=False):
@@ -533,11 +533,11 @@ def compare_mean_map_to_salience_map(mmap_fname, sal_fname, start = 100, gauss=F
 
 
 	
-def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epochs=100, error=True, error_list = False, sal_map_fname = 'testsaliences_combined'):
+def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epochs=100, error=True, error_list = False, sal_map_fname = 'testsaliences_combined', fn=run_colour_split_experiment):
 	N = len(param_list)
 	for i in xrange(N):
 		save_name = save_base + '_' + param_name + '_test_'+str(i)
-		mean_maps = run_colour_split_experiment(input_fname, epochs=epochs, param_name = param_name, param = param_list[i],save_name = save_name)
+		mean_maps = fn(input_fname, epochs=epochs, param_name = param_name, param = param_list[i],save_name = save_name)
 		if error:
 			#we load and process the sal maps
 			salmaps = load(sal_map_fname)
@@ -548,6 +548,13 @@ def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epoch
 				err, errlist = get_errors(mean_maps, salmaps, error, error_list, save_name='save_base' + '_' + str(param) + '_'+str(param_list[i]) + '_errors')
 			if not error_list:
 				err = get_errors(mean_maps, salmaps, error, error_list, save_name='save_base' + '_' + str(param) + '_'+str(param_list[i]) + '_errors')
+
+
+def multi_hyperparam_grid_search(param_names, param_lists, input_fname, save_bases, epochs=100, error=True, error_list = False, sal_map_fname = 'testsaliences_combined', fn=run_colour_split_experiment):
+	N = len(param_names)
+	assert N == len(param_lists) == len(save_bases), "each hyperparam must have param list and save base"
+	for i in xrange(N):
+		hyperparam_grid_search(param_names[i], param_lists[i], input_fname, save_bases[i], epochs=epochs, error=error, error_list=error_list, sal_map_fname = sal_map_fname, fn=fn)
 
 
 #we need a way to get the error and accuracies or whatever, but we'll have to add that in a bit, so I don't know!
@@ -572,7 +579,7 @@ if __name__ == '__main__':
 	#run_colour_split_experiments_images_from_file('testimages_combined', epochs=50, test_all=True, save_name="all_errmaps")
 	#run_spatial_frequency_split_experiments_images_from_file('benchmark_images_spatial_frequency_split', epochs=50,test_all=True, save_name='spfreq_errmaps')
 	#run_half_split_experiments()
-	run_all_colour_split_experiments_from_file('testimages_combined', epochs=50, test_all=True, save_name="all_errmaps_all_colour_combinations")
+	run_all_colour_split_experiments_images_from_file('testimages_combined', epochs=1, test_all=True, save_name="all_errmaps_all_colour_combinations")
 
 
 
