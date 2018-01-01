@@ -193,6 +193,24 @@ def load_and_show_colour_split_images(fname):
 
 	plt.tight_layout()
 	plt.show(fig)
+
+def show_two_images(img1, img2, title1, title2):
+	fig = plt.figure()
+
+	ax1 = fig.add_subplot(221)
+	plt.imshow(img1)
+	plt.title(title1)
+	plt.xticks([])
+	plt.yticks([])
+
+	ax2=fig.add_subplot(222)
+	plt.imshow(img2)
+	plt.title(title2)
+	plt.xticks([])
+	plt.yticks([])
+
+	plt.tight_layout()
+	plt.show(fig)
 			
 
 def mean_map(err_map1, err_map2):
