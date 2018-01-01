@@ -146,7 +146,7 @@ def mean_map(err_map1, err_map2):
 
 
 # this is a generic function for all mean maps given as a tuple or list of error maps
-def mean_maps(err_maps):
+def get_mean_maps(err_maps):
 	shape = err_maps[0].shape
 	assert len(shape) ==2, 'error maps must be two dimensional!'
 	N = len(err_maps)
@@ -167,6 +167,31 @@ def mean_maps(err_maps):
 			avg_map[n][m] = avg_map[n][m]/N
 	return avg_map
 
+def mean_maps(all_err_maps):
+	#all err maps is a tuple of error maps, I think, where each error maps contains multiple of the whole test set
+	assert len(all_err_maps)>0 and type(all_err_maps) == tuple, "all error maps must be a tuple of error maps containing at least one!"
+	num_maps = len(all_err_maps)
+	shape = all_err_maps[0].shape
+	N = shape[0]
+	avg_maps = []
+	for i in xrange(num_maps):
+		#first we do the asserts
+		assert all_err_maps[i].shape == shape, "error maps must all be same shape to be averaged"
+	
+	for j in xrange(N):
+		err_maps = []
+		for k in xrange(num_maps):
+			errmaps = all_err_maps[k]
+			#we make sure the thing is okay and reshape
+			if len(errmaps) ==4:
+				errmaps = np.reshape(errmaps, (N, shape[1], shape[2]))
+			err_maps.append(errmaps[j])
+		avg_maps.append(get_mean_maps(err_maps))
+	avg_maps = np.array(avg_maps)
+	return avg_maps	
+		
+
+#the trouble here is that we generate a mean map for each test image, and we don't want to average them all until we do that, thus, we need to figure out a loop over all of them also, as well as reshaping, so let's look at this!
 	#this algorithm is horrendously inefficient. hopefully it doesn't really matter that much!
 
 
