@@ -533,7 +533,7 @@ def compare_mean_map_to_salience_map(mmap_fname, sal_fname, start = 100, gauss=F
 
 
 	
-def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epochs=100, error=True, error_list = False, sal_map_fname = 'testsaliences_combined', fn=run_colour_split_experiment):
+def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epochs=100, error=True, error_list = False, sal_map_fname = 'testsaliences_combined', fn=run_colour_split_experiments_images_from_file):
 	N = len(param_list)
 	for i in xrange(N):
 		save_name = save_base + '_' + param_name + '_test_'+str(i)
@@ -550,7 +550,7 @@ def hyperparam_grid_search(param_name, param_list, input_fname, save_base, epoch
 				err = get_errors(mean_maps, salmaps, error, error_list, save_name='save_base' + '_' + str(param) + '_'+str(param_list[i]) + '_errors')
 
 
-def multi_hyperparam_grid_search(param_names, param_lists, input_fname, save_bases, epochs=100, error=True, error_list = False, sal_map_fname = 'testsaliences_combined', fn=run_colour_split_experiment):
+def multi_hyperparam_grid_search(param_names, param_lists, input_fname, save_bases, epochs=100, error=True, error_list = False, sal_map_fname = 'testsaliences_combined', fn=run_colour_split_experiments_images_from_file):
 	N = len(param_names)
 	assert N == len(param_lists) == len(save_bases), "each hyperparam must have param list and save base"
 	for i in xrange(N):
