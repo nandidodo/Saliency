@@ -285,12 +285,12 @@ plt.show()"""
 #maps = np.reshape(arr, (arr.shape[0], arr.shape[1], arr.shape[2]))
 
 
-arr = load_array('all_errmaps_imgs_preds_errmaps')
-print type(arr)
-print len(arr)
-maps = arr[2]
-print type(maps)
-print maps.shape
+#arr = load_array('all_errmaps_imgs_preds_errmaps')
+#print type(arr)
+#print len(arr)
+#maps = arr[2]
+#print type(maps)
+#print maps.shape
 
 #for i in xrange(1):
 #	plt.imshow(maps[i])
@@ -314,10 +314,10 @@ def sum_normalise_err_maps(errmaps):
 	basemap = np.array(basemap)
 	return basemap
 
-basemap = sum_normalise_err_maps(maps)
-basemap = basemap[30:70, 30:70]
-print type(basemap)
-print basemap.shape
+#basemap = sum_normalise_err_maps(maps)
+#basemap = basemap[30:70, 30:70]
+#print type(basemap)
+#print basemap.shape
 #plt.imshow(basemap)
 #plt.show()
 
@@ -329,7 +329,7 @@ def plot_basemap(basemap, cmap='gist_gray',save=False, fname=""):
 	if not save:
 		plt.show()
 	if save:
-		plt.savefig("basemap_" + fname + ".png")
+		plt.savefig("results/basemap_" + fname + ".png")
 #plt.imshow(errmaps[2])
 #print basemap
 
@@ -345,8 +345,8 @@ def iterate_through_cmaps_and_save(basemap):
 
 
 #plot_basemap(basemap)
-iterate_through_cmaps_and_save(basemap)
-save_array(basemap, "center_bias_base_error_map")
+#iterate_through_cmaps_and_save(basemap)
+#save_array(basemap, "center_bias_base_error_map")
 
 #get and save the dataset split by spatial frequency
 """
@@ -383,6 +383,21 @@ for i in xrange(10):
 """
 
 
+
+def load_show_colour_split_images(fname="testimages_combined"):
+	imgs = load_array(fname)
+	print imgs.shape
+	for i in xrange(len(imgs)):
+		img = imgs[i]
+		red = img[:,:,0]
+		green = img[:,:,1]
+		blue = img[:,:,2]
+		titles=("Original", "Red", "Green", "Blue")
+		showimgs = (img, red,green,blue)
+		compare_images(showimgs, titles,reshape=False)
+
+
+load_show_colour_split_images()
 
 
 
