@@ -49,6 +49,51 @@ def split_dataset_center_slice(dataset, split_width):
 	
 
 
+def plot_slice_splits(leftsplit, rightslpit, leftslice, rightslice, show=True):	
+	fig = plt.figure()
+
+	#originalcolour
+	ax1 = fig.add_subplot(221)
+	plt.imshow(leftsplit)
+	plt.title('Left Half')
+	plt.xticks([])
+	plt.yticks([])
+
+	#red
+	ax2 = fig.add_subplot(222)
+	plt.imshow(leftslice)
+	plt.title('Left Slice')
+	plt.xticks([])
+	plt.yticks([])
+
+	#green
+	ax3 = fig.add_subplot(223)
+	plt.imshow(rightsplit)
+	plt.title('Right Half')
+	plt.xticks([])
+	plt.yticks([])
+
+	##blue
+	ax4 = fig.add_subplot(224)
+	plt.imshow(rightslice)
+	plt.title('Right Slice')
+	plt.xticks([])
+	plt.yticks([])
+
+	plt.tight_layout()
+	if show:
+		plt.show(fig)
+	return fig
+
+
+def show_split_dataset_with_slices(dataset, split_width):
+	leftsplits, rightsplits, leftslices, rightslices = split_dataset_half_small_section(dataset, split_width=split_width)
+	N = len(dataset)
+	for i in xrange(N):
+		plot_slice_splits(leftsplits[i], rightsplits[i], leftslices[i], rightslices[i])
+	
+
+
 def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
 	#we'll do this in the three dimensional test
 	imgs = load_array(fname)
