@@ -172,14 +172,7 @@ def get_dirs_from_rootdir(rootdir, mode='RGB', crop_size = None, save=True, save
 
 # okay, the sorted is the key, without that it just breaks terribly. So we need to fix this in our functoins before it works, which should hopefully help, so let's work at that! now at least we nkow the problem. hopefully we can get some reasonable results tomorrow to show to richard, for thursday
 
-#dirname = 'testSet/Stimuli/Action'
-#get_files_in_directory(dirname)
 
-#rootdir = 'testSet/Stimuli'
-#get_dirs_from_rootdir(rootdir, crop_size = (100, 100), save_dir = 'testSet/Data/test')
-
-#load_file_test('testSet/Data/test/Action')
-#load_file_test('testSet/Data/test/Action_Output')
 
 def compare_image_and_salience(dirname, N=20, start=0):
 	for i in xrange(N):
@@ -344,6 +337,30 @@ def iterate_through_cmaps_and_save(basemap):
 
 
 
+def split_by_spatial_frequency(name, save_name):
+	arr = load_array(name)
+	arr = arr[:,:,:,0]
+	shape = arr.shape
+	arr = np.reshape(arr, (shape[0], shape[1], shape[2]))
+	lp,hp,bp = split_dataset_spatial_frequency(arr, save_name=save_name)
+	return (lp, hp, bp)
+
+def test_spatial_frequency_split():
+	# okay, let's test it
+	test = load_array('benchmark_images_spatial_frequency_split')
+	print type(test)
+	print len(test)
+	lp, hp, bp = test
+	print lp.shape
+	print hp.shape
+	for i in xrange(10):
+		compare_two_images(lp[i], hp[i], 'lp', 'hp')
+
+
+
+
+
+
 #plot_basemap(basemap)
 #iterate_through_cmaps_and_save(basemap)
 #save_array(basemap, "center_bias_base_error_map")
@@ -361,26 +378,8 @@ print arr.shape
 lp,hp,bp = split_dataset_spatial_frequency(arr, save_name='benchmark_images_spatial_frequency_split')
 """
 
-"""
-def split_by_spatial_frequency(name, save_name):
-	arr = load_array(name)
-	arr = arr[:,:,:,0]
-	shape = arr.shape
-	arr = np.reshape(arr, (shape[0], shape[1], shape[2]))
-	lp,hp,bp = split_dataset_spatial_frequency(arr, save_name=save_name)
-	return (lp, hp, bp)
 
-# okay, let's test it
-test = load_array('benchmark_images_spatial_frequency_split')
-print type(test)
-print len(test)
-lp, hp, bp = test
-print lp.shape
-print hp.shape
-for i in xrange(10):
-	compare_two_images(lp[i], hp[i], 'lp', 'hp')
 
-"""
 
 
 
@@ -537,17 +536,38 @@ def show_all_error_maps_with_original_imgs(fname="testimages_combined_imgs_preds
 	
 
 
-show_all_error_maps_with_original_imgs()
+
+
+def load_imgs(fname):
+	imgs = load_array(fname)
+	print imgs.shape
+	for i in xrange(100):
+		plt.imshow(imgs[i])
+		plt.show()
+
+
+
+
+
+if __name__ =='__main__':
+	#dirname = 'testSet/Stimuli/Action'
+	#get_files_in_directory(dirname)
+
+	#rootdir = 'testSet/Stimuli'
+	#get_dirs_from_rootdir(rootdir, crop_size = (100, 100), save_dir = 'testSet/Data/test')
+
+	#load_file_test('testSet/Data/test/Action')
+	#load_file_test('testSet/Data/test/Action_Output')
+
+
+
+	#show_all_error_maps_with_original_imgs()
 	
 
 
-#load_show_colour_split_images()
-#show_colour_split_images()
-#load_and_show_colour_split_images("BenchmarkIMAGES/i5.jpg")
-
-
-
-
+	#load_show_colour_split_images()
+	#show_colour_split_images()
+	#load_and_show_colour_split_images("BenchmarkIMAGES/i5.jpg")
 
 
 
