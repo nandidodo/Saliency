@@ -334,7 +334,7 @@ def run_spatial_frequency_split_experiments_images_from_file(fname, epochs=100, 
 	return mean_maps
 
 
-def run_colour_split_experiments_images_from_file_with_all_hyperparams(fname,epochs=100, save=True, test_up_to=None, verbose = False,lrate=0.001,decay=1e-6, momentum=0.9, nesterov=True, shuffle=True, loss='binary_crossentropy',activation='relu', dropout=0.3, padding='same', save_name = None, batch_size=25, optimizer=None):
+def run_colour_split_experiments_images_from_file_with_all_hyperparams(fname,epochs=100, save=False, test_up_to=None, verbose = False,lrate=0.001,decay=1e-6, momentum=0.9, nesterov=True, shuffle=True, loss='binary_crossentropy',activation='relu', dropout=0.3, padding='same', save_name = None, batch_size=25, optimizer=None):
 	imgs = load(fname)
 	imgs= normalise(imgs)
 	red, green,blue = split_dataset_by_colour(imgs)
@@ -356,10 +356,6 @@ def run_colour_split_experiments_images_from_file_with_all_hyperparams(fname,epo
 	a2.train(epochs=epochs)
 	if verbose:
 		print "a2 trained"
-
-	a1.plot_results()
-	a2.plot_results()
-
 	preds1, errmap1 = a1.get_error_maps(return_preds = True)
 	preds2, errmap2 = a2.get_error_maps(return_preds=True)
 
@@ -372,18 +368,14 @@ def run_colour_split_experiments_images_from_file_with_all_hyperparams(fname,epo
 	if verbose:
 		print errmap1[0]
 	
-	a1.plot_error_maps(errmap1, predictions=preds1)
-	a2.plot_error_maps(errmap2,predictions=preds2)
-	
 	mean_maps = mean_map(errmap1, errmap2)
-	a1.plot_error_maps(mean_maps)
 
 	if save:
 		if save_name is None:
 			save_array(mean_maps, 'benchmark_red_green_error_maps')
 		if save_name is not None:
 			save_array(mean_maps, save_name + '_mean_maps')
-	return mean_maps
+	return redtest, preds1, errmap1, mean_maps
 
 
 
@@ -635,10 +627,18 @@ if __name__ == '__main__':
 
 	#quick hyperparam test before the main event
 	param_names=("lrate","momentum")
-	lrates=(0.001, 0.002)
-	moms = (0.9, 0.5)
+	lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
+	moms = (0.9, 0.5,0.8,0.99,0.3,0)
+	res = []
 	for lrate in lrates:
-		run_colour_split_experiments_images_from_file_with_all_hyperparams('testimages_combined', epochs=1, save_name="hyperparam_test",lrate=lrate)
+		result = run_colour_split_experiments_images_from_file_with_all_hyperparams('testimages_combined', epochs=50,lrate=lrate)
+		res.append(result)
+	save_array(res, "hyperparam_test_lrates") 
+	res2=[]
+	for mom in moms:
+		result = run_colour_split_experiments_images_from_file_with_all_hyperparams('testimages_combined', epochs=50, momentum=mom)
+		res2.append(result)
+	save_array(res2, "hyperparam_test_momentums")
 		
 
 
