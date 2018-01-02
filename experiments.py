@@ -334,6 +334,57 @@ def run_spatial_frequency_split_experiments_images_from_file(fname, epochs=100, 
 	return mean_maps
 
 
+def run_colour_split_experiments_images_from_file_with_all_hyperparams(fname,epochs=100, save=True, test_up_to=None, verbose = False,lrate=0.001,decay=1e-6, momentum=0.9, nesterov=True, shuffle=True, loss='binary_crossentropy',activation='relu', dropout=0.3, padding='same', save_name = None, batch_size=25, optimizer=None):
+	imgs = load(fname)
+	imgs= normalise(imgs)
+	red, green,blue = split_dataset_by_colour(imgs)
+	redtrain, redtest = split_into_test_train(red)
+	greentrain, greentest = split_into_test_train(green)
+
+	#setup default optimizer
+	if optimizer is None:
+		optimizer = optimizers.SGD(lr =lrate, decay=decay, momentum = momentum, nesterov = nesterov)
+
+	a1=Hemisphere(redtrain, greentrain, redtest, greentest, batch_size=batch_size, dropout=dropout,activation=activation, padding=padding, optimizer =optimizer, epochs=epochs, loss=loss)
+	a2=Hemisphere(greentrain, redtrain, greentest, redtest, batch_size=batch_size, dropout=dropout,activation=activation, padding=padding, optimizer =optimizer, epochs=epochs, loss=loss)
+	
+
+	a1.train(epochs=epochs)
+	if verbose:
+		print "a1 trained"
+	
+	a2.train(epochs=epochs)
+	if verbose:
+		print "a2 trained"
+
+	a1.plot_results()
+	a2.plot_results()
+
+	preds1, errmap1 = a1.get_error_maps(return_preds = True)
+	preds2, errmap2 = a2.get_error_maps(return_preds=True)
+
+	if save:
+		if save_name is None:
+			save_array((redtest, preds1, errmap1),fname+'_imgs_preds_errmaps')
+		if save_name is not None:
+			save_array((redtest, preds1, errmap1), save_name + '_imgs_preds_errmaps')
+
+	if verbose:
+		print errmap1[0]
+	
+	a1.plot_error_maps(errmap1, predictions=preds1)
+	a2.plot_error_maps(errmap2,predictions=preds2)
+	
+	mean_maps = mean_map(errmap1, errmap2)
+	a1.plot_error_maps(mean_maps)
+
+	if save:
+		if save_name is None:
+			save_array(mean_maps, 'benchmark_red_green_error_maps')
+		if save_name is not None:
+			save_array(mean_maps, save_name + '_mean_maps')
+	return mean_maps
+
 
 
 def run_colour_split_experiments_images_from_file(fname,epochs=100, save=True, test_up_to=None, preview = False, verbose = False, param_name= None, param = None, save_name = None, test_all=False):
@@ -586,7 +637,9 @@ if __name__ == '__main__':
 	param_names=("lrate","momentum")
 	lrates=(0.001, 0.002)
 	moms = (0.9, 0.5)
-	multi_hyperparam_grid_search(param_names, (lrates, moms), "testimages_combined",("lrates", "momentums", epochs=1)
+	for lrate in lrates:
+		run_colour_split_experiments_images_from_file_with_all_hyperparams('testimages_combined', epochs=1, save_name="hyperparam_test",lrate=lrate)
+		
 
 
 
