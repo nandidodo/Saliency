@@ -579,7 +579,14 @@ if __name__ == '__main__':
 	#run_colour_split_experiments_images_from_file('testimages_combined', epochs=50, test_all=True, save_name="all_errmaps")
 	#run_spatial_frequency_split_experiments_images_from_file('benchmark_images_spatial_frequency_split', epochs=50,test_all=True, save_name='spfreq_errmaps')
 	#run_half_split_experiments()
-	run_all_colour_split_experiments_images_from_file('testimages_combined', epochs=1, test_all=True, save_name="all_errmaps_all_colour_combinations")
+	#run_all_colour_split_experiments_images_from_file('testimages_combined', epochs=50, test_all=True, save_name="all_errmaps_all_colour_combinations")
+
+
+	#quick hyperparam test before the main event
+	param_names=("lrate","momentum")
+	lrates=(0.001, 0.002)
+	moms = (0.9, 0.5)
+	multi_hyperparam_grid_search(param_names, (lrates, moms), "testimages_combined",("lrates", "momentums", epochs=1)
 
 
 
