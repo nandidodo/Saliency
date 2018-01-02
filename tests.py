@@ -559,15 +559,28 @@ if __name__ =='__main__':
 	#load_file_test('testSet/Data/test/Action')
 	#load_file_test('testSet/Data/test/Action_Output')
 
+	#dirname = 'testSet/Data/test'
+	#combine_images_into_big_array(dirname)
+
+	#arr = load_array('testimages_combined_imgs_preds_errmaps')
+
 
 
 	#show_all_error_maps_with_original_imgs()
-	
+	#rootdir = 'BenchmarkIMAGES/'
+	#make_dir = 'BenchmarkDATA'
+	#save_images_per_directory(rootdir, save=True, crop_size=(200,200), make_dir_name=make_dir)
+
+	save_images_per_directory("datasets/testSet/Stimuli", save=True, crop_size=(200,200),make_dir_name="datasets/testSet/200CropTest")
+
 
 
 	#load_show_colour_split_images()
 	#show_colour_split_images()
 	#load_and_show_colour_split_images("BenchmarkIMAGES/i5.jpg")
+
+	#oay, let's try to recreate everything here, and with a better cropping and see if it helps?
+	
 
 
 
