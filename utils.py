@@ -5,6 +5,13 @@ import scipy
 import matplotlib.pyplot as plt
 import cPickle as pickle
 from skimage import exposure
+import sys
+
+
+#simple thing here really, depending on whether this actually works, idk, but may as well have it as a util function
+def get_run_num():
+	if len(sys.argv)>1:
+		return sys.argv[1]
 
 
 #pickle loading and saving functoinality

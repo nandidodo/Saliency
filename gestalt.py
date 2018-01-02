@@ -20,8 +20,8 @@ from autoencoder import *
 from experiments import *
 import sys
 
-#get our arg number
-run_num = sys.argv[1]
+if len(sys.argv) >1:
+	run_num = sys.argv[1]
 # we can then use this globally for the thing when we do our hyperparam grid search
 
 
@@ -30,10 +30,12 @@ def split_dataset_half_small_section(dataset,split_width):
 	#I think horizontal is just the thing
 	#we assume all images in the dataset are cropped to the same width - a big assumption, so we need that preprocessing step for this to work really
 	img_width = len(dataset[0])
-	leftsplit = dataset[:,0:img_width/2,:,:]
-	rightsplit = dataset[:,(img_width/2):img_width, :,:]
-	leftslice = dataset[:,(img_width-split_width):img_width,:,:]
-	rightslice = dataset[:,img_width:(img_width+split_width),:,:]
+	print dataset.shape
+	half= img_width/2
+	leftsplit = dataset[:,:,0:half,:]
+	rightsplit = dataset[:,:, half:img_width,:]
+	leftslice = dataset[:,:,half-split_width:half,:]
+	rightslice = dataset[:,:,half: half+split_width,:]
 	return leftsplit, rightsplit, leftslice, rightslice
 
 def split_dataset_center_slice(dataset, split_width):
@@ -49,7 +51,7 @@ def split_dataset_center_slice(dataset, split_width):
 	
 
 
-def plot_slice_splits(leftsplit, rightslpit, leftslice, rightslice, show=True):	
+def plot_slice_splits(leftsplit, rightsplit, leftslice, rightslice, show=True):	
 	fig = plt.figure()
 
 	#originalcolour
@@ -161,7 +163,7 @@ def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up
 	return mean_maps
 
 
-def split_predict_slice_from_half_from_file((fname,slice_pix=30, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
+def split_predict_slice_from_half_from_file(fname,slice_pix=30, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
 	#we'll do this in the three dimensional test
 	imgs = load_array(fname)
 	train, test = imgs
@@ -221,5 +223,8 @@ def split_predict_slice_from_half_from_file((fname,slice_pix=30, epochs=100, sav
 
 
 if __name__ == '__main__':
-	split_predict_slice_from_half_from_file('testimages_combined', slice_pix=30)
+	#split_predict_slice_from_half_from_file('testimages_combined', slice_pix=30)
+	fname = "testimages_combined"
+	dataset = load_array(fname)
+	show_split_dataset_with_slices(dataset,split_width=30)
 
