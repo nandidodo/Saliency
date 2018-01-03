@@ -142,9 +142,9 @@ def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up
 
 	if save:
 		if save_name is None:
-			save_array((redtest, preds1, errmap1),fname+'spfreq_imgs_preds_errmaps')
+			save_array((redtest, preds1, errmap1),"gestalt_split_imgs_preds_errmaps")
 		if save_name is not None:
-			save_array((redtest, preds1, errmap1), save_name + 'spfreq_imgs_preds_errmaps')
+			save_array((redtest, preds1, errmap1), save_name + "gestalt_split_imgs_preds_errmaps")
 
 	if verbose:
 		print errmap1[0]
@@ -163,7 +163,7 @@ def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up
 	return mean_maps
 
 
-def split_predict_slice_from_half_from_file(fname,slice_pix=30, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
+def split_predict_slice_from_half_from_file(fname,slice_pix=30, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False, his=True):
 	#we'll do this in the three dimensional test
 	imgs = load_array(fname)
 	train, test = imgs
@@ -183,11 +183,11 @@ def split_predict_slice_from_half_from_file(fname,slice_pix=30, epochs=100, save
 	if verbose:
 		print "second hemisphere initialised"
 
-	a1.train(epochs=epochs)
+	his1 = a1.train(epochs=epochs)
 	if verbose:
 		print "a1 trained"
 	
-	a2.train(epochs=epochs)
+	his2 = a2.train(epochs=epochs)
 	if verbose:
 		print "a2 trained"
 
@@ -217,14 +217,21 @@ def split_predict_slice_from_half_from_file(fname,slice_pix=30, epochs=100, save
 			save_array(mean_maps, 'gestalt_slice_predict_mean_maps')
 		if save_name is not None:
 			save_array(mean_maps, save_name + '_gestalt_slice_predict_mean_maps')
+
+	if his:
+		return (mean_maps, his1, his2)
 	return mean_maps
 
+#test
 
 
 
 if __name__ == '__main__':
 	#split_predict_slice_from_half_from_file('testimages_combined', slice_pix=30)
-	fname = "testimages_combined"
-	dataset = load_array(fname)
-	show_split_dataset_with_slices(dataset,split_width=30)
+	#fname = "BenchmarkDATA/BenchmarkIMAGES_images"
+	#dataset = load_array(fname)
+	#show_split_dataset_with_slices(dataset,split_width=10)
+	mean_maps, his1, his2= split_predict_slice_from_half_from_file("testimages_combined", slice_pix=20,epochs=50) 
+	#we save history here
+	save_array((his1, his2), "gestalt_history_callback_test")
 

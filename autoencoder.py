@@ -16,6 +16,7 @@ from keras import backend as K
 from keras.callbacks import TensorBoard
 from file_reader import *
 from utils import *
+import keras
 
 # define reasonable defaults
 batch_size = 25
@@ -36,7 +37,7 @@ loss = 'binary_crossentropy'
 
 optimizer = optimizers.SGD(lr =lrate, decay=decay, momentum = momentum, nesterov = nesterov)
 
-default_callbacks = [TerminateOnNaN]
+default_callbacks = [keras.callbacks.TerminateOnNaN]
 
 
 class Hemisphere(object):
@@ -118,7 +119,7 @@ class Hemisphere(object):
 
 
 	# okay, so we begin the functions here
-	def train(self, epochs = None, shuffle=True, callbacks = defaultCallbacks, get_weights=False):
+	def train(self, epochs = None, shuffle=True, callbacks = default_callbacks, get_weights=False):
 		if epochs is None:
 			epochs = self.epochs
 		print "Model training:"
