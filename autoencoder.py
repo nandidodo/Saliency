@@ -39,11 +39,13 @@ loss = 'binary_crossentropy'
 # so the conv net can create any dimension it wants given input and output
 # I'm not sure how to get that working at all, but perhaps I should be if I were decent... dagnabbit!
 
+# okay, well, the thing straight up doesn't work, somehow gets negative loss(!!!!) and diverges... I'm not totally sure what's going on there, but IDK honestly!
+
 gestalt = True
 
 optimizer = optimizers.SGD(lr =lrate, decay=decay, momentum = momentum, nesterov = nesterov)
 
-default_callbacks = [keras.callbacks.TerminateOnNaN]
+default_callbacks = [keras.callbacks.TerminateOnNaN()]
 
 
 class Hemisphere(object):
@@ -75,7 +77,10 @@ class Hemisphere(object):
 			raise NotImplementedError
 			pass
 		if architecture is None:
-
+				
+			if verbose:
+				print self.shape
+			
 			input_img = Input(shape=(self.shape[1], self.shape[2], self.shape[3]))
 
 			x = Conv2D(16, (3, 3), activation=self.activation, padding=self.padding)(input_img)
@@ -120,21 +125,37 @@ class Hemisphere(object):
 			
 			#HACK!!! remove if/when possible
 			if gestalt:
-				sh = self.output_data.shape
-				final = Dense(20, activation='sigmoid')(decoded)
-				if verbose:
-					print final.shape
+				#sh = self.output_data.shape
+				#final = Dense(20, activation='sigmoid')(decoded)
+				#let's try with a reshape layer althoguh this is a direly ugly hack
+				#final = Reshape((sh[1], sh[2], sh[3]))(decoded)
+					# thi sis such a horrendously hacky solution there's no way it can work
+
+				#the trouble is that it's so hacky that if it doesn't work, I don't even know that it's because of the method being inherently unstable, or the crazy permnutations I'vedone here
+	# so it's a terrible test. I guess I need to reimplement everything in tensorflow anyway, where I have more control!?
+				print decoded.shape
+				dec = decoded.shape
+				print dec
+				final = Permute((1,3,2))(decoded)
+				print final.shape
+				final = Dense(20, activation='sigmoid')(final)
+				print final.shape
+				final = Permute((1,3,2))(final)
+				print final.shape
+				#if verbose:
+				#	print final.shape
 
 			#we then define our model
 			self.model = Model(input_img, decoded)
 			if gestalt:
 				self.model = Model(input_img, final)
+			print self.model.summary()
 			self.model.compile(optimizer = self.optimizer, loss = self.loss)
 
 
 
 	# okay, so we begin the functions here
-	def train(self, epochs = None, shuffle=True, callbacks = default_callbacks, get_weights=False):
+	def train(self, epochs = None, shuffle=True, callbacks = None, get_weights=False):
 		if epochs is None:
 			epochs = self.epochs
 		print "Model training:"

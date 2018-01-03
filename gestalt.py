@@ -179,19 +179,25 @@ def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up
 	return mean_maps
 
 
-def two_dimensionalise(arr, col=0):
+def two_dimensionalise(arr, col=0, reshape=True, expand=False):
 	shape = arr.shape
 	assert len(shape) == 4, "input array must be four dimensional (3d img + num of imgs)"
 	arr = arr[:,:,:,col]
-	return np.reshape(arr, (shape[0], shape[1], shape[2]))
+	if reshape:
+		arr =  np.reshape(arr, (shape[0], shape[1], shape[2]))
+	if expand:
+		arr = np.reshape(arr, (shape[0], shape[1], shape[2], 1))
+	return arr
 
 
 def split_predict_slice_from_half_from_file(fname,slice_pix=30, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False, his=True):
 	#we'll do this in the three dimensional test
 	imgs = load_array(fname)
 	train, test = split_into_test_train(imgs)
-	train =np.reshape(train[:,:,:,0], (train.shape[0], train.shape[1], train.shape[2]))
-	test =np.reshape(test[:,:,:,0], (test.shape[0], test.shape[1], test.shape[2]))
+	#train =np.reshape(train[:,:,:,0], (train.shape[0], train.shape[1], train.shape[2]))
+	#test =np.reshape(test[:,:,:,0], (test.shape[0], test.shape[1], test.shape[2]))
+	train = two_dimensionalise(train, reshape=False, expand=True)
+	test = two_dimensionalise(test, reshape=False, expand=True)
 	lefthalftrain, righthalftrain, leftslicetrain, rightslicetrain = split_dataset_half_small_section(train, slice_pix)
 	lefthalftest, righthalftest, leftslicetest, rightslicetest = split_dataset_half_small_section(test, slice_pix)
 
