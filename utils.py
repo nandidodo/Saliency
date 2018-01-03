@@ -375,24 +375,81 @@ def get_error(err_map, sal_map, accuracy = True, verbose = True):
 	return error
 
 
-def get_errors(mean_maps, sal_maps, total_error = True, verbose = False, save=True, save_name = '_errors'):
-	errmaps = np.abs(mean_maps, sal_maps)
+def get_errors(mean_maps, sal_maps, total_error = True, verbose = False, save=True, save_name = '_errors', err_list = True, avg_error = True):
+	errmaps = np.abs(mean_maps - sal_maps)
 	N = len(errmaps)
+	ret = []
 	if total_error:
-		total_err = float(np.sum(errmaps))/float(N)
+		total = float(np.sum(errmaps))/float(N)
+		ret.append(total_error)
 
-	errslist = []
-	for i in xrange(N):
-		err = float(np.sum(errmaps[i]))
-		errslist.append(err)
+	if avg_error:
+		if total_error:
+			avg = total/float(N)
+		if not total_error:
+			avg= float(np.sum(errmaps))/float(N)
+		ret.append(avg)
 
-	errslist = np.array(errslist)
-	ret = errslist
-	if total_error:
-		ret = (total_err, errslist)
+	if err_list:
+		errslist = []
+		for i in xrange(N):
+			err = float(np.sum(errmaps[i]))
+			errslist.append(err)
+
+		errslist = np.array(errslist)
+		ret.append(errslist)
+
 	if save:
 		save_array(ret, save_name)
+
 	return ret
+
+
+
+def process_hyperparams_error(results_file, saliences_file, params, param_name, err_list=False, save=True, save_name=None):
+
+	res_dict = {}
+	if err_list:
+		list_dict = {}
+
+	res = load_array(results_file)
+	N = len(res)
+	assert N == len(params) and type(res) == list, "Your number of paramaters and results do not match"
+	assert type(param_name) == str and len(param_name)>=1
+
+	shape = res[0].shape
+	sals = load_array(saliences_file)
+	sal_shape = sals.shape
+	assert shape==sal_shape, "results and salience shapes must be the same. You probably have the wrong salience file"
+	for i in xrange(N):
+		assert res[i].shape == shape, "all results should be of the same shape!"
+		m_maps = res[i][3]
+		ret = get_errors(m_maps, sals, save=False, err_list=err_list)
+		avg_error = ret[1]
+		key_string = param_name + " " + str(params[i])
+		res_dict[avg_error] = key_string
+		if err_list:
+			errs = ret[2]
+			list_dict[key_string] = errs
+
+	
+	if save:
+		if save_name is None:
+			save_name= param_name + "_error_dict"
+		if err_list:
+			save_array((res_dict, list_dict), save_name)
+		if not err_list:
+			save_array(res_dict, save_name)
+	
+	if err_list:
+		return (res_dict, list_dict)
+	return res_dict
+		
+	
+
+	
+
+		
 
 
 
