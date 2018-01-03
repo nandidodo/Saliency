@@ -21,7 +21,7 @@ import keras
 # define reasonable defaults
 batch_size = 25
 dropout = 0.3
-verbose = False
+verbose = True
 architecture = None
 activation = 'relu'
 padding = 'same'
@@ -34,6 +34,12 @@ momentum = 0.9
 nesterov = True
 shuffle = True
 loss = 'binary_crossentropy'
+
+#this is a horrendously ugly hack. I'm not sure how to get this working properly
+# so the conv net can create any dimension it wants given input and output
+# I'm not sure how to get that working at all, but perhaps I should be if I were decent... dagnabbit!
+
+gestalt = True
 
 optimizer = optimizers.SGD(lr =lrate, decay=decay, momentum = momentum, nesterov = nesterov)
 
@@ -61,7 +67,7 @@ class Hemisphere(object):
 
 		#next we do some asserts
 		self.shape = input_data.shape
-		assert self.shape == output_data.shape, 'input and output data do not have the same shape'
+		#assert self.shape == output_data.shape, 'input and output data do not have the same shape'
 
 		#next we define our model, we will normally do something with architecture here, but we're not going o do that yet, so we'll have a placeholder
 		if architecture is not None:
@@ -111,9 +117,18 @@ class Hemisphere(object):
 			decoded = Conv2D(1, (3, 3), activation='sigmoid', padding=self.padding)(x)
 			if verbose:
 				print decoded.shape
+			
+			#HACK!!! remove if/when possible
+			if gestalt:
+				sh = self.output_data.shape
+				final = Dense(20, activation='sigmoid')(decoded)
+				if verbose:
+					print final.shape
 
 			#we then define our model
 			self.model = Model(input_img, decoded)
+			if gestalt:
+				self.model = Model(input_img, final)
 			self.model.compile(optimizer = self.optimizer, loss = self.loss)
 
 

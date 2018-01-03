@@ -30,24 +30,40 @@ def split_dataset_half_small_section(dataset,split_width):
 	#I think horizontal is just the thing
 	#we assume all images in the dataset are cropped to the same width - a big assumption, so we need that preprocessing step for this to work really
 	img_width = len(dataset[0])
-	print dataset.shape
+	shape = dataset.shape
+	print shape
 	half= img_width/2
-	leftsplit = dataset[:,:,0:half,:]
-	rightsplit = dataset[:,:, half:img_width,:]
-	leftslice = dataset[:,:,half-split_width:half,:]
-	rightslice = dataset[:,:,half: half+split_width,:]
-	return leftsplit, rightsplit, leftslice, rightslice
+	if len(shape) ==4: # i.e a 3d dimensioanl image
+		leftsplit = dataset[:,:,0:half,:]
+		rightsplit = dataset[:,:, half:img_width,:]
+		leftslice = dataset[:,:,half-split_width:half,:]
+		rightslice = dataset[:,:,half: half+split_width,:]
+		return leftsplit, rightsplit, leftslice, rightslice
+
+	if len(shape)==3: # i.e. a 3d image
+		leftsplit = dataset[:,:,0:half]
+		rightsplit = dataset[:,:, half:img_width]
+		leftslice = dataset[:,:,half-split_width:half]
+		rightslice = dataset[:,:,half: half+split_width]
+		return leftsplit, rightsplit, leftslice, rightslice
 
 def split_dataset_center_slice(dataset, split_width):
 
 	#this just returns the equivalent of the leftslpit and the rightsplit
 	#also assumes three dimensional images and four d dataset
 	#also all images are cropped to the same width
-
+	shape = dataset.shape
+	
 	img_width = len(dataset[0])
-	leftslice = dataset[:,(img_width-split_width):img_width,:,:]
-	rightslice = dataset[:,img_width:(img_width+split_width),:,:]
-	return leftslice, rightslice
+	half = img_width/2
+	if len(shape) ==4:
+		leftslice = dataset[:,:,half-split_width:half,:]
+		rightslice = dataset[:,:,half: half+split_width,:]
+		return leftslice, rightslice
+	if len(shape)==3:
+		leftslice = dataset[:,:,half-split_width:half]
+		rightslice = dataset[:,:,half: half+split_width]
+		return leftslice, rightslice
 	
 
 
@@ -163,17 +179,26 @@ def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up
 	return mean_maps
 
 
+def two_dimensionalise(arr, col=0):
+	shape = arr.shape
+	assert len(shape) == 4, "input array must be four dimensional (3d img + num of imgs)"
+	arr = arr[:,:,:,col]
+	return np.reshape(arr, (shape[0], shape[1], shape[2]))
+
+
 def split_predict_slice_from_half_from_file(fname,slice_pix=30, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False, his=True):
 	#we'll do this in the three dimensional test
 	imgs = load_array(fname)
-	train, test = imgs
+	train, test = split_into_test_train(imgs)
+	train =np.reshape(train[:,:,:,0], (train.shape[0], train.shape[1], train.shape[2]))
+	test =np.reshape(test[:,:,:,0], (test.shape[0], test.shape[1], test.shape[2]))
 	lefthalftrain, righthalftrain, leftslicetrain, rightslicetrain = split_dataset_half_small_section(train, slice_pix)
 	lefthalftest, righthalftest, leftslicetest, rightslicetest = split_dataset_half_small_section(test, slice_pix)
 
 	if param_name is None or param is None:
-		a1 = Hemisphere(lefthalftrain, rightslicetrain, lefthalftest, rightslicetest)
+		a1 = Hemisphere(lefthalftrain, rightslicetrain, lefthalftest, rightslicetest, verbose=True)
 	if param_name is not None and param is not None:
-		a1 = Hemisphere(lefthalftrain, rightslicetrain, lefthalftest, rightslicetest, param_name=param)
+		a1 = Hemisphere(lefthalftrain, rightslicetrain, lefthalftest, rightslicetest, param_name=param, verbose=True)
 	if verbose:
 		print "hemisphere initialised"
 	if param_name is None or param is None:
