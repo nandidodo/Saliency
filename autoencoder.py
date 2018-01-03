@@ -27,7 +27,7 @@ padding = 'same'
 
 epochs = 20
 
-lrate = 0.01
+lrate = 0.001
 decay = 1e-6
 momentum = 0.9
 nesterov = True
@@ -36,6 +36,7 @@ loss = 'binary_crossentropy'
 
 optimizer = optimizers.SGD(lr =lrate, decay=decay, momentum = momentum, nesterov = nesterov)
 
+default_callbacks = [TerminateOnNaN]
 
 
 class Hemisphere(object):
@@ -117,16 +118,19 @@ class Hemisphere(object):
 
 
 	# okay, so we begin the functions here
-	def train(self, epochs = None, shuffle=True, callbacks = None, get_weights=False):
+	def train(self, epochs = None, shuffle=True, callbacks = defaultCallbacks, get_weights=False):
 		if epochs is None:
 			epochs = self.epochs
 		print "Model training:"
-		self.model.fit(self.input_data, self.output_data, epochs=epochs, shuffle = shuffle, callbacks = callbacks)
+		history = self.model.fit(self.input_data, self.output_data, epochs=epochs, shuffle = shuffle, callbacks = callbacks)
 		print "Training complete"
 		if get_weights:
 			weights, biases= self.model.layers[-2].get_weights()
 			print weights
 			print biases
+			return (history, weights, biases)
+		return history
+
 			
 
 	def predict(self, test_data = None):
