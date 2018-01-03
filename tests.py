@@ -230,18 +230,26 @@ def combine_images_into_big_array(dirname, makedir = '', save=True, verbose=True
 	outputs = []
 	for f in filelist:
 		arr = load(dirname + '/' + f)
-		if '_' in f: #i.e. it's an output
+		if 'output' in f: #i.e. it's an output
 			outputs.append(arr)
 			print "OUTPUT: " + f
 			print arr.shape
-		if '_' not in f: # so it's an image
+			print len(outputs)
+		if 'images' in f: # so it's an image
 			imgs.append(arr)
 			print "IMAGE: " + f
 			print arr.shape
+			print len(imgs)
 	#we now stack them
+	print type(imgs)
+	print len(imgs)
+	print type(imgs[0])
+	print imgs[0].shape
 
 	imgs = np.concatenate(imgs)
 	outputs = np.concatenate(outputs)
+	print type(imgs)
+	print imgs.shape
 	if verbose:
 		print "images shape: " + str(imgs.shape)
 		print "outputs shape: " + str(outputs.shape)
@@ -571,7 +579,8 @@ if __name__ =='__main__':
 	#make_dir = 'BenchmarkDATA'
 	#save_images_per_directory(rootdir, save=True, crop_size=(200,200), make_dir_name=make_dir)
 
-	save_images_per_directory("datasets/testSet/Stimuli", save=True, crop_size=(200,200),make_dir_name="datasets/testSet/200CropTest")
+	#save_images_per_directory("datasets/testSet/Stimuli", save=True, crop_size=(200,200),make_dir_name="datasets/testSet/200CropTest")
+	#combine_images_into_big_array("datasets/testSet/200CropTest")
 
 
 
@@ -580,6 +589,30 @@ if __name__ =='__main__':
 	#load_and_show_colour_split_images("BenchmarkIMAGES/i5.jpg")
 
 	#oay, let's try to recreate everything here, and with a better cropping and see if it helps?
+	#h1 = load_array('hyperparam_test_imgs_preds_errmaps')
+	#h2 = load_array('hyperparam_test_mean_maps')
+	#print type(h1)
+	#print len(h1)
+	#print type(h2)
+	#print len(h2)
+	#hyp = load_array('hyperparam_test')
+	#print type(hyp)
+	#print len(hyp)
+	#print type(hyp[0])
+	#print len(hyp[0])
+	#print type(hyp[0][0])
+	#print hyp[0][0].shape
+
+	#hlrates = load_array("hyperparam_test_lrates")
+	#print type(hlrates)
+	#print len(hlrates)
+	#print type(hlrates[0])
+	#print len(hlrates[0])
+	lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
+	res_dict = process_hyperparams_error("hyperparam_test_lrates", "testsaliences_combined", lrates, "lrate", save_name = "lrates_hyperparam_results_dict")
+	name, loss = get_min_loss(res_dict)
+	print name
+	print loss
 	
 
 
