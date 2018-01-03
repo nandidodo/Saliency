@@ -444,6 +444,13 @@ def process_hyperparams_error(results_file, saliences_file, params, param_name, 
 	if err_list:
 		return (res_dict, list_dict)
 	return res_dict
+
+
+def get_min_loss(res_dict, name=True):
+	min_loss = min(res_dict.keys())
+	if name:
+		return (res_dict[min_loss], min_loss)
+	return min_loss
 		
 	
 
