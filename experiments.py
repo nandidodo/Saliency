@@ -626,6 +626,7 @@ if __name__ == '__main__':
 
 
 	#quick hyperparam test before the main event
+	"""
 	param_names=("lrate","momentum")
 	lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
 	moms = (0.9, 0.5,0.8,0.99,0.3,0)
@@ -639,6 +640,9 @@ if __name__ == '__main__':
 		result = run_colour_split_experiments_images_from_file_with_all_hyperparams('testimages_combined', epochs=50, momentum=mom)
 		res2.append(result)
 	save_array(res2, "hyperparam_test_momentums")
+	"""
+	lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
+	process_hyperparams_error("hyperparam_test_lrates", "testsaliences_combined", "lrate", lrates)
 		
 
 

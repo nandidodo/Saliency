@@ -603,16 +603,30 @@ if __name__ =='__main__':
 	#print type(hyp[0][0])
 	#print hyp[0][0].shape
 
-	#hlrates = load_array("hyperparam_test_lrates")
-	#print type(hlrates)
-	#print len(hlrates)
-	#print type(hlrates[0])
-	#print len(hlrates[0])
-	lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
-	res_dict = process_hyperparams_error("hyperparam_test_lrates", "testsaliences_combined", lrates, "lrate", save_name = "lrates_hyperparam_results_dict")
-	name, loss = get_min_loss(res_dict)
-	print name
-	print loss
+	hlrates = load_array("hyperparam_test_lrates")
+	print type(hlrates)
+	print len(hlrates)
+	print type(hlrates[0])
+	print len(hlrates[0])
+	#lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
+	#res_dict = process_hyperparams_error("hyperparam_test_lrates", "testsaliences_combined", lrates, "lrate", save_name = "lrates_hyperparam_results_dict")
+	#name, loss = get_min_loss(res_dict)
+	#print name
+	#print loss
+	print "errmaps, hopefully!"
+	bib = hlrates[0]
+	errmaps = bib[3]
+	print type(errmaps)
+	print len(errmaps)
+	print errmaps.shape
+	#print type(hlrates[3])
+	#print len(hlrates[3])
+	#print hlrates[3].shape
+	print "saliences"
+	sals = load_array("testsaliences_combined")
+	print sals.shape
+	sals = sals[1710:1900,:,:,:]
+	save_array(sals, "just_test_saliences")
 	
 
 
