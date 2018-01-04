@@ -112,12 +112,14 @@ def show_split_dataset_with_slices(dataset, split_width):
 	
 
 
-def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
+def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=None, preview=True, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
 	#we'll do this in the three dimensional test
 	imgs = load_array(fname)
 	train, test = split_into_test_train(imgs)
-	train = two_dimensionalise(train, reshape=False, expand=True)
-	test = two_dimensionalise(test, reshape=False, expand=True)
+	#train = two_dimensionalise(train, reshape=False, expand=True)
+	#test = two_dimensionalise(test, reshape=False, expand=True)
+	train, greentrain, bluetrain = split_dataset_by_colour(train)
+	test, greentest, bluetest = split_dataset_by_colour(test)
 	halftrain1, halftrain2 = split_image_dataset_into_halves(train)
 	halftest1, halftest2 = split_image_dataset_into_halves(test)
 	
@@ -129,11 +131,11 @@ def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up
 	if param_name is None or param is None:
 		a1 = Hemisphere(halftrain1, halftrain2, halftrain1, halftrain2)
 	if param_name is not None and param is not None:
-		a1 = Hemisphere(halftrain2, halftrain1, halftest2, halftest1, param_name=param)
+		a1 = Hemisphere(halftrain1, halftrain2, halftrain1, halftrain2, param_name=param)
 	if verbose:
 		print "hemisphere initialised"
 	if param_name is None or param is None:
-		a2 = Hemisphere(halftrain1, halftrain2,halftest1, halftest2)
+		a2 = Hemisphere(halftrain2, halftrain1,halftest2, halftest1)
 	if param_name is not None and param is not None:
 		a2 = Hemisphere(halftrain2, halftrain1, halftest2, halftest1, param_name=param)
 	if verbose:
@@ -270,5 +272,5 @@ if __name__ == '__main__':
 	#we save history here
 	#save_array((his1, his2), "gestalt_history_callback_test")
 	mean_maps, his1, his2  = split_half_image_experiments_from_file("testimages_combined", epochs=3, save=False)
-	save_array((his1, his2), "gestalt_history_callback_test")
+	#save_array((his1, his2), "gestalt_history_callback_test")
 

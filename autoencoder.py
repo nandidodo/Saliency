@@ -41,7 +41,7 @@ loss = 'binary_crossentropy'
 
 # okay, well, the thing straight up doesn't work, somehow gets negative loss(!!!!) and diverges... I'm not totally sure what's going on there, but IDK honestly!
 
-gestalt = True
+gestalt = False
 
 optimizer = optimizers.SGD(lr =lrate, decay=decay, momentum = momentum, nesterov = nesterov)
 

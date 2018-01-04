@@ -1,0 +1,1 @@
+# okay, so the previou sautoencoder model wasn't really working (at all!) so my lpan, I think,  is to try to make a gestalt autoencoder model which hopefully will work significantly better than before, and see if it does. let's hope it does. we can copy some of the VGG conv layers and stuff if it seems to be doing oay, and isn't too horrendously slow!
