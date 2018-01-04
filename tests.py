@@ -413,8 +413,11 @@ def show_colour_split_images(fname="benchmarkIMAGES_images"):
 		
 		compare_two_images(img, red)
 
-def load_and_show_colour_split_images(fname):
-	img = plt.imread(fname)
+def load_and_show_colour_split_images(fname, img_from_file=True):
+	if img_from_file:
+		img = plt.imread(fname)
+	if not img_from_file:
+		img = fname
 	red = img[:,:,0]
 	green = img[:,:,1]
 	blue=img[:,:,2]
@@ -544,6 +547,11 @@ def show_all_error_maps_with_original_imgs(fname="testimages_combined_imgs_preds
 	
 
 
+def show_colour_split_image(fname,N=10):
+	imgs = load_array(fname)
+	for i in xrange(N):
+		load_and_show_colour_split_images(imgs[i], img_from_file=False)
+
 
 
 def load_imgs(fname):
@@ -603,16 +611,17 @@ if __name__ =='__main__':
 	#print type(hyp[0][0])
 	#print hyp[0][0].shape
 
-	hlrates = load_array("hyperparam_test_lrates")
-	print type(hlrates)
-	print len(hlrates)
-	print type(hlrates[0])
-	print len(hlrates[0])
+	#hlrates = load_array("hyperparam_test_lrates")
+	#print type(hlrates)
+	#print len(hlrates)
+	#print type(hlrates[0])
+	#print len(hlrates[0])
 	#lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
-	#res_dict = process_hyperparams_error("hyperparam_test_lrates", "testsaliences_combined", lrates, "lrate", save_name = "lrates_hyperparam_results_dict")
+	#res_dict = process_hyperparams_error("hyperparam_test_lrates", "just_test_saliences", lrates, "lrate", save_name = "lrates_hyperparam_results_dict")
 	#name, loss = get_min_loss(res_dict)
 	#print name
 	#print loss
+	"""
 	print "errmaps, hopefully!"
 	bib = hlrates[0]
 	errmaps = bib[3]
@@ -627,6 +636,14 @@ if __name__ =='__main__':
 	print sals.shape
 	sals = sals[1710:1900,:,:,:]
 	save_array(sals, "just_test_saliences")
+	"""
+	#show_colour_split_image("just_test_saliences")
+	#sals = load_array("just_test_saliences")
+	#sals = sals[:,:,:,0]
+	#shape = sals.shape
+	#sals = np.reshape(sals, (shape[0], shape[1], shape[2]))
+	##print sals.shape
+	#save_array(sals, "just_test_saliences")
 	
 
 
