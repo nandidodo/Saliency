@@ -28,6 +28,14 @@ def save_array(obj, fname):
 def load_array(fname):
 	return pickle.load(open(fname, 'rb'))
 
+
+def serialize_class_object(f):
+	try:
+		return dict((k,v) for k,v in f.__dict__.iteritems() if not callable(v) and not k.startswith('__'))
+	except Exception as err:
+		print "Exception in Serialization: " + str(err)
+		return {"Error" : err}
+
 def show_colour_splits(img, show_original = True):
 	#assumes img is 4d so we can split along the colour	
 	if show_original:
