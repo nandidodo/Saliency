@@ -105,7 +105,7 @@ def plot_slice_splits(leftsplit, rightsplit, leftslice, rightslice, show=True):
 
 
 def show_split_dataset_with_slices(dataset, split_width):
-	leftsplits, rightsplits, leftslices, rightslices = split_dataset_half_small_section(dataset, split_width=split_width)
+	leftsplits, rightsplits, leftslices, rightslices = split_dataset_half_small_section(dataset, split_width=split_width, history=True)
 	N = len(dataset)
 	for i in xrange(N):
 		plot_slice_splits(leftsplits[i], rightsplits[i], leftslices[i], rightslices[i])
@@ -115,7 +115,9 @@ def show_split_dataset_with_slices(dataset, split_width):
 def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up_to=None, preview=False, verbose=False, param_name=None, param=None, save_name=None, test_all=False):
 	#we'll do this in the three dimensional test
 	imgs = load_array(fname)
-	train, test = imgs
+	train, test = split_into_test_train(imgs)
+	train = two_dimensionalise(train, reshape=False, expand=True)
+	test = two_dimensionalise(test, reshape=False, expand=True)
 	halftrain1, halftrain2 = split_image_dataset_into_halves(train)
 	halftest1, halftest2 = split_image_dataset_into_halves(test)
 	
@@ -142,11 +144,11 @@ def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up
 		a2=Hemisphere(halftrain2,halftrain1,halftrain2,halftrain1)
 	
 
-	a1.train(epochs=epochs)
+	hist1 = a1.train(epochs=epochs)
 	if verbose:
 		print "a1 trained"
 	
-	a2.train(epochs=epochs)
+	hist2 = a2.train(epochs=epochs)
 	if verbose:
 		print "a2 trained"
 
@@ -176,6 +178,8 @@ def split_half_image_experiments_from_file(fname, epochs=100, save=True, test_up
 			save_array(mean_maps, 'split_half_gestalt_mean_maps')
 		if save_name is not None:
 			save_array(mean_maps, save_name + '_mean_maps')
+	if history:
+		return (mean_maps, hist1, hist2)
 	return mean_maps
 
 
@@ -262,7 +266,9 @@ if __name__ == '__main__':
 	#fname = "BenchmarkDATA/BenchmarkIMAGES_images"
 	#dataset = load_array(fname)
 	#show_split_dataset_with_slices(dataset,split_width=10)
-	mean_maps, his1, his2= split_predict_slice_from_half_from_file("testimages_combined", slice_pix=20,epochs=50) 
+	#mean_maps, his1, his2= split_predict_slice_from_half_from_file("testimages_combined", slice_pix=20,epochs=50) 
 	#we save history here
+	#save_array((his1, his2), "gestalt_history_callback_test")
+	mean_maps, his1, his2  = split_half_image_experiments_from_file("testimages_combined", epochs=3, save=False)
 	save_array((his1, his2), "gestalt_history_callback_test")
 

@@ -162,16 +162,16 @@ def run_colour_experiments(epochs = 1, save=True, test_up_to=None):
 	return errmaps
 	
 
-def run_half_split_experiments(epochs = 10, save=True,test_up_to=None):
+def run_half_split_experiments(epochs = 1, save=True,test_up_to=None, history=True):
 	
 	half1train, half2train, half1test, half2test = load_half_split_cifar(test_up_to=test_up_to)
 
 	a1 = Hemisphere(half1train, half2train, half1test, half2test)
 	a2 = Hemisphere(half2train, half1train, half2test, half1test)
 
-	a1.train(epochs=10)
-	a2.train(epochs=10)
-
+	his1 =a1.train(epochs=epochs)
+	his2 = a2.train(epochs=epochs)
+	
 	a1.plot_results()
 	a2.plot_results()
 
@@ -186,6 +186,9 @@ def run_half_split_experiments(epochs = 10, save=True,test_up_to=None):
 	#saving functionality
 	if save:
 		save(errmaps, 'colour_red_green_errormaps_split_half')
+
+	if history:
+		return (errmaps, his1, his2)
 
 	return errmaps
 
@@ -641,8 +644,15 @@ if __name__ == '__main__':
 		res2.append(result)
 	save_array(res2, "hyperparam_test_momentums")
 	"""
-	lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
-	process_hyperparams_error("hyperparam_test_lrates", "testsaliences_combined", "lrate", lrates)
+	#lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
+	#process_hyperparams_error("hyperparam_test_lrates", "testsaliences_combined", "lrate", lrates)
+
+	#okay, here are the actual history tests
+	maps, his1, his2 = run_half_split_experiments(epochs=1, save=False)
+	print type(his1)
+	print his1
+	save_array((his1, his2), "history_experiment")
+	
 		
 
 
