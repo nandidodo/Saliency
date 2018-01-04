@@ -616,11 +616,14 @@ if __name__ =='__main__':
 	#print len(hlrates)
 	#print type(hlrates[0])
 	#print len(hlrates[0])
-	#lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
-	#res_dict = process_hyperparams_error("hyperparam_test_lrates", "just_test_saliences", lrates, "lrate", save_name = "lrates_hyperparam_results_dict")
+	lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
+	res_dict = process_hyperparams_error("hyperparam_test_lrates", "just_test_saliences", lrates, "lrate", save_name = "lrates_hyperparam_results_dict")
+	#print_res_dict(res_dict)
+	#print " "
 	#name, loss = get_min_loss(res_dict)
 	#print name
 	#print loss
+	
 	"""
 	print "errmaps, hopefully!"
 	bib = hlrates[0]

@@ -406,7 +406,7 @@ def get_errors(mean_maps, sal_maps, total_error = True, verbose = False, save=Tr
 
 
 
-def process_hyperparams_error(results_file, saliences_file, params, param_name, err_list=False, save=True, save_name=None):
+def process_hyperparams_error(results_file, saliences_file, params, param_name, err_list=False, save=True, save_name=None, info=True):
 
 	res_dict = {}
 	if err_list:
@@ -417,12 +417,14 @@ def process_hyperparams_error(results_file, saliences_file, params, param_name, 
 	assert N == len(params) and type(res) == list, "Your number of paramaters and results do not match"
 	assert type(param_name) == str and len(param_name)>=1
 
-	shape = res[0].shape
+	shape = res[0][3].shape
 	sals = load_array(saliences_file)
 	sal_shape = sals.shape
+	print shape
+	print sal_shape
 	assert shape==sal_shape, "results and salience shapes must be the same. You probably have the wrong salience file"
 	for i in xrange(N):
-		assert res[i].shape == shape, "all results should be of the same shape!"
+		assert res[i][3].shape == shape, "all results should be of the same shape!"
 		m_maps = res[i][3]
 		ret = get_errors(m_maps, sals, save=False, err_list=err_list)
 		avg_error = ret[1]
@@ -440,10 +442,30 @@ def process_hyperparams_error(results_file, saliences_file, params, param_name, 
 			save_array((res_dict, list_dict), save_name)
 		if not err_list:
 			save_array(res_dict, save_name)
+
+	if info:
+		print "Hyperparamter results: \n"
+		print_res_dict(res_dict)
+		mu, std = get_average_loss_std(res_dict)
+		print "Mean loss: " + str(mu) + "\n"
+		print "Standard Deviation of loss: " + str(std) + "\n"
+		name, loss = get_min_loss(res_dict)
+		print "The minimum loss is: " + name + ": " + str(loss)
+		print " "
 	
 	if err_list:
 		return (res_dict, list_dict)
 	return res_dict
+
+def get_average_loss_std(res_dict):
+	ks = res_dict.keys()
+	mu = np.mean(ks)
+	sigma = np.std(ks)
+	return (mu, sigma)
+
+def print_res_dict(res_dict):
+	for k,v in res_dict.iteritems():
+		print str(k) + " : " + str(v) + "\n"
 
 
 def get_min_loss(res_dict, name=True):
@@ -451,13 +473,6 @@ def get_min_loss(res_dict, name=True):
 	if name:
 		return (res_dict[min_loss], min_loss)
 	return min_loss
-		
-	
-
-	
-
-		
-
 
 
 def gaussian_filter(img, sigma = 2):
