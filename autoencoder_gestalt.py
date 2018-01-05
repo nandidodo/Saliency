@@ -15,6 +15,7 @@ from gestalt_models import *
 from utils import *
 from experiments import *
 from gestalt import *
+import matplotlib.pyplot as plt
 
 
 
@@ -50,6 +51,17 @@ def test_cifar():
 
 
 	model.fit(xtrain, xtrain, nb_epoch=5, batch_size=128, shuffle=True, validation_data=(xtest, xtest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+
+	preds = model.predict(xtest)
+	print preds.shape
+	for i in xrange(10):
+		plt.imshow(np.reshape(xtest[i],(100,20)))
+		plt.title('image')
+		plt.show()
+		plt.imshow(np.reshape(preds[i],(100,20)))
+		plt.title('prediction')
+		plt.show()
+	
 
 
 if __name__ =='__main__':
