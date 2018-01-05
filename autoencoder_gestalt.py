@@ -54,21 +54,21 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10):
 
 		#red
 		ax2 = fig.add_subplot(222)
-		plt.imshow(rightslice)
+		plt.imshow(rightslice[i])
 		plt.title('Actual right slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		#green
 		ax3 = fig.add_subplot(223)
-		plt.imshow(leftslice)
+		plt.imshow(leftslice[i])
 		plt.title('Actual Left slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		##blue
 		ax4 = fig.add_subplot(224)
-		plt.imshow(rightslice)
+		plt.imshow(rightslice[i])
 		plt.title('Actual Right slice')
 		plt.xticks([])
 		plt.yticks([])
@@ -94,24 +94,25 @@ def test_gestalt():
 	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks("gestalt/")
-	model.fit(slicelefttrain, slicerighttrain, epochs=100, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), callbacks=callbacks)
+	his = model.fit(slicelefttrain, slicerighttrain, epochs=500, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), callbacks=callbacks)
 
 	print "MODEL FITTED"
 
 	preds = model.predict(slicelefttest)
 	print preds.shape
-	for i in xrange(10):
+	"""for i in xrange(10):
 		plt.imshow(np.reshape(slicerighttest[i],(100,20)),cmap='gray')
 		plt.title('image')
 		plt.show()
 		plt.imshow(np.reshape(preds[i],(100,20)), cmap='gray')
 		plt.title('prediction')
 		plt.show()
-
-	res = [preds, leftslicetest, rightslicetest]
+	"""
+	history = serialize_class_object(his)
+	res = [his,preds, slicelefttest, slicerighttest]
 	save_array(res, "gestalt/gestalt_half_split_results")
 
-	plot_four_image_comparison(preds, leftslicetest, rightslicetest, 20)
+	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
 	
 	
 
@@ -130,7 +131,7 @@ def test_cifar():
 	model.fit(xtrain, xtrain, nb_epoch=5, batch_size=128, shuffle=True, validation_data=(xtest, xtest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	
 
-
+# it actually seems to have worked really well!!! our model is really niec and good! that's awesome! next steps are getting more images, getting gestalt images, telling richard about it, and seeing what he says, and experimenting with different settings but the basic hyperparams seem to work really well this time, which is great!
 
 if __name__ =='__main__':
 	#test_cifar()
