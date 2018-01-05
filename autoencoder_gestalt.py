@@ -36,7 +36,7 @@ def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
 	return train, test
 
 
-def plot_four_image_comparison(preds, rightslice, leftslice,N=10):
+def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False):
 	shape = preds.shape
 	preds = np.reshape(preds, (shape[0], shape[1], shape[2]))
 	rightslice = np.reshape(rightslice,(shape[0], shape[1], shape[2]))
@@ -47,22 +47,28 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10):
 
 		#originalcolour
 		ax1 = fig.add_subplot(221)
-		plt.imshow(preds[i])
-		plt.title('Prediction')
+		plt.imshow(leftslice[i])
+		plt.title('Left slice')
+		if reverse:
+			plt.title('Right slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		#red
 		ax2 = fig.add_subplot(222)
-		plt.imshow(rightslice[i])
-		plt.title('Actual right slice')
+		plt.imshow(preds[i])
+		plt.title('Predicted Right Slice')
+		if reverse:
+			plt.title('Predicted Left Slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		#green
 		ax3 = fig.add_subplot(223)
 		plt.imshow(leftslice[i])
-		plt.title('Actual Left slice')
+		plt.title('Left slice')
+		if reverse:
+			plt.title('Right Slice')
 		plt.xticks([])
 		plt.yticks([])
 
@@ -70,6 +76,8 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10):
 		ax4 = fig.add_subplot(224)
 		plt.imshow(rightslice[i])
 		plt.title('Actual Right slice')
+		if reverse:
+			plt.title('Actual Left Slice')
 		plt.xticks([])
 		plt.yticks([])
 
@@ -79,7 +87,7 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10):
 
 
 
-def test_gestalt():
+def test_gestalt(both=False,epochs=500):
 	imgs = load_array("testimages_combined")
 	#print imgs.shape
 	imgs = imgs[:,:,:,0].astype('float32')/255.
@@ -87,7 +95,8 @@ def test_gestalt():
 	imgs = np.reshape(imgs, (shape[0], shape[1], shape[2], 1))
 	train, test = split_first_test_train(imgs)
 	slicelefttrain, slicerighttrain = split_dataset_center_slice(train, 20)
-	slicelefttest, slicerighttest = split_dataset_center_slice(test,20)
+	slicelefttest, 
+slicerighttest = split_dataset_center_slice(test,20)
 	shape = slicelefttrain.shape
 	
 	#sort out our model
@@ -95,6 +104,9 @@ def test_gestalt():
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks("gestalt/")
 	his = model.fit(slicelefttrain, slicerighttrain, epochs=500, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), callbacks=callbacks)
+
+	if both:
+		his2 = model.fit(slicerighttrain, slicelefttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(slicerighttest, slicelefttest), callbacks=callbacks)
 
 	print "MODEL FITTED"
 
@@ -110,10 +122,30 @@ def test_gestalt():
 	"""
 	history = serialize_class_object(his)
 	res = [history,preds, slicelefttest, slicerighttest]
-	save_array(res, "gestalt/gestalt_half_split_results")
+	save_array(res, "gestalt/gestalt_half_split_results_proper")
 
 	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
+
+	if both:
+	preds = model.predict(slicelefttest)
+	print preds.shape
+	"""for i in xrange(10):
+		plt.imshow(np.reshape(slicerighttest[i],(100,20)),cmap='gray')
+		plt.title('image')
+		plt.show()
+		plt.imshow(np.reshape(preds[i],(100,20)), cmap='gray')
+		plt.title('prediction')
+		plt.show()
+	"""
+	history = serialize_class_object(his2)
+	res = [history,preds, slicelefttest, slicerighttest]
+	save_array(res, "gestalt/gestalt_half_split_results_proper_other")
+
+	plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
 	
+
+	#okay, that's weird. it seems to learn to predict the right slice, even though it's not supposed to, and I have no idea whyy it's trying to do that, so I really don't know...
+# ah, les, I have an idea actually. let's flip_this aroud and see if we get anything on the other side
 	
 
 def test_cifar():
@@ -135,4 +167,4 @@ def test_cifar():
 
 if __name__ =='__main__':
 	#test_cifar()
-	test_gestalt()
+	test_gestalt(both=True, epochs=500)
