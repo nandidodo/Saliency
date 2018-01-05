@@ -18,6 +18,24 @@ from gestalt import *
 import matplotlib.pyplot as plt
 
 
+def split_first_test_train(data, frac_train = 0.9):
+	assert frac_train <=1, "frac_train must be a fraction"
+	frac_test = 1-frac_train
+	N = len(data)
+	train = data[int(frac_test*length):N]
+	test = data[0:int(frac_test*length)]
+	return train, test
+
+def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
+	assert frac_train + frac_test == 1, 'fractions must add up to one'
+	length = len(data)
+	#print length
+	#print frac_train*length
+	train = data[0:int(frac_train*length)]
+	test = data[int(frac_train*length): length]
+	return train, test
+
+
 
 def test_gestalt():
 	imgs = load_array("testimages_combined")
@@ -25,7 +43,7 @@ def test_gestalt():
 	imgs = imgs[:,:,:,0].astype('float32')/255.
 	shape = imgs.shape
 	imgs = np.reshape(imgs, (shape[0], shape[1], shape[2], 1))
-	train, test = split_into_test_train(imgs)
+	train, test = split_first_test_train(imgs)
 	slicelefttrain, slicerighttrain = split_dataset_center_slice(train, 20)
 	slicelefttest, slicerighttest = split_dataset_center_slice(test,20)
 	shape = slicelefttrain.shape
@@ -35,6 +53,19 @@ def test_gestalt():
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks("gestalt/")
 	model.fit(slicelefttrain, slicerighttrain, epochs=5, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), callbacks=callbacks)
+
+	print "MODEL FITTED"
+
+	preds = model.predict(slicelefttest)
+	print preds.shape
+	for i in xrange(10):
+		plt.imshow(np.reshape(slicerighttest[i],(100,20)))
+		plt.title('image')
+		plt.show()
+		plt.imshow(np.reshape(preds[i],(100,20)))
+		plt.title('prediction')
+		plt.show()
+	
 
 
 
@@ -51,17 +82,8 @@ def test_cifar():
 
 
 	model.fit(xtrain, xtrain, nb_epoch=5, batch_size=128, shuffle=True, validation_data=(xtest, xtest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
-
-	preds = model.predict(xtest)
-	print preds.shape
-	for i in xrange(10):
-		plt.imshow(np.reshape(xtest[i],(100,20)))
-		plt.title('image')
-		plt.show()
-		plt.imshow(np.reshape(preds[i],(100,20)))
-		plt.title('prediction')
-		plt.show()
 	
+
 
 
 if __name__ =='__main__':
