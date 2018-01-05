@@ -22,8 +22,8 @@ def split_first_test_train(data, frac_train = 0.9):
 	assert frac_train <=1, "frac_train must be a fraction"
 	frac_test = 1-frac_train
 	N = len(data)
-	train = data[int(frac_test*length):N]
-	test = data[0:int(frac_test*length)]
+	train = data[int(frac_test*N):N]
+	test = data[0:int(frac_test*N)]
 	return train, test
 
 def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
@@ -34,6 +34,48 @@ def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
 	train = data[0:int(frac_train*length)]
 	test = data[int(frac_train*length): length]
 	return train, test
+
+
+def plot_four_image_comparison(preds, rightslice, leftslice,N=10):
+	shape = preds.shape
+	preds = np.reshape(preds, (shape[0], shape[1], shape[2]))
+	rightslice = np.reshape(rightslice,(shape[0], shape[1], shape[2]))
+	leftslice = np.reshape(leftslice, (shape[0], shape[1], shape[2]))
+
+	for i in xrange(N):
+		fig = plt.figure()
+
+		#originalcolour
+		ax1 = fig.add_subplot(221)
+		plt.imshow(preds[i])
+		plt.title('Prediction')
+		plt.xticks([])
+		plt.yticks([])
+
+		#red
+		ax2 = fig.add_subplot(222)
+		plt.imshow(rightslice)
+		plt.title('Actual right slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		#green
+		ax3 = fig.add_subplot(223)
+		plt.imshow(leftslice)
+		plt.title('Actual Left slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		##blue
+		ax4 = fig.add_subplot(224)
+		plt.imshow(rightslice)
+		plt.title('Actual Right slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		plt.tight_layout()
+		plt.show(fig)
+
 
 
 
@@ -52,22 +94,26 @@ def test_gestalt():
 	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks("gestalt/")
-	model.fit(slicelefttrain, slicerighttrain, epochs=5, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), callbacks=callbacks)
+	model.fit(slicelefttrain, slicerighttrain, epochs=100, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), callbacks=callbacks)
 
 	print "MODEL FITTED"
 
 	preds = model.predict(slicelefttest)
 	print preds.shape
 	for i in xrange(10):
-		plt.imshow(np.reshape(slicerighttest[i],(100,20)))
+		plt.imshow(np.reshape(slicerighttest[i],(100,20)),cmap='gray')
 		plt.title('image')
 		plt.show()
-		plt.imshow(np.reshape(preds[i],(100,20)))
+		plt.imshow(np.reshape(preds[i],(100,20)), cmap='gray')
 		plt.title('prediction')
 		plt.show()
+
+	res = [preds, leftslicetest, rightslicetest]
+	save_array(res, "gestalt/gestalt_half_split_results")
+
+	plot_four_image_comparison(preds, leftslicetest, rightslicetest, 20)
 	
-
-
+	
 
 def test_cifar():
 	(xtrain, ytrain), (xtest, ytest) = cifar10.load_data()
