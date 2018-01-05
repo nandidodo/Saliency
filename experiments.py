@@ -188,6 +188,8 @@ def run_half_split_experiments(epochs = 1, save=True,test_up_to=None, history=Tr
 		save(errmaps, 'colour_red_green_errormaps_split_half')
 
 	if history:
+		his1 = serialize_class_object(his1)
+		his2 = serialize_class_object(his2)
 		return (errmaps, his1, his2)
 
 	return errmaps
@@ -648,10 +650,15 @@ if __name__ == '__main__':
 	#process_hyperparams_error("hyperparam_test_lrates", "testsaliences_combined", "lrate", lrates)
 
 	#okay, here are the actual history tests
-	maps, his1, his2 = run_half_split_experiments(epochs=1, save=False)
-	print type(his1)
-	print his1
-	save_array((his1, his2), "history_experiment")
+	#maps, his1, his2 = run_half_split_experiments(epochs=1, save=False)
+	#print type(his1)
+	#print his1
+	#save_array((his1, his2), "history_experiment")
+
+	# okay, this works. what shuold be my next steps in modelling this?
+	# so we can try to get the gestalts working and play aroudn with those numbers
+	#that seems like the most reasonable solution to be honest, so let's try to get that working
+	#and then see what we can obtain from that. if wecan do thattonight, and get a reasonable looking model, then I wuold be very happy indeed. so let's try that!
 	
 		
 

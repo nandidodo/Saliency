@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import cPickle as pickle
 from skimage import exposure
 import sys
+from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, TensorBoard, TerminateOnNaN
 
 
 #simple thing here really, depending on whether this actually works, idk, but may as well have it as a util function
@@ -35,6 +36,24 @@ def serialize_class_object(f):
 	except Exception as err:
 		print "Exception in Serialization: " + str(err)
 		return {"Error" : err}
+
+
+
+def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0):
+	
+	checkpointer = ModelCheckpoint(filepath=os.path.join(save_path, "_weights", monitor="val_loss",save_best_only=True, save_weights_only=True
+	
+	early_stopper = EarlyStopping(monitor='val_loss', min_delta=min_delta, patience=patience)
+
+	epoch_logger = CSVLogger(os.path.join(save_path, "epoch_logs.csv"))
+	
+	batch_logger= BatchLossCSVLogger(os.path.join(save_path, "batch_logs.csv"))
+	
+	tensorboard = TensorBoard(log_dir=(os.path.join(save_path, '_tensorboard_logs')), histogram_freq=histogram_freq, write_grads=(histogram_freq>0))
+
+	terminator = TerminateOnNaN()
+
+	return (checkpointer, early_stopper, epoch_logger, batch_logger, tensorboard, terminator)
 
 def show_colour_splits(img, show_original = True):
 	#assumes img is 4d so we can split along the colour	
