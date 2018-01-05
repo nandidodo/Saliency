@@ -122,6 +122,33 @@ def SimpleAutoencoder(input_shape, weights_path=None):
 	model = Model(input_img, decoded)
 	return model
 
+
+
+def SimpleContinuingConvModel(input_shape):
+	#this is a bunch of convolutional models which try to keep the miage of the same shape
+	# in the line of the 1x1 convolutions all convolutional networks
+	#I'm seeing how powerful the convolutional image transformers are
+	#I was thinking this could map from our error maps to their given sal maps
+	#for actual apples to apples comparison of ROC curves and so forth of our method to theirs
+	input_img = Input(input_shape)
+	x = Conv2D(32,2,strides=(1,1), activation='relu',padding='same')(input_img)
+	x = BatchNormalization(momentum=0.9)(x)
+	print x.shape
+	x = Conv2D(64,2,strides=(1,1), activation='relu',padding='same')(x)
+	x = BatchNormalization(momentum=0.9)(x)
+	print x.shape
+	x = Conv2D(64,1,strides=(1,1), activation='relu',padding='same')(x)
+	x = BatchNormalization(momentum=0.9)(x)
+	print x.shape
+	x = Conv2D(32,1,strides=(1,1), activation='relu',padding='same')(x)
+	x = BatchNormalization(momentum=0.9)(x)
+	print x.shape
+	x = Conv2D(1,2,strides=(1,1), activation='relu',padding='valid')(x)
+	print x.shape
+
+	model = Model(input_img, x)
+	return model
+
 if __name__ =='__main__':
 	"""
 	(xtrain, ytrain), (xtest, ytest) = cifar10.load_data()

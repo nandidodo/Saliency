@@ -109,7 +109,7 @@ def test_gestalt():
 		plt.show()
 	"""
 	history = serialize_class_object(his)
-	res = [his,preds, slicelefttest, slicerighttest]
+	res = [history,preds, slicelefttest, slicerighttest]
 	save_array(res, "gestalt/gestalt_half_split_results")
 
 	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
@@ -128,7 +128,7 @@ def test_cifar():
 	model.compile(optimizer='sgd', loss='mse')
 
 
-	model.fit(xtrain, xtrain, nb_epoch=5, batch_size=128, shuffle=True, validation_data=(xtest, xtest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	model.fit(xtrain, xtrain, nb_epoch=500, batch_size=128, shuffle=True, validation_data=(xtest, xtest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	
 
 # it actually seems to have worked really well!!! our model is really niec and good! that's awesome! next steps are getting more images, getting gestalt images, telling richard about it, and seeing what he says, and experimenting with different settings but the basic hyperparams seem to work really well this time, which is great!
