@@ -44,7 +44,7 @@ def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0
 	
 	checkpointer = ModelCheckpoint(filepath=os.path.join(save_path, "_weights"), monitor="val_loss",save_best_only=True, save_weights_only=True)
 	
-	early_stopper = EarlyStopping(monitor='val_loss', min_delta=min_delta, patience=patience)
+	early_stopper = EarlyStopping(monitor='val_loss', min_delta=min_delta, patience=patience*2)
 
 	epoch_logger = CSVLogger(os.path.join(save_path, "epoch_logs.csv"))
 	
@@ -54,7 +54,7 @@ def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0
 
 	terminator = TerminateOnNaN()
 	
-	reduceLR = ReduceLROnPlateau(monitor='val_loss', factor=2, patience= patience, verbose=1, mode='auto', min_lr = 1e-8)
+	reduceLR = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience= patience, verbose=1, mode='auto', min_lr = 1e-8)
 
 	return [checkpointer, early_stopper, epoch_logger, tensorboard, terminator, reduceLR]
 

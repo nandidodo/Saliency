@@ -95,9 +95,15 @@ def test_gestalt(both=False,epochs=500):
 	imgs = np.reshape(imgs, (shape[0], shape[1], shape[2], 1))
 	train, test = split_first_test_train(imgs)
 	slicelefttrain, slicerighttrain = split_dataset_center_slice(train, 20)
-	slicelefttest, 
-slicerighttest = split_dataset_center_slice(test,20)
+	slicelefttest, slicerighttest = split_dataset_center_slice(test, 20)
+	#slicerighttest = split_dataset_center_slice(test,20)
 	shape = slicelefttrain.shape
+
+	print "SHAPES OF INPUTS:"
+	print slicelefttrain.shape
+	print slicerighttrain.shape
+	print slicelefttest.shape
+	print slicerighttest.shape
 	
 	#sort out our model
 	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
@@ -106,7 +112,9 @@ slicerighttest = split_dataset_center_slice(test,20)
 	his = model.fit(slicelefttrain, slicerighttrain, epochs=500, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), callbacks=callbacks)
 
 	if both:
-		his2 = model.fit(slicerighttrain, slicelefttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(slicerighttest, slicelefttest), callbacks=callbacks)
+		model2 = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
+		model2.compile(optimizer='sgd', loss='mse')
+		his2 = model2.fit(slicerighttrain, slicelefttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(slicerighttest, slicelefttest), callbacks=callbacks)
 
 	print "MODEL FITTED"
 
@@ -127,21 +135,21 @@ slicerighttest = split_dataset_center_slice(test,20)
 	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
 
 	if both:
-	preds = model.predict(slicelefttest)
-	print preds.shape
-	"""for i in xrange(10):
-		plt.imshow(np.reshape(slicerighttest[i],(100,20)),cmap='gray')
-		plt.title('image')
-		plt.show()
-		plt.imshow(np.reshape(preds[i],(100,20)), cmap='gray')
-		plt.title('prediction')
-		plt.show()
-	"""
-	history = serialize_class_object(his2)
-	res = [history,preds, slicelefttest, slicerighttest]
-	save_array(res, "gestalt/gestalt_half_split_results_proper_other")
+		preds = model.predict(slicelefttest)
+		print preds.shape
+		"""for i in xrange(10):
+			plt.imshow(np.reshape(slicerighttest[i],(100,20)),cmap='gray')
+			plt.title('image')
+			plt.show()
+			plt.imshow(np.reshape(preds[i],(100,20)), cmap='gray')
+			plt.title('prediction')
+			plt.show()
+		"""
+		history = serialize_class_object(his2)
+		res = [history,preds, slicelefttest, slicerighttest]
+		save_array(res, "gestalt/gestalt_half_split_results_proper_other")
 
-	plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
+		plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
 	
 
 	#okay, that's weird. it seems to learn to predict the right slice, even though it's not supposed to, and I have no idea whyy it's trying to do that, so I really don't know...
