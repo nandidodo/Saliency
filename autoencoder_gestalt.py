@@ -36,6 +36,59 @@ def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
 	return train, test
 
 
+def plot_both_six_image_comparison(leftpreds, rightpreds, leftslice, rightslice, N=10):
+	shape = leftpreds.shape
+	assert shape == rightpreds.shape == leftslice.shape == rightslice.shape, "all images must be same size"
+	
+	leftpreds = np.reshape(leftpreds, (shape[0], shape[1], shape[2]))
+	rightpreds = np.reshape(rightpreds, (shape[0], shape[1], shape[2]))
+	leftslice = np.reshape(leftslice, (shape[0], shape[1], shape[2]))
+	rightslice = np.reshape(rightslice, (shape[0], shape[1], shape[2]))
+
+	for i in xrange(N):
+		fig = plt.figure()	
+		fig = plt.figure()
+
+		ax1 = fig.add_subplot(231)
+		plt.imshow(leftslice[i])
+		plt.title('Actual left slice')
+		plt.xticks([])
+		plt.yticks([])
+	
+		ax2 = fig.add_subplot(232)
+		plt.imshow(rightpreds[i])
+		plt.title('Predicted right slice')
+		plt.xticks([])
+		plt.yticks([])
+	
+		ax3 = fig.add(subplot(233)
+		plt.imshow(rightslice[i])
+		plt.title('Actual right slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		ax4 = fig.add_subplot(234)
+		plt.imshow(rightslice[i])
+		plt.title('Actual right slice')
+		plt.xticks([])
+		plt.yticks([])
+		
+		ax5 = fig.add_subplot(235)
+		plt.imshow(leftpreds[i])
+		plt.title('Predicted left slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		ax6 = fig.add_subplot(236)
+		plt.imshow(leftslice[i])
+		plt.title('Actual left slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		plt.tight_layout()
+		plt.show(fig)
+
+
 def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False):
 	shape = preds.shape
 	preds = np.reshape(preds, (shape[0], shape[1], shape[2]))
@@ -83,6 +136,7 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 		plt.tight_layout()
 		plt.show(fig)
+		return fig
 
 
 
