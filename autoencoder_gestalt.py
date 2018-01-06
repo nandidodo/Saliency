@@ -61,7 +61,7 @@ def plot_both_six_image_comparison(leftpreds, rightpreds, leftslice, rightslice,
 		plt.xticks([])
 		plt.yticks([])
 	
-		ax3 = fig.add(subplot(233)
+		ax3 = fig.add_subplot(233)
 		plt.imshow(rightslice[i])
 		plt.title('Actual right slice')
 		plt.xticks([])
@@ -189,7 +189,7 @@ def test_gestalt(both=False,epochs=500):
 	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
 
 	if both:
-		preds = model.predict(slicelefttest)
+		preds = model.predict(slicerighttest)
 		print preds.shape
 		"""for i in xrange(10):
 			plt.imshow(np.reshape(slicerighttest[i],(100,20)),cmap='gray')
