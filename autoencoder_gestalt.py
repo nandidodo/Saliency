@@ -177,7 +177,7 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test"):
 	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks("gestalt/")
-	his = model.fit(slicelefttrain, slicerighttrain, epochs=500, batch_size=128, shuffle=True, validation_data=(sliceleftval, slicerightval), callbacks=callbacks)
+	his = model.fit(slicelefttrain, slicerighttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(sliceleftval, slicerightval), callbacks=callbacks)
 
 	if both:
 		model2 = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
@@ -245,7 +245,7 @@ def test_cifar():
 
 if __name__ =='__main__':
 	#test_cifar()
-	test_gestalt(both=True, epochs=1)
+	test_gestalt(both=True, epochs=500)
 	"""
 	imgs = load_array('testsaliences_combined')
 	imgs = imgs[:,:,:,0]
