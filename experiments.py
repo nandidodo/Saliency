@@ -632,7 +632,7 @@ def try_gestalt_model_for_normal(fname,epochs=100, both=True):
 
 	preds1 = model.predict(redtest)
 	history = serialize_class_object(his)
-	res = [history, preds, redtest, greentest]
+	res = [history, preds1, redtest, greentest]
 	save_array(res, "STANDARD_WITH_GESTALT_AUTOENCODER_MODEL_1")
 
 	if both:
