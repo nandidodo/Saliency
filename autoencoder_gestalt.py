@@ -153,7 +153,8 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 
 
-def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test"):
+def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Model=SimplceConvDropoutBatchNorm):
+	# has model function for additional generality here, which is great!
 	imgs = load_array("testimages_combined")
 	#print imgs.shape
 	imgs = imgs[:,:,:,0].astype('float32')/255.
@@ -174,13 +175,13 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test"):
 	print slicerighttest.shape
 	
 	#sort out our model
-	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
+	model = Model((shape[1], shape[2], shape[3]))
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks("gestalt/")
 	his = model.fit(slicelefttrain, slicerighttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(sliceleftval, slicerightval), callbacks=callbacks)
 
 	if both:
-		model2 = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
+		model2 = Model((shape[1], shape[2], shape[3]))
 		model2.compile(optimizer='sgd', loss='mse')
 		his2 = model2.fit(slicerighttrain, slicelefttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(sliceleftval, slicerightval), callbacks=callbacks)
 

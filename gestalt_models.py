@@ -143,7 +143,23 @@ def SimpleContinuingConvModel(input_shape):
 	x = Conv2D(32,1,strides=(1,1), activation='relu',padding='same')(x)
 	x = BatchNormalization(momentum=0.9)(x)
 	print x.shape
-	x = Conv2D(1,2,strides=(1,1), activation='relu',padding='valid')(x)
+	x = Conv2D(1,2,strides=(1,1), activation='relu',padding='same')(x)
+	print x.shape
+
+	model = Model(input_img, x)
+	return model
+
+def TinyContinuingConvModel(input_shape, batch_norm=True):
+	input_ig = Input(input_shape)
+	x = Conv2D(32,2,strides=(1,1), activation='relu', padding='same')(input_img)
+	print x.shape
+	if batch_norm:
+		x = BatchNormalization(momentum=0.9)(x)
+	x = Conv2D(32,2,strides=(1,1),activation='relu', padding='same')(x)
+	print x.shape
+	if batch_norm:
+		x = BatchNormalization(momentum=0.9)(x)
+	x = Conv2D(1, 2, strides=(1,1), activation='relu', padding='same')(x)
 	print x.shape
 
 	model = Model(input_img, x)
@@ -168,7 +184,7 @@ if __name__ =='__main__':
 	xtest = np.reshape(xtest, (len(xtest), 32,32,1))
 	print xtrain.shape
 	#model = SimpleAutoencoder((28,28,1))
-	model=SimpleConvDropoutBatchNorm((32,32,1))
+	model=SimpleContinuingConvModel((32,32,1))
 	model.compile(optimizer='sgd', loss='mse')
 
 
