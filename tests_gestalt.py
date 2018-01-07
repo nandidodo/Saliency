@@ -18,7 +18,7 @@ def load_array(fname):
 
 
 
-def plot_both_six_image_comparison(leftpreds, rightpreds, leftslice, rightslice, N=10):
+def plot_both_six_image_comparison(leftpreds, rightpreds, leftslice, rightslice, N=50):
 	shape = leftpreds.shape
 	assert shape == rightpreds.shape == leftslice.shape == rightslice.shape, "all images must be same size"
 	
@@ -31,37 +31,37 @@ def plot_both_six_image_comparison(leftpreds, rightpreds, leftslice, rightslice,
 		fig = plt.figure()	
 
 		ax1 = fig.add_subplot(231)
-		plt.imshow(leftslice[i])
+		plt.imshow(leftslice[i],cmap='gray')
 		plt.title('Actual left slice')
 		plt.xticks([])
 		plt.yticks([])
 	
 		ax2 = fig.add_subplot(232)
-		plt.imshow(rightpreds[i])
+		plt.imshow(rightpreds[i],cmap='gray')
 		plt.title('Predicted right slice')
 		plt.xticks([])
 		plt.yticks([])
 	
 		ax3 = fig.add_subplot(233)
-		plt.imshow(rightslice[i])
+		plt.imshow(rightslice[i],cmap='gray')
 		plt.title('Actual right slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		ax4 = fig.add_subplot(234)
-		plt.imshow(rightslice[i])
+		plt.imshow(rightslice[i],cmap='gray')
 		plt.title('Actual right slice')
 		plt.xticks([])
 		plt.yticks([])
 		
 		ax5 = fig.add_subplot(235)
-		plt.imshow(leftpreds[i])
+		plt.imshow(leftpreds[i],cmap='gray')
 		plt.title('Predicted left slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		ax6 = fig.add_subplot(236)
-		plt.imshow(leftslice[i])
+		plt.imshow(leftslice[i],cmap='gray')
 		plt.title('Actual left slice')
 		plt.xticks([])
 		plt.yticks([])
@@ -128,10 +128,14 @@ def get_both_preds_results(fname1, fname2):
 
 
 if __name__ == '__main__':
+	
 	res = load_array("gestalt_half_split_results_proper")
+	#res = load_array("STANDARD_WITH_GESTALT_AUTOENCODER_MODEL_1")
 	history, predsleft, sliceleft, sliceright = res
 	res2 = load_array("gestalt_half_split_results_proper_other")
+	#res2 = load_array("STANDARD_WITH_GESTALT_AUTOENCODER_MODEL_2")
 	history2, predsright, _,_2 = res2
 	plot_both_six_image_comparison(predsleft, predsright, sliceleft, sliceright)
+	
 	
 	

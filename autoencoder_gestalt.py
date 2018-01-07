@@ -36,6 +36,18 @@ def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
 	return train, test
 
 
+def split_first_test_val_train(data, frac_train =0.9, frac_val = 0.05, frac_test = 0.05):
+	assert frac_train + frac_val + frac_test ==1, "train test validation splits must add up to one"
+	N = len(data)
+	len_test = int(frac_test*N)
+	len_val = int(frac_val*N)
+	#len_train = int(frac_train *N)
+	test = data[0:len_test]
+	val = data[len_test: (len_test+len_val)]
+	train =data[(len_test+len_val):N]
+	return train, val, test 
+
+
 def plot_both_six_image_comparison(leftpreds, rightpreds, leftslice, rightslice, N=10):
 	shape = leftpreds.shape
 	assert shape == rightpreds.shape == leftslice.shape == rightslice.shape, "all images must be same size"
@@ -141,15 +153,17 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 
 
-def test_gestalt(both=False,epochs=500):
+def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test"):
 	imgs = load_array("testimages_combined")
 	#print imgs.shape
 	imgs = imgs[:,:,:,0].astype('float32')/255.
 	shape = imgs.shape
 	imgs = np.reshape(imgs, (shape[0], shape[1], shape[2], 1))
-	train, test = split_first_test_train(imgs)
+	#train, test = split_first_test_train(imgs)
+	train, val, test = split_first_test_val_train(imgs)
 	slicelefttrain, slicerighttrain = split_dataset_center_slice(train, 20)
 	slicelefttest, slicerighttest = split_dataset_center_slice(test, 20)
+	sliceleftval, slicerightval = split_dataset_center_slice(val, 20)
 	#slicerighttest = split_dataset_center_slice(test,20)
 	shape = slicelefttrain.shape
 
@@ -163,12 +177,12 @@ def test_gestalt(both=False,epochs=500):
 	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks("gestalt/")
-	his = model.fit(slicelefttrain, slicerighttrain, epochs=500, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), callbacks=callbacks)
+	his = model.fit(slicelefttrain, slicerighttrain, epochs=500, batch_size=128, shuffle=True, validation_data=(sliceleftval, slicerightval), callbacks=callbacks)
 
 	if both:
 		model2 = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
 		model2.compile(optimizer='sgd', loss='mse')
-		his2 = model2.fit(slicerighttrain, slicelefttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(slicerighttest, slicelefttest), callbacks=callbacks)
+		his2 = model2.fit(slicerighttrain, slicelefttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(sliceleftval, slicerightval), callbacks=callbacks)
 
 	print "MODEL FITTED"
 
@@ -184,9 +198,9 @@ def test_gestalt(both=False,epochs=500):
 	"""
 	history = serialize_class_object(his)
 	res = [history,preds, slicelefttest, slicerighttest]
-	save_array(res, "gestalt/gestalt_half_split_results_proper")
+	save_array(res, fname+ "_1")
 
-	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
+	#plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
 
 	if both:
 		preds = model.predict(slicerighttest)
@@ -201,9 +215,9 @@ def test_gestalt(both=False,epochs=500):
 		"""
 		history = serialize_class_object(his2)
 		res = [history,preds, slicelefttest, slicerighttest]
-		save_array(res, "gestalt/gestalt_half_split_results_proper_other")
+		save_array(res, fname + "_2")
 
-		plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
+		#plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
 	
 
 	#okay, that's weird. it seems to learn to predict the right slice, even though it's not supposed to, and I have no idea whyy it's trying to do that, so I really don't know...
@@ -231,4 +245,13 @@ def test_cifar():
 
 if __name__ =='__main__':
 	#test_cifar()
-	test_gestalt(both=True, epochs=500)
+	test_gestalt(both=True, epochs=1)
+	"""
+	imgs = load_array('testsaliences_combined')
+	imgs = imgs[:,:,:,0]
+	print imgs.shape
+	train, val, test = split_first_test_val_train(imgs)
+	print train.shape
+	print val.shape
+	print test.shape
+	"""
