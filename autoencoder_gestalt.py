@@ -208,6 +208,8 @@ def test_gestalt(both=False,epochs=500):
 
 	#okay, that's weird. it seems to learn to predict the right slice, even though it's not supposed to, and I have no idea whyy it's trying to do that, so I really don't know...
 # ah, les, I have an idea actually. let's flip_this aroud and see if we get anything on the other side
+
+# what's crazy is that this actually seems to work!?!??! that's totally insane and I've no idea how it does it. It'll definitely be something to show richard. We should also experiment with seeing how good the autoencoder is on the standard colour transfer task to see if we get any interesting errmaps. That's what I'll do tonight, I think
 	
 
 def test_cifar():

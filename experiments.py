@@ -17,6 +17,8 @@ from keras.callbacks import TensorBoard
 from file_reader import *
 from utils import *
 from autoencoder import *
+from gestalt_models import *
+from autoencoder_gestalt import *
 
 
 seed = 8
@@ -606,7 +608,39 @@ def multi_hyperparam_grid_search(param_names, param_lists, input_fname, save_bas
 
 
 #we need a way to get the error and accuracies or whatever, but we'll have to add that in a bit, so I don't know!
-		
+
+
+def try_gestalt_model_for_normal(fname,epochs=100, both=True):
+	imgs = load_array(fname)
+	imgs = imgs.astype('float32')/255.
+	red, green, blue = split_dataset_by_colour(imgs)
+	redtrain, redtest = split_first_test_train(red)
+	greentrain, greentest = split_first_test_train(green)
+	shape = redtrain.shape
+
+	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
+	model.compile(optimizer='sgd',loss='mse')
+	callbacks = build_callbacks("./")
+	his=model.fit(redtrain, greentrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(redtest, greentest), callbacks=callbacks)
+
+	if both:
+		model2 = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
+		model2.compile(optimizer='sgd', loss='mse')
+		his2 = model2.fit(greentrain, redtrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(greentest, redtest), callbacks=callbacks)
+
+	print "MODEL FITTED"
+
+	preds1 = model.predict(redtest)
+	history = serialize_class_object(his)
+	res = [history, preds, redtest, greentest]
+	save_array(res, "STANDARD_WITH_GESTALT_AUTOENCODER_MODEL_1")
+
+	if both:
+		preds2 = model2.predict(greentest)
+		history2 = serialize_class_object(his2)
+		res2 = [history2, preds2, greentest, redtest]
+		save_array(res2, "STANDARD_WITH_GESTALT_AUTOENCODER_MODEL_2")
+	
 
 
 
@@ -659,6 +693,11 @@ if __name__ == '__main__':
 	# so we can try to get the gestalts working and play aroudn with those numbers
 	#that seems like the most reasonable solution to be honest, so let's try to get that working
 	#and then see what we can obtain from that. if wecan do thattonight, and get a reasonable looking model, then I wuold be very happy indeed. so let's try that!
+
+
+	#okay, here's me trying my probably better and more successful gestalt models
+	#for the standard autoencoding task
+	try_gestalt_model_for_normal("testsaliences_combined", epochs=1, both=True)
 	
 		
 

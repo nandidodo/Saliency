@@ -29,7 +29,6 @@ def plot_both_six_image_comparison(leftpreds, rightpreds, leftslice, rightslice,
 
 	for i in xrange(N):
 		fig = plt.figure()	
-		fig = plt.figure()
 
 		ax1 = fig.add_subplot(231)
 		plt.imshow(leftslice[i])
