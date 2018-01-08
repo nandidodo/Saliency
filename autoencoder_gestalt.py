@@ -232,8 +232,8 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 	#I guess we'll have to see
 	#if this works it's prtty hard proof since it's most definitely never seen any of these images
 	 # before... so I guess we'll just have to look and see!
-	imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images")
-	igs = imgs.astype('float32')/255.
+	imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
+	imgs = imgs.astype('float32')/255.
 	print imgs.shape
 	imgs = imgs[:,:,:,0]
 	imgs = np.reshape(imgs, (imgs.shape[0], imgs.shape[1], imgs.shape[2], 1))
@@ -272,9 +272,12 @@ def test_cifar():
 
 # it actually seems to have worked really well!!! our model is really niec and good! that's awesome! next steps are getting more images, getting gestalt images, telling richard about it, and seeing what he says, and experimenting with different settings but the basic hyperparams seem to work really well this time, which is great!
 
+# okay, everthing with our model works, we can now test... yay!
+#let's get this show on the road!
+
 if __name__ =='__main__':
 	#test_cifar()
-	test_gestalt(both=True, epochs=1, fname="test_images_DELETE",save_model_fname="gestalt/SimpleConvBatchNormModel")
+	test_gestalt(both=True, epochs=500, fname="test_images_DELETE",save_model_fname="gestalt/SimpleConvBatchNormModel")
 	"""
 	imgs = load_array('testsaliences_combined')
 	imgs = imgs[:,:,:,0]
