@@ -50,16 +50,15 @@ def split_first_test_val_train(data, frac_train =0.9, frac_val = 0.05, frac_test
 
 def plot_both_six_image_comparison(leftpreds, rightpreds, leftslice, rightslice, N=10):
 	shape = leftpreds.shape
-	assert shape == rightpreds.shape == leftslice.shape == rightslice.shape, "all images must be same size"
+	#assert shape == rightpreds.shape == leftslice.shape == rightslice.shape, "all images must be same size"
 	
-	leftpreds = np.reshape(leftpreds, (shape[0], shape[1], shape[2]))
-	rightpreds = np.reshape(rightpreds, (shape[0], shape[1], shape[2]))
-	leftslice = np.reshape(leftslice, (shape[0], shape[1], shape[2]))
-	rightslice = np.reshape(rightslice, (shape[0], shape[1], shape[2]))
+	leftpreds = np.reshape(leftpreds, (leftpreds.shape[0], leftpreds.shape[1], leftpreds.shape[2]))
+	rightpreds = np.reshape(rightpreds, (rightpreds.shape[0], rightpreds.shape[1], rightpreds.shape[2]))
+	leftslice = np.reshape(leftslice, (leftslice.shape[0], leftslice.shape[1], leftslice.shape[2]))
+	rightslice = np.reshape(rightslice, (rightslice.shape[0], rightslice.shape[1], rightslice.shape[2]))
 
 	for i in xrange(N):
 		fig = plt.figure()	
-		fig = plt.figure()
 
 		ax1 = fig.add_subplot(231)
 		plt.imshow(leftslice[i])
@@ -153,7 +152,7 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 
 
-def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Model=SimplceConvDropoutBatchNorm):
+def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Model=SimpleConvDropoutBatchNorm, save_model=True, save_model_fname="gestalt/default_gestalt_model"):
 	# has model function for additional generality here, which is great!
 	imgs = load_array("testimages_combined")
 	#print imgs.shape
@@ -167,6 +166,8 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 	sliceleftval, slicerightval = split_dataset_center_slice(val, 20)
 	#slicerighttest = split_dataset_center_slice(test,20)
 	shape = slicelefttrain.shape
+
+	#plot_both_six_image_comparison(slicelefttrain, sliceleftval, slicelefttest,slicelefttrain)
 
 	print "SHAPES OF INPUTS:"
 	print slicelefttrain.shape
@@ -218,6 +219,30 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 		res = [history,preds, slicelefttest, slicerighttest]
 		save_array(res, fname + "_2")
 
+	if save_model:
+		model.save(save_model_fname + "_1")
+		model2.save(save_model_fname + "_2")
+
+
+	#this will test our model with completely unseen data, which is very important
+	#and larger data than it expects!?!?!? which might mess it up actually
+	#I guess we'll find out!
+	#but this is to tell if it's actually any good at what it does at all, or if it isn't
+	#and it's somehow cheating by training on the validatoin set or whatever
+	#I guess we'll have to see
+	#if this works it's prtty hard proof since it's most definitely never seen any of these images
+	 # before... so I guess we'll just have to look and see!
+	imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images")
+	igs = imgs.astype('float32')/255.
+	print imgs.shape
+	imgs = imgs[:,:,:,0]
+	imgs = np.reshape(imgs, (imgs.shape[0], imgs.shape[1], imgs.shape[2], 1))
+	sliceleft, sliceright = split_dataset_center_slice(imgs, 20)
+	rightpreds = model.predict(sliceleft)
+	leftpreds = model2.predict(sliceright)
+	res = [leftpreds, rightpreds]
+	save_array(res, "gestalt/BenchmarkDataTestSetGestaltPrediction")
+
 		#plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
 	
 
@@ -225,6 +250,9 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 # ah, les, I have an idea actually. let's flip_this aroud and see if we get anything on the other side
 
 # what's crazy is that this actually seems to work!?!??! that's totally insane and I've no idea how it does it. It'll definitely be something to show richard. We should also experiment with seeing how good the autoencoder is on the standard colour transfer task to see if we get any interesting errmaps. That's what I'll do tonight, I think
+
+# okay, this is really really weird.  have no idea how it actually manages to do it.. .argh!?
+#like how can it know??? those are test images it's showing... wtf?? how does it manage to know that... argh?
 	
 
 def test_cifar():
@@ -246,7 +274,7 @@ def test_cifar():
 
 if __name__ =='__main__':
 	#test_cifar()
-	test_gestalt(both=True, epochs=500)
+	test_gestalt(both=True, epochs=1, fname="test_images_DELETE",save_model_fname="gestalt/SimpleConvBatchNormModel")
 	"""
 	imgs = load_array('testsaliences_combined')
 	imgs = imgs[:,:,:,0]
@@ -255,4 +283,15 @@ if __name__ =='__main__':
 	print train.shape
 	print val.shape
 	print test.shape
+	
+
+	imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images")
+	print type(imgs)
+	print len(imgs)
+	print imgs.shape
+	imgs = imgs[:,:,:,0]
+	print imgs.shape
+	plt.imshow(imgs[0])
+	plt.show()
 	"""
+	
