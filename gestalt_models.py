@@ -123,6 +123,42 @@ def SimpleAutoencoder(input_shape, weights_path=None):
 	return model
 
 
+def VGGnet(input_shape, desired_output_shape, activation='relu'):
+	#my implementation of VGGnet just so I can understand it
+	input_img = Input(input_shape)
+	x = Conv2D(64, 2, strides=(1,1), activation=activation, padding='same')(input_img)
+	x = Conv2D(64, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = MaxPooling2D((2,2))(x)
+
+	x = Conv2D(128, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = Conv2D(128, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = MaxPooling2D((2,2))(x)
+
+	x = Conv2D(256, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = Conv2D(256, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = Conv2D(256, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = MaxPooling2D((2,2))(x)
+
+	x = Conv2D(512, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = Conv2D(512, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = Conv2D(512, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = MaxPooling2D((2,2))(x)
+
+	x = Conv2D(512, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = Conv2D(512, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = Conv2D(512, 2, strides=(1,1), activation=activation, padding='same')(x)
+	x = MaxPooling2D((2,2))(x)
+
+	x = Flatten()(x)
+	x = Dense(5112)(x)
+	x = Dense(2056)(x)
+	x = Dense(output_shape)(x)
+
+	model = Model(input_img, x)
+	return model
+	
+
+
 
 def SimpleContinuingConvModel(input_shape):
 	#this is a bunch of convolutional models which try to keep the miage of the same shape
