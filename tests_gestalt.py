@@ -16,6 +16,27 @@ def save_array(obj, fname):
 def load_array(fname):
 	return pickle.load(open(fname, 'rb'))
 
+def split_dataset_center_slice(dataset, split_width):
+
+	#this just returns the equivalent of the leftslpit and the rightsplit
+	#also assumes three dimensional images and four d dataset
+	#also all images are cropped to the same width
+	shape = dataset.shape
+	
+	img_width = len(dataset[0])
+	half = img_width/2
+	if len(shape) ==4:
+		leftslice = dataset[:,:,half-split_width:half,:]
+		rightslice = dataset[:,:,half: half+split_width,:]
+		return leftslice, rightslice
+	if len(shape)==3:
+		leftslice = dataset[:,:,half-split_width:half]
+		rightslice = dataset[:,:,half: half+split_width]
+		return leftslice, rightslice
+	
+
+
+
 
 
 def plot_both_six_image_comparison(leftpreds, rightpreds, leftslice, rightslice, N=50):
@@ -121,21 +142,40 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 
 
-def get_both_preds_results(fname1, fname2):
-	pass
-
+def get_both_preds_results(preds_fname, data_fname):
+	leftpreds, rightpreds = load_array(preds_fname)
+	imgs = load_array(data_fname)
+	imgs = imgs.astype('float32')/255.
+	imgs = imgs[:,:,:,0]
+	sliceleft, sliceright = split_dataset_center_slice(imgs, 20)
+	print leftpreds.shape
+	print sliceleft.shape
+	shape = leftpreds.shape
+	leftpreds = np.reshape(leftpreds, (shape[0], shape[1], shape[2]))
+	rightpreds = np.reshape(rightpreds, (shape[0], shape[1], shape[2]))
+	plot_both_six_image_comparison(leftpreds, rightpreds, sliceleft, sliceright)
 
 
 
 if __name__ == '__main__':
 	
-	res = load_array("gestalt_half_split_results_proper")
+	#res = load_array("gestalt_half_split_results_proper")
 	#res = load_array("STANDARD_WITH_GESTALT_AUTOENCODER_MODEL_1")
-	history, predsleft, sliceleft, sliceright = res
-	res2 = load_array("gestalt_half_split_results_proper_other")
+	#res=load_array("default_gestalt_test_1")
+	#history, predsleft, sliceleft, sliceright = res
+	#res2 = load_array("gestalt_half_split_results_proper_other")
 	#res2 = load_array("STANDARD_WITH_GESTALT_AUTOENCODER_MODEL_2")
-	history2, predsright, _,_2 = res2
-	plot_both_six_image_comparison(predsleft, predsright, sliceleft, sliceright)
+	#res2 = load_array("default_gestalt_test_2")
+	#history2, predsright, _,_2 = res2
+	#plot_both_six_image_comparison(predsleft, predsright, sliceleft, sliceright)
+
+	get_both_preds_results("BenchmarkDataTestSetGestaltPrediction", "../datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
+
+
+
+# oay, so as a general thing, as I suspected, it didn't work. basically the model just learns to predict it's own hemisphere and for some reason that miminizes the loss. I'm not totally sure how to deal with that otherwise to be honest. I can try different loss functions next, and that I think is what I'm going to do. otherwise I really don't know because it's really unfortunate. we just aren't getting really any gestalts at all. unless my training algorithm is somehow messed up to make it try to learn itself, but I'm surprised it learns that instead of just giving up and giving messes or gestalts or something. i must be doing somethin wrong, but I don't know what!
+
+# I think first things I'll try different loss functions, see if I can hit it out of this. I should also inspect my code bu tI don't see how since it is predicting slicelefttrain from slicerighttrain and vice versa, and I don't see any obvious issues there tbh and they are different, I shuold check that actually. let's just do that
 	
 	
 	

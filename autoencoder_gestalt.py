@@ -152,13 +152,14 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 
 
-def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Model=SimpleConvDropoutBatchNorm, save_model=True, save_model_fname="gestalt/default_gestalt_model"):
+def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Model=SimpleConvDropoutBatchNorm, save_model=True, save_model_fname="gestalt/default_gestalt_model", loss_func = 'mse'):
 	# has model function for additional generality here, which is great!
 	imgs = load_array("testimages_combined")
 	#print imgs.shape
 	imgs = imgs[:,:,:,0].astype('float32')/255.
 	shape = imgs.shape
-	imgs = np.reshape(imgs, (shape[0], shape[1], shape[2], 1))
+	imgs = np.reshape(imgs, (shape[ 
+0], shape[1], shape[2], 1))
 	#train, test = split_first_test_train(imgs)
 	train, val, test = split_first_test_val_train(imgs)
 	slicelefttrain, slicerighttrain = split_dataset_center_slice(train, 20)
@@ -168,6 +169,22 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 	shape = slicelefttrain.shape
 
 	#plot_both_six_image_comparison(slicelefttrain, sliceleftval, slicelefttest,slicelefttrain)
+	"""
+	for i in xrange(10):
+		fig = plt.figure()
+		sh = slicelefttrain.shape
+		ax = plt.subplot(121)
+		
+		plt.imshow(np.reshape(slicelefttrain[i],(sh[1],sh[2])))
+		
+		ax2 = plt.subplot(122)
+		plt.imshow(np.reshape(slicerighttrain[i],(sh[1],sh[2])))
+	
+		plt.tight_layout()
+		plt.show(fig)
+
+	"""
+	# okay, so oru slices are correct and we're fitting it right... I think. let's have another examine of this
 
 	print "SHAPES OF INPUTS:"
 	print slicelefttrain.shape
@@ -177,13 +194,13 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 	
 	#sort out our model
 	model = Model((shape[1], shape[2], shape[3]))
-	model.compile(optimizer='sgd', loss='mse')
+	model.compile(optimizer='sgd', loss=loss_func)
 	callbacks = build_callbacks("gestalt/")
 	his = model.fit(slicelefttrain, slicerighttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(sliceleftval, slicerightval), callbacks=callbacks)
 
 	if both:
 		model2 = Model((shape[1], shape[2], shape[3]))
-		model2.compile(optimizer='sgd', loss='mse')
+		model2.compile(optimizer='sgd', loss=loss_func)
 		his2 = model2.fit(slicerighttrain, slicelefttrain, epochs=epochs, batch_size=128, shuffle=True, validation_data=(sliceleftval, slicerightval), callbacks=callbacks)
 
 	print "MODEL FITTED"
@@ -277,7 +294,7 @@ def test_cifar():
 
 if __name__ =='__main__':
 	#test_cifar()
-	test_gestalt(both=True, epochs=500, fname="test_images_DELETE",save_model_fname="gestalt/SimpleConvBatchNormModel")
+	test_gestalt(both=True, epochs=500, fname="test_images_DELETE",save_model_fname="gestalt/SimpleConvBatchNormModel", loss_func='binary_crossentropy')
 	"""
 	imgs = load_array('testsaliences_combined')
 	imgs = imgs[:,:,:,0]
