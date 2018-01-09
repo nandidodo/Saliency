@@ -183,7 +183,7 @@ def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test", Mod
 	preds1 = model.predict(half1test)
 	preds2 = mode.predict(half2test)
 
-	if_save_model:
+	if save_model:
 		mode.save(save_model_fname)
 
 	res=[preds1, preds2, history, half1test, half2test]
