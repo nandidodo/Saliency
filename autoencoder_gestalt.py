@@ -150,7 +150,58 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 		return fig
 
 
+def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test", Model=SimpleConvDropoutBatchNorm, save_model=True, save_model_fname="gestalt/default_single_model", loss_func = 'mse',data_fname="testimages_combined"):
+	print "IN FUCNTION"
+	imgs = load_array(data_fname)
+	imgs = imgs[:,:,:,0].astype('float32')/255.
+	shape = imgs.shape
+	imgs = np.reshape(imgs, (shape[0],shape[1],shape[2],1))
+	train, val,test = split_first_test_val_train(imgs)
+	slicelefttrain, slicerighttrain = split_dataset_center_slice(train, 20)
+	slicelefttest, slicerighttest = split_dataset_center_slice(test, 20)
+	sliceleftval, slicerightval = split_dataset_center_slice(val, 20)
 
+	#now we concat these things together
+	print slicelefttrain.shape
+	half1train = np.concatenate((slicelefttrain, slicerighttrain), axis=0)
+	half2train = np.concatenate((slicerighttrain, slicelefttrain), axis=0)
+	
+	half1val = np.concatenate((sliceleftval, slicerightval), axis=0)
+	half2val = np.concatenate((slicerightval, sliceleftval), axis=0)
+	
+	half1test = np.concatenate((slicelefttest, slicerighttest), axis=0)
+	half2test = np.concatenate((slicerighttest, slicelefttest), axis=0)
+	print half1train.shape
+	print half1test.shape
+	shape = half1train.shape
+
+	model = Model((shape[1], shape[2], shape[3])) # is this a cause of bugs here... there shuoldn't be a shape[3], right
+	model.compile(optimizer='sgd', loss=loss_func)
+	callbacks = build_callbacks("gestalt/")
+	his = model.fit(half1train, half2train, epochs=epochs, batch_size=128, shuffle=True, validation_data=(half1val, half2val), callbacks=callbacks)
+	history = serialize_class_object(his)
+	preds1 = model.predict(half1test)
+	preds2 = mode.predict(half2test)
+
+	if_save_model:
+		mode.save(save_model_fname)
+
+	res=[preds1, preds2, history, half1test, half2test]
+	save_array(res, fname)
+
+	#benchmark predictions
+
+	benchmark_imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
+	benchmark_imgs = benchmark_imgs.astype('float32')/255.
+	imgs = imgs[:,:,:,0]
+	sh = benchmark_imgs.shape
+	benchmark_imgs = np.reshape(benchmark_imgs, (sh[0], sh[1],sh[2],1))
+	leftslice, rightslice = split_dataset_center_slice(benchmark_imgs, 20)
+	benchmark_test = np.concatenate((leftslice, rightslice), axis=0)
+	benchmark_preds = model.predict(benchmark_imgs)
+	save_array(benchmark_preds, "gestalt/Benchmark_single_model_test_set_prediction")
+	
+	return [model, preds1, preds2, history, benchmark_preds]
 
 def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Model=SimpleConvDropoutBatchNorm, save_model=True, save_model_fname="gestalt/default_gestalt_model", loss_func = 'mse'):
 	# has model function for additional generality here, which is great!
@@ -258,7 +309,7 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 	rightpreds = model.predict(sliceleft)
 	leftpreds = model2.predict(sliceright)
 	res = [leftpreds, rightpreds]
-	save_array(res, "gestalt/BenchmarkDataTestSetGestaltPrediction")
+	save_array(res, "gestalt/BCE_BenchmarkDataTestSetGestaltPrediction")
 
 		#plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
 	
@@ -294,7 +345,9 @@ def test_cifar():
 
 if __name__ =='__main__':
 	#test_cifar()
-	test_gestalt(both=True, epochs=500, fname="test_images_DELETE",save_model_fname="gestalt/SimpleConvBatchNormModel", loss_func='binary_crossentropy')
+	#test_gestalt(both=True, epochs=500, fname="BCE_gestalt_results",save_model_fname="gestalt/BCE_SimpleConvBatchNormModel", loss_func='binary_crossentropy')
+
+	test_gestalt_single_model()
 	"""
 	imgs = load_array('testsaliences_combined')
 	imgs = imgs[:,:,:,0]
@@ -315,3 +368,6 @@ if __name__ =='__main__':
 	plt.show()
 	"""
 	
+
+# let's try different loss functions see if that helps - I think the kullback leibler wouldbe very interesting personally to see i fit works, so we'll try that out, as well as other attempts to see if it's cool to craft a dcent loss function
+# if this doesn't work, I think we shuld definitely explore GANs to generate image continuations as that could be very interesting as a partial thing to see if there's anything cool there, althou this approach of crossprediction is much more plausible from a cognitive science perspective, I think, but GANs could be very interesting also!
