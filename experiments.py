@@ -640,6 +640,22 @@ def try_gestalt_model_for_normal(fname,epochs=100, both=True):
 		history2 = serialize_class_object(his2)
 		res2 = [history2, preds2, greentest, redtest]
 		save_array(res2, "STANDARD_WITH_GESTALT_AUTOENCODER_MODEL_2")
+
+
+def get_error_maps(preds, test):
+	assert preds.shape ==  test.shape
+	res = []
+	for i in xrange(N):
+		res.append(np.absolute(preds[i] - test[i]))
+	res = np.array(res)
+	return res
+
+
+def plot_error_maps_saliences_from_preds(preds_fname):
+	history1, preds1, redtest, greentest = load_array(preds_fname + "_1")
+	history2, preds2, greentest, redtest = load_array(preds_fname + "_2")
+	
+	
 	
 
 
@@ -697,7 +713,7 @@ if __name__ == '__main__':
 
 	#okay, here's me trying my probably better and more successful gestalt models
 	#for the standard autoencoding task
-	try_gestalt_model_for_normal("testsaliences_combined", epochs=1, both=True)
+	try_gestalt_model_for_normal("testsaliences_combined", epochs=500, both=True)
 	
 		
 
