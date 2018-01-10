@@ -651,9 +651,24 @@ def get_error_maps(preds, test):
 	return res
 
 
-def plot_error_maps_saliences_from_preds(preds_fname):
+def plot_error_maps_saliences_from_preds(preds_fname, sal_fname, N = 20):
 	history1, preds1, redtest, greentest = load_array(preds_fname + "_1")
 	history2, preds2, greentest, redtest = load_array(preds_fname + "_2")
+	errmaps1 = get_error_maps(preds1, redtest)
+	errmaps2 = get_error_maps(preds2, greentest)
+	errmaps = np.concatenate((errmaps1, errmaps2), axis=0)
+	original_images = np.concatenate((redtest, greentest), axis=0)
+	# now we need to load the actual salince maps
+	sal_maps = load_array(sal_fname)
+	assert sal_maps.shape == preds1.shape == preds2.shape, 'all potential images must be same shape!'
+	if N == -1:
+		N = len(preds)
+	#now we do the plotting
+	for i in xrange(N):
+		imgs = (original_images, errmaps, sal_maps)
+		titles = ('Original Image', 'Error Map', 'Ground-truth salience map')
+		compare_images(imgs, titles)
+	
 	
 	
 	
