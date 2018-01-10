@@ -645,29 +645,42 @@ def try_gestalt_model_for_normal(fname,epochs=100, both=True):
 def get_error_maps(preds, test):
 	assert preds.shape ==  test.shape
 	res = []
-	for i in xrange(N):
+	for i in xrange(len(preds)):
 		res.append(np.absolute(preds[i] - test[i]))
 	res = np.array(res)
 	return res
 
 
-def plot_error_maps_saliences_from_preds(preds_fname, sal_fname, N = 20):
+def plot_error_maps_saliences_from_preds(preds_fname, sal_fname, N = 20, save=True, save_name="gestalt/STANDARD_WITH_GESTALT_ERROR_MAPS"):
 	history1, preds1, redtest, greentest = load_array(preds_fname + "_1")
 	history2, preds2, greentest, redtest = load_array(preds_fname + "_2")
 	errmaps1 = get_error_maps(preds1, redtest)
 	errmaps2 = get_error_maps(preds2, greentest)
 	errmaps = np.concatenate((errmaps1, errmaps2), axis=0)
 	original_images = np.concatenate((redtest, greentest), axis=0)
+	preds = np.concatenate((preds1, preds2), axis=0)
 	# now we need to load the actual salince maps
-	sal_maps = load_array(sal_fname)
+	sal_maps = load_array(sal_fname)[:,:,:,0]
+	_, sal_maps = split_first_test_train(sal_maps)
+	sh = sal_maps.shape
+	sal_maps = np.reshape(sal_maps, (sh[0], sh[1], sh[2], 1))
+	print sal_maps.shape
+	print preds1.shape
+	print preds2.shape
 	assert sal_maps.shape == preds1.shape == preds2.shape, 'all potential images must be same shape!'
+
+	if save:
+		save_array(errmaps, save_name)
+
 	if N == -1:
 		N = len(preds)
 	#now we do the plotting
 	for i in xrange(N):
-		imgs = (original_images, errmaps, sal_maps)
-		titles = ('Original Image', 'Error Map', 'Ground-truth salience map')
+		imgs = (original_images[i],preds[i], errmaps[i], sal_maps[i])
+		titles = ('Original Image','Predicted Image', 'Error Map', 'Ground-truth salience map')
 		compare_images(imgs, titles)
+
+	return [errmaps, original_images]
 	
 	
 	
@@ -728,7 +741,8 @@ if __name__ == '__main__':
 
 	#okay, here's me trying my probably better and more successful gestalt models
 	#for the standard autoencoding task
-	try_gestalt_model_for_normal("testsaliences_combined", epochs=500, both=True)
+	#try_gestalt_model_for_normal("testsaliences_combined", epochs=500, both=True)
+	plot_error_maps_saliences_from_preds("gestalt/STANDARD_WITH_GESTALT_AUTOENCODER_MODEL", "testsaliences_combined")
 	
 		
 
