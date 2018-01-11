@@ -18,9 +18,9 @@ from keras.datasets import mnist
 # these are our hyperparams here briefly!
 img_rows, img_cols, img_channels = 28,28,1
 filters = 64
-conv_kernel = 3
+num_conv = 3 # convolution kernel size
 batch_size = 64
-if (K.image_data_format() =='channels_first':
+if K.image_data_format() =='channels_first':
 	original_img_size = (img_channels, img_rows, img_cols)
 	intermediate_output_shape = (batch_size, filters, 14,14)
 	output_shape=(batch_size, filters, 29,29)
@@ -39,7 +39,7 @@ activation = 'relu'
 #this is the encoder
 x = Input(shape=original_img_size)
 conv1 = Conv2D(img_channels, kernel_size=(2,2),padding='same', activation=activation)(x)
-conv2 = Conv2D(filters, kernel_size=(2,2), padding='same', activation=activation), strides=(2,2))(conv1)
+conv2 = Conv2D(filters, kernel_size=(2,2), padding='same', activation=activation, strides=(2,2))(conv1)
 conv3 = Conv2D(filters, kernel_size=num_conv, padding='same', activation=activation, strides=1)(conv2)
 conv4 = Conv2D(filters, kernel_size=num_conv, padding='same',activation=activation, strides=1)(conv3)
 
@@ -52,10 +52,9 @@ z_mean = Dense(latent_dim)(hidden)
 z_log_var = Dense(latent_dim)(hidden)
 
 #reparametrisation trick
-def sampling(args);
+def sampling(args):
 	z_mean, z_log_var = args
-	epsilon = K.random_normal(shape=K.shape(z_mean)[0], latent_dim),
-							mean=0., stdev=epsilon_std)
+	epsilon = K.random_normal(shape=(K.shape(z_mean)[0], latent_dim),mean=0., stddev=epsilon_std)
 	return z_mean + K.exp(z_log_var) * epsilon
 
 
@@ -67,8 +66,8 @@ decoder_hid = Dense(intermediate_dim, activation=activation)
 decoder_upsample=Dense(filters * 14 * 14, activation=activation)
 
 decoder_reshape=Reshape(intermediate_output_shape[1:])
-decoder_deconv1 = Conv2dTranspose(filters, kernel_size=num_conv, padding='same',strides=1, activation=activation)
-decoder_deconv2 = Conv2DTranspose(flters, kernel_size=num_conv, padding='same', strides=1, activation=activation)
+decoder_deconv1 = Conv2DTranspose(filters, kernel_size=num_conv, padding='same',strides=1, activation=activation)
+decoder_deconv2 = Conv2DTranspose(filters, kernel_size=num_conv, padding='same', strides=1, activation=activation)
 decoder_deconv3_upsamp = Conv2DTranspose(filters, kernel_size=(3,3), strides=(2,2), padding='valid', activation=activation)
 
 decoder_mean_squash = Conv2D(img_channels, kernel_size=2, padding='valid', activation='sigmoid')
@@ -80,7 +79,7 @@ up_decoded = decoder_upsample(hid_decoded)
 reshape_decoded=decoder_reshape(up_decoded)
 deconv1_decoded=decoder_deconv1(reshape_decoded)
 deconv2_decoded=decoder_deconv2(deconv1_decoded)
-x_decoded_relu=decoder_deconv3(deconv2_decoded)
+x_decoded_relu=decoder_deconv3_upsamp(deconv2_decoded)
 x_decoded_mean_squash = decoder_mean_squash(x_decoded_relu)
 
 # we define our custom variational loss layer here
@@ -96,7 +95,7 @@ class CustomVariationalLayer(Layer):
 		x = K.flatten(x)
 		x_decoded_mean_squash = K.flatten(x_decoded_mean_squash)
 		xent_loss = img_rows*img_cols * metrics.binary_crossentropy(x, x_decoded_mean_squash)
-		kl_loss = -0.5 * K.mean(1 + z_log_var - K.sqaure(z_mean) - K.exp(z_log_var), axis=-1)
+		kl_loss = -0.5 * K.mean(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
 		return K.mean(xent_loss + kl_loss)
 
 	def call(self, inputs):
@@ -118,7 +117,7 @@ xtrain = xtrain.reshape((xtrain.shape[0],) + original_img_size)
 xtest = xtest.astype('float32')/255.
 xtest = xtest.reshape((xtest.shape[0],)+original_img_size)
 
-print (" xtrain shape: " + str(xtrain.shape)
+print (" xtrain shape: " + str(xtrain.shape))
 
 vae.fit(xtrain, shuffle=True, epochs=epochs, batch_size=batch_size, validation_data=(xtest, None))
 
@@ -154,7 +153,7 @@ grid_y = norm.ppf(np.linspace(0.05, 0.95,n))
 
 #I'm not really sure what ay of this does. hopefully it helps a bit thoguh!?
 for i, yi in enumerate(grid_x):
-	for j xi in enumerate(grid_y):
+	for j, xi in enumerate(grid_y):
 		z_sample = np.array([[xi, yi]])
 		z_sample = np.tile(z_sample, batch_size).reshape(batch_size,2)
 		x_decoded = generator.predict(z_sample, batch_size=batch_size)
