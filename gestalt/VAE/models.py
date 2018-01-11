@@ -27,9 +27,9 @@ def reparametrised_sample(z_mean, z_log_var):
 def DCVAE(input_shape, weights_path): # Deep convolutoinal VAE
 	N, width, height,channels = input_shape
 
-	x = Input(shape=input_shape)
+	x_input = Input(shape=input_shape)
 	#convolutional encoder model
-	x = Conv2D(channels, kernel_size=(2,2), padding='same', activation=activation)(x)
+	x = Conv2D(channels, kernel_size=(2,2), padding='same', activation=activation)(x_input)
 	x = Conv2D(filters, kernel_size=(2,2),padding='same', activation=activation, strides=(2,2))(x)
 	x = Conv2D(filters, kernel_size=kernel, padding='same',activation=activation,strides=1)(x)
 	x = Conv2D(filters, kernel_size=kernel, padding='same', activation=activationstrides=1)(x)
@@ -67,12 +67,12 @@ def DCVAE(input_shape, weights_path): # Deep convolutoinal VAE
 	
 	y= CustomVariationalLayer()([x,y])
 
-	vae= Model(x,y)
+	vae= Model(x_input,y)
 	vae.compile(optimizer=optimizer, loss=None)
 	vae.summary()
 
 	#we build the encoder too
-	encoder = Model(x, z_mean)
+	encoder = Model(x_input, z_mean)
 
 	#and the generator
 	gen_input = Input(shape=(latent_dim,))
