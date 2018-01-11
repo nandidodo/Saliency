@@ -68,7 +68,7 @@ def DCVAE(input_shape, weights_path): # Deep convolutoinal VAE
 	y= CustomVariationalLayer()([x,y])
 
 	vae= Model(x_input,y)
-	vae.compile(optimizer=optimizer, loss=None)
+	#vae.compile(optimizer=optimizer, loss=None)
 	vae.summary()
 
 	#we build the encoder too
