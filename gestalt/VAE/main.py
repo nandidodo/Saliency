@@ -7,6 +7,8 @@ import numpy as np
 from utils import *
 from models import *
 
+BATCH_SIZE = 64
+
 def test_gestalt_half_split_images(fname, epochs=20, model=DCVAE,optimizer='sgd'):
 	imgs = load_array(fname)
 	imgs = imgs[:,:,:,0].astype('float32')/255.
@@ -17,10 +19,25 @@ def test_gestalt_half_split_images(fname, epochs=20, model=DCVAE,optimizer='sgd'
 	sliceleftval, slicerightval = split_dataset_center_slice(val, 20)
 	input_shape = slicelefttrain.shape[1:]
 
+	#we do the concatenatoins to produce the full thing
+	train1 = np.concatenate((slicelefttrain, slicerighttrain),axis=0)
+	train2 = np.concatenate((slicerighttrain, slicelefttrain),axis=0)
+	val1 = np.concatenate((sliceleftval, slicerightval), axis=0)
+	val2 = np.concatenate((slicerightval, sliceleftval),axis=0)
+	test1= np.concatenate((slicelefttest, slicerighttest), axis=0)
+	test2 = np.concatenate((slicerighttest,slicelefttest),axis=0)
+
+	callbacks = build_callbacks("results/")
+
 	vae, encoder,decoder = model(input_shape)
 	vae.compile(optimizer=optimizer,loss=None)
 	#we fit the vae
-	#TODO
+	his = vae.fit(train1, train2, epochs=epochs, batch_size = BATCH_SIZE, shuffle=True, validation_data = (val1, val2), callbacks = callbacks
+	history = serialize_class_object(his)
+
+	#now we try to get the predictions
+	full_predictions = vae.predict(test1, batch_size=BATCH_SIZE)
+	# and we can save them or view the mor wahtever. do that in a bit tomorrow perhaps. and hope to god it works
 	
 
 
