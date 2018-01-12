@@ -51,6 +51,8 @@ def test_gestalt_half_split_images(fname, epochs=20, model=DCVAE,optimizer='sgd'
 	full_predictions = vae.predict(test1, batch_size=BATCH_SIZE)
 	# and we can save them or view the mor wahtever. do that in a bit tomorrow perhaps. and hope to god it works
 	
+	#let's do some quick plotting or something here
+	
 
 
 	#encoder.compile(optimizer=optimizer, loss=None)
@@ -69,4 +71,4 @@ def test_gestalt_half_split_images(fname, epochs=20, model=DCVAE,optimizer='sgd'
 
 
 if __name__ == '__main__':
-	test_gestalt_half_split_images("testimages_combined", save_name="results/test_1")
+	test_gestalt_half_split_images("testimages_combined", epochs=1,save_name="results/test_1")

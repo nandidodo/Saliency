@@ -184,9 +184,10 @@ def DCVAE(input_shape, weights_path=None, verbose=False):
 	def flattened_binary_crossentropy_vae_loss(outputs, truth):
 		outputs = K.flatten(outputs)
 		truth = K.flatten(truth)
-		xent_loss = metrics.binary_crossentropy(outputs, truth)
+		xent_loss = width * height * metrics.binary_crossentropy(outputs, truth)
 		kl_loss = -0.5 * K.mean(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
 		return K.mean(xent_loss + kl_loss)
+	
 
 	#wow! this thing seems to work except our loss is increasing!!!
 	#but it gives us a reasonable number, which is kind of insane
