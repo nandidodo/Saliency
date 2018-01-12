@@ -6,8 +6,51 @@
 import numpy as np
 from utils import *
 from models import *
+from keras.datasets import mnist
 
 BATCH_SIZE = 64
+
+def sanity_check_mnist(epochs=20, model=DCVAE, optimizer='sgd'):
+	(xtrain, ytrain), (xtest, ytest) = mnist.load_data()
+	sh = xtrain.shape
+	xtrain = xtrain.astype('float32')/255.
+	xtrain = xtrain.reshape((xtrain.shape[0], sh[1], sh[2],1))
+	xtest = xtest.astype('float32')/255.
+	xtest = xtest.reshape((xtest.shape[0],sh[1],sh[2],1))
+	print (" xtrain shape: " + str(xtrain.shape))
+	print (" xtest shape: " + str(xtest.shape))
+
+	vae, encoder, decoder = model(xtrain.shape[1:])
+	vae.fit(xtrain,xtrain, shuffle=True, epochs=epochs, batch_size=64, validation_data = (xtest, xtest))
+
+		# so we want to display a 2d plot of the digit classes in the latent space
+	x_test_encoded = encoder.predict(xtest, batch_size=batch_size)
+	plt.figure(figsize=(6,6))
+	plt.scatter(x_test_encoded[:,0], x_test_encoded[:,1],c=ytest)
+	plt.colorbar()
+	plt.show()
+
+	# and now we want to display a 2d manifold of the digits
+	n = 15 # we have a figure with 15x15 digits
+	digit_size  = 28
+	figure = np.zeros((digit_size*n, digit_size*n))
+	#linearly spaced coordinates on the unit square are transformed through inverse CDF of gaussian
+	# to produce values o fthe latent variables z sinec prior of latent space is gaussian
+	grid_x = norm.ppf(np.linspace(0.05,0.95,n))
+	grid_y = norm.ppf(np.linspace(0.05, 0.95,n))
+
+	#I'm not really sure what ay of this does. hopefully it helps a bit thoguh!?
+	for i, yi in enumerate(grid_x):
+		for j, xi in enumerate(grid_y):
+			z_sample = np.array([[xi, yi]])
+			z_sample = np.tile(z_sample, batch_size).reshape(batch_size,2)
+			x_decoded = generator.predict(z_sample, batch_size=batch_size)
+			digit = x_decoded[0].reshape(digit_size, digit_size)
+			figure[i*digit_size: (i+1) * digit_size,
+					j*digit_size: (j+1)*digit_size] = digit
+	plt.figure(figsize=(10,10))
+	plt.imshow(figure, cmap='Greys_r')
+	plt.show()
 
 def test_gestalt_half_split_images(fname, epochs=20, model=DCVAE,optimizer='sgd', save_name=None):
 	imgs = load_array(fname)
@@ -71,4 +114,5 @@ def test_gestalt_half_split_images(fname, epochs=20, model=DCVAE,optimizer='sgd'
 
 
 if __name__ == '__main__':
-	test_gestalt_half_split_images("testimages_combined", epochs=1,save_name="results/test_1")
+	#test_gestalt_half_split_images("testimages_combined", epochs=1,save_name="results/	test_1")
+	sanity_check_mnist()

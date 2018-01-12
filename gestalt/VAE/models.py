@@ -20,10 +20,6 @@ activation ='relu'
 optimizer = 'sgd'
 
 
-#output shapes - this is going to be the tricky bit to get working
-intermediate_output_shape = (batch_size, 50, 10, filters)
-output_shape = (batch_size, 101, 21, filters)
-
 
 def reparametrised_sample(args):
 	z_mean, z_log_var = args
@@ -34,6 +30,10 @@ def reparametrised_sample(args):
 
 def DCVAE_Keras(input_shape, weights_path=None): # Deep convolutoinal VAE
 	width, height,channels = input_shape
+
+	#output shapes - this is going to be the tricky bit to get working
+	intermediate_output_shape = (batch_size, width/2., height/2., filters)
+	output_shape = (batch_size, width+1, height+1, filters)
 
 	x_input = Input(shape=input_shape)
 	#convolutional encoder model
@@ -103,6 +103,10 @@ def DCVAE_Keras(input_shape, weights_path=None): # Deep convolutoinal VAE
 
 def DCVAE(input_shape, weights_path=None, verbose=False):
 	width, height, channels = input_shape
+
+	#output shapes - this is going to be the tricky bit to get working
+	intermediate_output_shape = (batch_size, width/2, height/2, filters)
+	output_shape = (batch_size, width+1, height+1, filters)
 
 	x_input = Input(shape=input_shape)
 	if verbose:
