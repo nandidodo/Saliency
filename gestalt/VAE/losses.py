@@ -15,6 +15,14 @@ def vae_loss(y_true, y_pred):
 	kl= 0.5 * K.sum(K.exp(log_sigma) + K.square(mu) - 1. - log_sigma, axis=1)
 	return recon + kl
 
+def metrics_flat_binary_crossentropy_loss(x_mean_squash, y):
+	y = K.flatten(y)
+	xent_loss = metrics.binary_crossentropy(x_mean_squash, y)
+	#kl_loss = 
+	#how am I going to get this in a different file as I need these things and just don't have them - i.e. the differences betweeen the things and the standard normal...? dagnabbit!?
+	kl_loss = -0.5 * K.mean(1 + self.z_log_var - K.square(self.z_mean) - K.exp(self.z_log_var), axis=-1)
+	return K.mean(xent_loss + kl_loss)
+
 class CustomVariationalLayer(Layer):
 	def __init__(self,z_mean, z_log_var, **kwargs):
 		self.is_placeholder=True
