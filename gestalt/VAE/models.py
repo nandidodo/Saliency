@@ -87,7 +87,7 @@ def DCVAE(input_shape, weights_path=None): # Deep convolutoinal VAE
 	gen = decoder_reshape(gen)
 	gen = decoder_deconv1(gen)
 	gen = decoder_deconv2(gen)
-	gen = decoder_deconv3(gen)
+	gen = decoder_deconv3_upsamp(gen)
 	gen = decoder_mean_squash(gen)
 	generator = Model(gen_input, gen)
 
@@ -96,6 +96,6 @@ def DCVAE(input_shape, weights_path=None): # Deep convolutoinal VAE
 		vae.save(weight_path + ".hdf5")
 
 	#and return our three models easily from the function to get at them!
-	return vae, encoder, decoder
+	return vae, encoder, generator
 
 

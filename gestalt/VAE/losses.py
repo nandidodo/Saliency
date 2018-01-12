@@ -4,6 +4,8 @@
 import numpy as np
 import keras
 from keras import backend as K
+from keras.layers import Layer
+from keras import metrics
 
 
 
@@ -14,8 +16,10 @@ def vae_loss(y_true, y_pred):
 	return recon + kl
 
 class CustomVariationalLayer(Layer):
-	def __init__(self, **kwargs):
+	def __init__(self,z_mean, z_log_var, **kwargs):
 		self.is_placeholder=True
+		self.z_mean = z_mean
+		self.z_log_var = z_log_var
 		super(CustomVariationalLayer, self).__init__(**kwargs)
 
 	#not sure what that does or means.. argh?
@@ -23,8 +27,10 @@ class CustomVariationalLayer(Layer):
 	def vae_loss(self, x, x_decoded_mean_squash):
 		x = K.flatten(x)
 		x_decoded_mean_squash = K.flatten(x_decoded_mean_squash)
-		xent_loss = img_rows*img_cols * metrics.binary_crossentropy(x, x_decoded_mean_squash)
-		kl_loss = -0.5 * K.mean(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
+		#xent_loss = img_rows*img_cols * metrics.binary_crossentropy(x, x_decoded_mean_squash)
+		#let's try to do this without the multiplying by image size, and just use the bianry
+		xent_loss = metrics.binary_crossentropy(x, x_decoded_mean_squash)		
+		kl_loss = -0.5 * K.mean(1 + self.z_log_var - K.square(self.z_mean) - K.exp(self.z_log_var), axis=-1)
 		return K.mean(xent_loss + kl_loss)
 
 	def call(self, inputs):

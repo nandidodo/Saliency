@@ -44,7 +44,7 @@ def test_gestalt_half_split_images(fname, epochs=20, model=DCVAE,optimizer='sgd'
 	vae, encoder,decoder = model(input_shape)
 	vae.compile(optimizer=optimizer,loss=None)
 	#we fit the vae
-	his = vae.fit(train1, train2, epochs=epochs, batch_size = BATCH_SIZE, shuffle=True, validation_data = (val1, val2), callbacks = callbacks)
+	his = vae.fit(train1, epochs=epochs, batch_size = BATCH_SIZE, shuffle=True, validation_data = (val1, None), callbacks = callbacks)
 	history = serialize_class_object(his)
 
 	#now we try to get the predictions
