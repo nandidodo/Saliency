@@ -163,34 +163,34 @@ def plot_three_image_comparison(slices, predicted_slices,other_slices,N=20):
 	rightslice = np.reshape(other_slices,(shape[0], shape[1], shape[2]))
 	leftslice = np.reshape(slices, (shape[0], shape[1], shape[2]))
 	for i in xrange(N):
+		print "in three image cmoparison loop"
 		fig = plt.figure()
 
 		#originalcolour
 		ax1 = fig.add_subplot(131)
-		plt.imshow(leftslice[i])
+		plt.imshow(leftslice[i],cmap='gray')
 		plt.title('Input Slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		#red
 		ax2 = fig.add_subplot(132)
-		plt.imshow(preds[i])
+		plt.imshow(preds[i],cmap='gray')
 		plt.title('Predicted Other Slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		#green
 		ax3 = fig.add_subplot(133)
-		plt.imshow(rightslice[i])
+		plt.imshow(rightslice[i],cmap='gray')
 		plt.title('Actual Other Slice')
-
 		plt.xticks([])
 		plt.yticks([])
 
 		
 		plt.tight_layout()
 		plt.show(fig)
-		return fig
+		#return fig
 
 
 def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test", Model=SimpleConvDropoutBatchNorm, save_model=True, save_model_fname="gestalt/default_single_model", loss_func = 'mse',data_fname="testimages_combined"):
@@ -413,6 +413,9 @@ if __name__ =='__main__':
 	plt.imshow(imgs[0])
 	plt.show()
 	"""
+
+	#this also works too incredibly well, which I do not trust or understand what I'm doing wrong here. I'mvery sure the arrays are going in at the correct time and it's not just learning the images it's given, at least here it had no choice, it was predicting, and the graphing is in the right place too, I'm pretty sure so I literally do not understand how thi sworks! it's WAY WAY WAY WAY WAY too good at learning and understanding the images... dagnabbit!
+	"""
 	preds = load_array("gestalt/BenchmarkDataTestSetGestaltPrediction")
 	benchmark_imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
 	benchmark_imgs = benchmark_imgs.astype('float32')/255.
@@ -423,7 +426,10 @@ if __name__ =='__main__':
 	leftslice, rightslice = split_dataset_center_slice(benchmark_imgs, 20)
 	benchmark_test = np.concatenate((leftslice, rightslice), axis=0)
 	benchmark_test2 = np.concatenate((rightslice, leftslice), axis=0)
-	plot_three_image_comparison(benchmark_test, preds, benchmark_test2)
+	plot_three_image_comparison(benchmark_test, preds, benchmark_test2, N=100)
+	"""
+	preds1, preds2, history, half1test, half2test = load_array("gestalt/single_model_test")
+	plot_three_image_comparison(half1test, preds1, half2test)
 	
 
 # let's try different loss functions see if that helps - I think the kullback leibler wouldbe very interesting personally to see i fit works, so we'll try that out, as well as other attempts to see if it's cool to craft a dcent loss function
