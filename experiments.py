@@ -609,6 +609,11 @@ def multi_hyperparam_grid_search(param_names, param_lists, input_fname, save_bas
 
 #we need a way to get the error and accuracies or whatever, but we'll have to add that in a bit, so I don't know!
 
+def try_gestalt_model_spatial_frequency(fname, epochs=100):
+	imgs = load_array(fname)
+	imgs = imgs.astype('float32')/255.
+	
+
 
 def try_gestalt_model_for_normal(fname,epochs=100, both=True):
 	imgs = load_array(fname)
@@ -668,6 +673,9 @@ def plot_error_maps_saliences_from_preds(preds_fname, sal_fname, N = 20, save=Tr
 	print preds1.shape
 	print preds2.shape
 	assert sal_maps.shape == preds1.shape == preds2.shape, 'all potential images must be same shape!'
+
+	#it seemsthe trouble is that the network is actually getting way too good at predicting thecolour change differences, and so we don't really get a salience map at all, except one dominated by the artefacts at the edge of the image or wahtever, which is really unfortunate. Not really sure what to do about that to be honest. let's do a bit of latex cleaning up and see what we want to go with?
+ 	#and rewrite discussion/introduction and also write up the thing algorithm. we've somehow already wasted hours. not sure how, so let's try and get this sorted fairly rapidly
 
 	if save:
 		save_array(errmaps, save_name)

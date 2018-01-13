@@ -15,6 +15,8 @@
 
 # what are the steps we need to udnerstand for this to function correctly? Because we are far far behind literally everyone in the world and we need to be decent. We need to train this, to train the rejection sampler, and do some tests and experiments on the vaes. all of that is important. now let's run the autoencoder train
 
+# okay, we do need to think substantially about efficiency and testing and stuff that is really useful, and how to produce efficient code rather than most github commits as that stuff doesn't really matter although it feels good. what really matters in the long term for me is progress, and we need to figureo ut how to do it explicitly, so let's try!
+
 import keras
 import numpy as np
 from gestalt_models import *
@@ -151,6 +153,41 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 		plt.xticks([])
 		plt.yticks([])
 
+		plt.tight_layout()
+		plt.show(fig)
+		return fig
+
+def plot_three_image_comparison(slices, predicted_slices,other_slices,N=20):
+	shape = slices.shape
+	preds = np.reshape(predicted_slices, (shape[0], shape[1], shape[2]))
+	rightslice = np.reshape(other_slices,(shape[0], shape[1], shape[2]))
+	leftslice = np.reshape(slices, (shape[0], shape[1], shape[2]))
+	for i in xrange(N):
+		fig = plt.figure()
+
+		#originalcolour
+		ax1 = fig.add_subplot(131)
+		plt.imshow(leftslice[i])
+		plt.title('Input Slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		#red
+		ax2 = fig.add_subplot(132)
+		plt.imshow(preds[i])
+		plt.title('Predicted Other Slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		#green
+		ax3 = fig.add_subplot(133)
+		plt.imshow(rightslice[i])
+		plt.title('Actual Other Slice')
+
+		plt.xticks([])
+		plt.yticks([])
+
+		
 		plt.tight_layout()
 		plt.show(fig)
 		return fig
@@ -356,7 +393,7 @@ if __name__ =='__main__':
 	#test_cifar()
 	#test_gestalt(both=True, epochs=500, fname="BCE_gestalt_results",save_model_fname="gestalt/BCE_SimpleConvBatchNormModel", loss_func='binary_crossentropy')
 
-	test_gestalt_single_model(epochs=500)
+	#test_gestalt_single_model(epochs=500)
 	"""
 	imgs = load_array('testsaliences_combined')
 	imgs = imgs[:,:,:,0]
@@ -376,6 +413,17 @@ if __name__ =='__main__':
 	plt.imshow(imgs[0])
 	plt.show()
 	"""
+	preds = load_array("gestalt/BenchmarkDataTestSetGestaltPrediction")
+	benchmark_imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
+	benchmark_imgs = benchmark_imgs.astype('float32')/255.
+	benchmark_imgs = benchmark_imgs[:,:,:,0]
+	sh = benchmark_imgs.shape
+	print benchmark_imgs.shape
+	benchmark_imgs = np.reshape(benchmark_imgs, (sh[0], sh[1],sh[2],1))
+	leftslice, rightslice = split_dataset_center_slice(benchmark_imgs, 20)
+	benchmark_test = np.concatenate((leftslice, rightslice), axis=0)
+	benchmark_test2 = np.concatenate((rightslice, leftslice), axis=0)
+	plot_three_image_comparison(benchmark_test, preds, benchmark_test2)
 	
 
 # let's try different loss functions see if that helps - I think the kullback leibler wouldbe very interesting personally to see i fit works, so we'll try that out, as well as other attempts to see if it's cool to craft a dcent loss function
