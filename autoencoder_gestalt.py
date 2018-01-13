@@ -9,6 +9,12 @@
 
 # s yeah, I guess this isn't original at all but the point of the autoencoder is to find some function on the input which can be easily defined and larned in an unsupervised manner which requires using full informatino about the stucture of the iamge to represent, so things like denoising and so forth add useful little things there as do the cross prediction channel thing. it's basically the same as a denoising autoencoder but without any serious problems at all, and it's not that fun really, but could be seriosuly useful. the zhang paper is really cool and useful, and Ishould look up where they do that to see if I can get it to work atall, and it is interesting. let's see if it can kind of manage to learn gestalt kind of continuations as that should be really interesting from a psychological perspective which is really the point
 
+# first we've got to run the test gestalt single model experiment and find those resulst. that's important. We'll run them over night, then tomorrow the autoencoder vae on mnist to check it works, and then if it does, run that too and hope for the best there, see if we get anything. also focus on GANs. That info MCMC thing looks vital! also info VAE study that.
+
+# yeah, we need tocheck results of this, see if it works better. and then run the autoencoder on mnist, and then what? I really don't nkow how it works. I put too much code up online, and everything is just going wrong today and I'm donig everything wrong and I hate it and ugh.
+
+# what are the steps we need to udnerstand for this to function correctly? Because we are far far behind literally everyone in the world and we need to be decent. We need to train this, to train the rejection sampler, and do some tests and experiments on the vaes. all of that is important. now let's run the autoencoder train
+
 import keras
 import numpy as np
 from gestalt_models import *
@@ -180,11 +186,13 @@ def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test", Mod
 	callbacks = build_callbacks("gestalt/")
 	his = model.fit(half1train, half2train, epochs=epochs, batch_size=128, shuffle=True, validation_data=(half1val, half2val), callbacks=callbacks)
 	history = serialize_class_object(his)
+	print model
+	print type(model)
 	preds1 = model.predict(half1test)
-	preds2 = mode.predict(half2test)
+	preds2 = model.predict(half2test)
 
 	if save_model:
-		mode.save(save_model_fname)
+		model.save(save_model_fname)
 
 	res=[preds1, preds2, history, half1test, half2test]
 	save_array(res, fname)
@@ -193,12 +201,13 @@ def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test", Mod
 
 	benchmark_imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
 	benchmark_imgs = benchmark_imgs.astype('float32')/255.
-	imgs = imgs[:,:,:,0]
+	benchmark_imgs = benchmark_imgs[:,:,:,0]
 	sh = benchmark_imgs.shape
+	print benchmark_imgs.shape
 	benchmark_imgs = np.reshape(benchmark_imgs, (sh[0], sh[1],sh[2],1))
 	leftslice, rightslice = split_dataset_center_slice(benchmark_imgs, 20)
 	benchmark_test = np.concatenate((leftslice, rightslice), axis=0)
-	benchmark_preds = model.predict(benchmark_imgs)
+	benchmark_preds = model.predict(benchmark_test)
 	save_array(benchmark_preds, "gestalt/Benchmark_single_model_test_set_prediction")
 	
 	return [model, preds1, preds2, history, benchmark_preds]
@@ -347,7 +356,7 @@ if __name__ =='__main__':
 	#test_cifar()
 	#test_gestalt(both=True, epochs=500, fname="BCE_gestalt_results",save_model_fname="gestalt/BCE_SimpleConvBatchNormModel", loss_func='binary_crossentropy')
 
-	test_gestalt_single_model()
+	test_gestalt_single_model(epochs=500)
 	"""
 	imgs = load_array('testsaliences_combined')
 	imgs = imgs[:,:,:,0]
