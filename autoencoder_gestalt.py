@@ -193,16 +193,16 @@ def plot_three_image_comparison(slices, predicted_slices,other_slices,N=20):
 		#return fig
 
 
-def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test", Model=SimpleConvDropoutBatchNorm, save_model=True, save_model_fname="gestalt/default_single_model", loss_func = 'mse',data_fname="testimages_combined"):
+def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test_32px", Model=SimpleSequentialModel, save_model=True, save_model_fname="gestalt/default_single_model_32px", loss_func = 'mse',data_fname="testimages_combined"):
 	print "IN FUCNTION"
 	imgs = load_array(data_fname)
 	imgs = imgs[:,:,:,0].astype('float32')/255.
 	shape = imgs.shape
 	imgs = np.reshape(imgs, (shape[0],shape[1],shape[2],1))
 	train, val,test = split_first_test_val_train(imgs)
-	slicelefttrain, slicerighttrain = split_dataset_center_slice(train, 20)
-	slicelefttest, slicerighttest = split_dataset_center_slice(test, 20)
-	sliceleftval, slicerightval = split_dataset_center_slice(val, 20)
+	slicelefttrain, slicerighttrain = split_dataset_center_slice(train, 32)
+	slicelefttest, slicerighttest = split_dataset_center_slice(test, 32)
+	sliceleftval, slicerightval = split_dataset_center_slice(val, 32)
 
 	#now we concat these things together
 	print slicelefttrain.shape
@@ -221,7 +221,7 @@ def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test", Mod
 	model = Model((shape[1], shape[2], shape[3])) # is this a cause of bugs here... there shuoldn't be a shape[3], right
 	model.compile(optimizer='sgd', loss=loss_func)
 	callbacks = build_callbacks("gestalt/")
-	his = model.fit(half1train, half2train, epochs=epochs, batch_size=128, shuffle=True, validation_data=(half1val, half2val), callbacks=callbacks)
+	his = model.fit(x=half1train, y=half2train, epochs=epochs, batch_size=128, shuffle=True, validation_data=(half1val, half2val), callbacks=callbacks)
 	history = serialize_class_object(his)
 	print model
 	print type(model)
@@ -242,10 +242,10 @@ def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test", Mod
 	sh = benchmark_imgs.shape
 	print benchmark_imgs.shape
 	benchmark_imgs = np.reshape(benchmark_imgs, (sh[0], sh[1],sh[2],1))
-	leftslice, rightslice = split_dataset_center_slice(benchmark_imgs, 20)
+	leftslice, rightslice = split_dataset_center_slice(benchmark_imgs, 32)
 	benchmark_test = np.concatenate((leftslice, rightslice), axis=0)
 	benchmark_preds = model.predict(benchmark_test)
-	save_array(benchmark_preds, "gestalt/Benchmark_single_model_test_set_prediction")
+	save_array(benchmark_preds, "gestalt/Benchmark_single_model_test_set_prediction_32px")
 	
 	return [model, preds1, preds2, history, benchmark_preds]
 
@@ -393,7 +393,7 @@ if __name__ =='__main__':
 	#test_cifar()
 	#test_gestalt(both=True, epochs=500, fname="BCE_gestalt_results",save_model_fname="gestalt/BCE_SimpleConvBatchNormModel", loss_func='binary_crossentropy')
 
-	#test_gestalt_single_model(epochs=500)
+	test_gestalt_single_model(epochs=500)
 	"""
 	imgs = load_array('testsaliences_combined')
 	imgs = imgs[:,:,:,0]
@@ -428,8 +428,9 @@ if __name__ =='__main__':
 	benchmark_test2 = np.concatenate((rightslice, leftslice), axis=0)
 	plot_three_image_comparison(benchmark_test, preds, benchmark_test2, N=100)
 	"""
-	preds1, preds2, history, half1test, half2test = load_array("gestalt/single_model_test")
-	plot_three_image_comparison(half1test, preds1, half2test)
+	#preds1, preds2, history, half1test, half2test = load_array("gestalt/single_model_test")
+	#plot_three_image_comparison(half1test, preds2, half2test)
+	# okay, so this isrealy strange here!? this time it fails completely the wrong way around # but on the supposed test set it doesn't? I'm so confused. On this test set it just learns the image it's given, which also makes no sense to be perfectly honest, but on the benchmark image set it somehow doesn't do that. I'm just so utterly and totally confused here, and undoubtedly the dissapointing one is that it learns the iamge it's given, but that's still really strange to be honest in this test set, maybe it'sj ust traing in a really rubbish way?
 	
 
 # let's try different loss functions see if that helps - I think the kullback leibler wouldbe very interesting personally to see i fit works, so we'll try that out, as well as other attempts to see if it's cool to craft a dcent loss function
