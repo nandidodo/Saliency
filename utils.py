@@ -1,5 +1,6 @@
 # okay, this is just for generic utils. such as saving functionality
 
+#from __future__ import division
 import numpy as np
 import scipy
 import matplotlib.pyplot as plt
@@ -57,6 +58,33 @@ def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0
 	reduceLR = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience= patience, verbose=1, mode='auto', min_lr = 1e-8)
 
 	return [checkpointer, early_stopper, epoch_logger, tensorboard, terminator, reduceLR]
+
+
+def calculate_variance_of_errmap(errmaps):
+	#so, I'm a bit confused here; should we calculate the variance of the error map or of the actual image for the predictive processing thing. I think we could just do both to be honest? but it would be kind of funny. I honestly do not know? I think the variance of te predictoin error would make the most sense. See if it makesthe images any more useful. if it does it would be hilarious to be honest?
+	shape = errmaps.shape
+	assert len(shape)==3, 'error map must be two dimensinoal (+ number of error maps)'
+	variance_map = np.zeros((shape[1], shape[2]))
+	for i in xrange(shape[1]):
+		for j in xrange(shape[2]):
+			var_list = errmaps[:,i,j]
+			var_list = np.array(var_list)
+			var = np.var(var_list)
+			variance_map[i][j] = var
+	return variance_map
+	#hopefully this will work
+
+def apply_var_map_to_sal_map(salmap, varmap):
+	#this just does the division. See if it gives any better results
+	#this is aactually more in line with the predictive processing framework, so that's good!
+	shape = salmap.shape
+	assert len(shape)==2, 'salience map must be two dimensional'
+	assert shape == varmap.shape,'maps must both be the same shape'
+	normed_salmap = np.zeros(shape)
+	for i in xrange(shape[0]):
+		for j in xrange(shape[1]):
+			normed_salmap[i][j] = float(salmap[i][j])/float(varmap[i][j])
+	return normed_salmap
 
 def show_colour_splits(img, show_original = True):
 	#assumes img is 4d so we can split along the colour	
