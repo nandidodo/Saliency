@@ -86,6 +86,29 @@ def apply_var_map_to_sal_map(salmap, varmap):
 			normed_salmap[i][j] = float(salmap[i][j])/float(varmap[i][j])
 	return normed_salmap
 
+def norm_error_map(errmap):
+	shape = errmap.shape
+	assert len(shape) == 2 or len(shape)==3, 'must be 2d with a possible number of 2d errmaps'
+	if len(shape) == 2:
+		total = sum(errmap)
+		normed_map = np.zeros(shape)
+		for i in xrange(shape[0]):
+			for j in xrange(shape[1]):
+				normed_map[i][j] = float(errmap[i][j])/float(total)
+		return normed_map
+	if len(shape) ==3:
+		normed_maps = []
+		for i in xrange(len(errmap)):
+			emap = errmap[i]
+			total = sum(emap)
+			normed_map = np.zeros((shape[1], shape[2]))
+			for j in xrange(shape[1]):
+				for k in xrange(shape[2]):
+					normed_map[j][k] = float(emap[j][k])/float(total)
+			normed_maps.append(normed_map)
+		normed_maps = np.array(normed_maps)
+		return normed_maps
+
 def show_colour_splits(img, show_original = True):
 	#assumes img is 4d so we can split along the colour	
 	if show_original:
