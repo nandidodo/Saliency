@@ -457,21 +457,21 @@ def load_and_show_colour_split_images(fname, img_from_file=True):
 
 	#red
 	ax2 = fig.add_subplot(222)
-	plt.imshow(red)
+	plt.imshow(red,cmap='Reds')
 	plt.title('Red Channel')
 	plt.xticks([])
 	plt.yticks([])
 
 	#green
 	ax3 = fig.add_subplot(223)
-	plt.imshow(green)
+	plt.imshow(green,cmap='Greens')
 	plt.title('Green Channel')
 	plt.xticks([])
 	plt.yticks([])
 
 	##blue
 	ax4 = fig.add_subplot(224)
-	plt.imshow(blue)
+	plt.imshow(blue,cmap='Blues')
 	plt.title('Blue Channel')
 	plt.xticks([])
 	plt.yticks([])
@@ -562,6 +562,10 @@ def load_imgs(fname):
 		plt.show()
 
 
+def check_error_maps_gestalt_standard_model():
+	arr = load_array("gestalt/STANDARD_WITH_GESTALT_ERROR_MAPS")
+
+
 
 
 
@@ -594,7 +598,7 @@ if __name__ =='__main__':
 
 	#load_show_colour_split_images()
 	#show_colour_split_images()
-	#load_and_show_colour_split_images("BenchmarkIMAGES/i5.jpg")
+	load_and_show_colour_split_images("datasets/Benchmark/BenchmarkIMAGES/i5.jpg")
 
 	#oay, let's try to recreate everything here, and with a better cropping and see if it helps?
 	#h1 = load_array('hyperparam_test_imgs_preds_errmaps')
@@ -616,8 +620,8 @@ if __name__ =='__main__':
 	#print len(hlrates)
 	#print type(hlrates[0])
 	#print len(hlrates[0])
-	lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
-	res_dict = process_hyperparams_error("hyperparam_test_lrates", "just_test_saliences", lrates, "lrate", save_name = "lrates_hyperparam_results_dict")
+	#lrates=(0.001, 0.002,0.01,0.1,0.0001,0.005,0.05)
+	#res_dict = process_hyperparams_error("hyperparam_test_lrates", "just_test_saliences", lrates, "lrate", save_name = "lrates_hyperparam_results_dict")
 	#print_res_dict(res_dict)
 	#print " "
 	#name, loss = get_min_loss(res_dict)
