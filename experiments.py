@@ -750,7 +750,33 @@ if __name__ == '__main__':
 	#okay, here's me trying my probably better and more successful gestalt models
 	#for the standard autoencoding task
 	#try_gestalt_model_for_normal("testsaliences_combined", epochs=500, both=True)
-	plot_error_maps_saliences_from_preds("gestalt/STANDARD_WITH_GESTALT_AUTOENCODER_MODEL", "testsaliences_combined")
+	#plot_error_maps_saliences_from_preds("gestalt/STANDARD_WITH_GESTALT_AUTOENCODER_MODEL", "testsaliences_combined")
+	fname= "all_errmaps_all_colour_combinations_imgs_preds_errmaps"
+	salname = "testsaliences_combined"
+	arr = load_array(fname)
+	print type(arr)
+	print len(arr)
+	#plot_error_maps_saliences_from_preds(fname, "testsaliences_combined")
+	errmaps = arr[2]
+	print errmaps.shape
+	saliences = load_array(salname)
+	sals = saliences[:,:,:,0]
+	varmap = calculate_variance_of_errmap(errmaps)
+	#errmaps = apply_var_map_to_sal_map(varmap, errmaps)
+	print varmap.shape
+	print errmaps.shape
+	print varmap
+	print np.amax(varmap)
+	print np.amin(varmap)
+	print np.var(varmap) # this is getting meta lol!
+	
+	for i in xrange(80):
+		errmap = apply_var_map_to_sal_map(varmap,errmaps[80+i])
+		print errmap
+		plt.imshow(norm_error_map(errmap), cmap='gray')
+		plt.show()
+	
+	
 	
 		
 

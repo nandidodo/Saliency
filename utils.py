@@ -90,17 +90,19 @@ def norm_error_map(errmap):
 	shape = errmap.shape
 	assert len(shape) == 2 or len(shape)==3, 'must be 2d with a possible number of 2d errmaps'
 	if len(shape) == 2:
-		total = sum(errmap)
+		total = np.sum(errmap)
+		print total
 		normed_map = np.zeros(shape)
 		for i in xrange(shape[0]):
 			for j in xrange(shape[1]):
+				print errmap[i][j]
 				normed_map[i][j] = float(errmap[i][j])/float(total)
 		return normed_map
 	if len(shape) ==3:
 		normed_maps = []
 		for i in xrange(len(errmap)):
 			emap = errmap[i]
-			total = sum(emap)
+			total = np.sum(emap)
 			normed_map = np.zeros((shape[1], shape[2]))
 			for j in xrange(shape[1]):
 				for k in xrange(shape[2]):
