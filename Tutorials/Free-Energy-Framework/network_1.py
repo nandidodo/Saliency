@@ -24,7 +24,7 @@ sigma_p = 1
 #what order do we evaluate nodes in... who even knows to be honest?
 # I think we should do prediction errors first, but I really don't know
 # do we fix u to a single value? let's define sigma u and p here as simple values
-num_runs = 500
+num_runs = 100
 lr = 0.1
 
 # and our values so we can plot them
@@ -68,3 +68,9 @@ for i in xrange(num_runs):
 # I have no ide what I'm doing wrong, so argh! this is converging but to a completely wrong value, and  I don't understand why!
 # I mean maybe it is reasonable in some sense? I really have no idea? I mean the idea is that the u is the v squared so it should be between sqrt of two right?
 # oh wow! it is actually right! that's awesome!!! we implemented it right!
+
+fig = plt.figure()
+plt.plot(phis)
+plt.plot(eps)
+plt.plot(eus)
+plt.show(fig)
