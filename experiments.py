@@ -19,6 +19,7 @@ from utils import *
 from autoencoder import *
 from gestalt_models import *
 from autoencoder_gestalt import *
+import scipy
 
 
 seed = 8
@@ -754,27 +755,66 @@ if __name__ == '__main__':
 	fname= "all_errmaps_all_colour_combinations_imgs_preds_errmaps"
 	salname = "testsaliences_combined"
 	arr = load_array(fname)
-	print type(arr)
-	print len(arr)
+	#print type(arr)
+	#print len(arr)
 	#plot_error_maps_saliences_from_preds(fname, "testsaliences_combined")
 	errmaps = arr[2]
-	print errmaps.shape
+	imgs = arr[0]
+	#print errmaps.shape
 	saliences = load_array(salname)
 	sals = saliences[:,:,:,0]
-	varmap = calculate_variance_of_errmap(errmaps)
-	#errmaps = apply_var_map_to_sal_map(varmap, errmaps)
-	print varmap.shape
-	print errmaps.shape
-	print varmap
-	print np.amax(varmap)
-	print np.amin(varmap)
-	print np.var(varmap) # this is getting meta lol!
+	#varmap = calculate_variance_of_errmap(errmaps)
+	#print sals.shape
+	#print "SALS"
+	##errmaps = apply_var_map_to_sal_map(varmap, errmaps)
+	#print varmap.shape
+	#print errmaps.shape
+	#print varmap
+	#print np.amax(varmap)
+	#print np.amin(varmap)
+	#print np.var(varmap) # this is getting meta lol!
+	#img = imgs[120]
+	#img = img[:,15:85]
+	#sh = img.shape
+	#print sh
+	#img = np.reshape(img, (sh[0],sh[1]))
+	#img = imresize(img, (200,200))
+	#print img.shape
+	#plt.imshow(img)
+	#plt.show()
+	
 	
 	for i in xrange(80):
-		errmap = apply_var_map_to_sal_map(varmap,errmaps[80+i])
-		print errmap
-		plt.imshow(norm_error_map(errmap), cmap='gray')
-		plt.show()
+		
+		#errmap = apply_var_map_to_sal_map(varmap,errmaps[80+i])
+		#print errmap
+		#plt.imshow(errmaps[120 + i], cmap='gray')
+		#plt.show()
+		#sort out image cropping!!! now! this should only take like half an hour!
+	#write in PUMA model!?
+	#focus on abstract and conclusion as that's where triage happens!
+		img = imgs[120+i]
+		img = np.reshape(img, (100,100))
+		img = img[:,15:85]
+		#sh = img.shape
+		#img = np.reshape(img, (sh[0],sh[1])
+		img = imresize(img, (200,200))
+		print img.shape
+		#plt.show(img
+		errmap = gaussian_filter(errmaps[120+i])
+		print errmap.shape
+		errmap = np.reshape(errmap, (100,100))
+		errmap= errmap[:, 15:85]
+		errmap = imresize(errmap, (200,200))
+		sal = sals[1830 + i]
+		sal = np.reshape(sal, (100,100))
+		sal = sal[:,15:85]
+		sal = imresize(sal, (200,200))
+		images = (img, errmap, sal)
+		titles=('Original Image', 'Error map','Real-Salience')
+		print i
+		compare_images(images,titles)
+	
 	
 	
 	
@@ -785,7 +825,7 @@ if __name__ == '__main__':
 
 
 
-
+#ideas: predictive processing neglect- very low precision means that side completely fades from view? except subconsciously???
 
 
 
