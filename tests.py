@@ -480,8 +480,12 @@ def load_and_show_colour_split_images(fname, img_from_file=True):
 	plt.show(fig)
 	
 
-def show_all_error_maps_with_original_imgs_3(fname="testimages_combined_imgs_preds_errmaps",sal_fname="testsaliences_combined",img_nums=(150,152,153)):
+def show_all_error_maps_with_original_imgs_3(fname="testimages_combined_imgs_preds_errmaps",sal_fname="testsaliences_combined",img_nums=(151,130,123)):
 
+	#MAYBE 144, 152,130,131, 139,138,137
+	#second round: 130 138 131
+	#130 
+	#151, 123
 	arr = load_array(fname)
 	imgs, preds, errmaps = arr
 	new_size=200
