@@ -480,6 +480,107 @@ def load_and_show_colour_split_images(fname, img_from_file=True):
 	plt.show(fig)
 	
 
+def show_all_error_maps_with_original_imgs_3(fname="testimages_combined_imgs_preds_errmaps",sal_fname="testsaliences_combined",img_nums=(150,152,153)):
+
+	arr = load_array(fname)
+	imgs, preds, errmaps = arr
+	new_size=200
+	sh = imgs.shape
+	imgs = np.reshape(imgs, (sh[0], sh[1],sh[2]))
+	imgs = imgs[:,:,15:85]
+	img1 = imgs[img_nums[0]]
+	img1 = imresize(img1, new_size)
+	img2 = imgs[img_nums[1]]
+	img2 = imresize(img2, new_size)
+	img3 = imgs[img_nums[2]]
+	img3 = imresize(img3, new_size)
+
+	errmaps = np.reshape(errmaps, (sh[0], sh[1],sh[2]))
+	errmaps = errmaps[:,:,15:85]
+	errmap1 = errmaps[img_nums[0]]
+	errmap1 = imresize(errmap1, new_size)
+	errmap2 = errmaps[img_nums[1]]
+	errmap2 = imresize(errmap2, new_size)
+	errmap3 = errmaps[img_nums[2]]
+	errmap3 = imresize(errmap3, new_size)
+
+	sals = load_array(sal_fname)
+	sals = sals[1710:1900,:,:,0]
+	print sals.shape
+	sals = np.reshape(sals, (sh[0],sh[1], sh[2]))
+	sals = sals[:,:,15:85]
+	sal1 = sals[img_nums[0]]
+	sal1 = imresize(sal1, new_size)
+	sal2 = sals[img_nums[1]]
+	sal2 = imresize(sal2, new_size)
+	sal3 = sals[img_nums[2]]
+	sal3 = imresize(sal3, new_size)
+
+	
+	#let the plotting commence!
+	fig = plt.figure()
+	
+	ax1 = fig.add_subplot(331)
+	plt.imshow(img1, cmap='gray')
+	plt.title('Original Image')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax2 = fig.add_subplot(332)
+	plt.imshow(gaussian_filter(errmap1), cmap='gray')
+	plt.title('Predicted Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax3 = fig.add_subplot(333)
+	plt.imshow(sal1,cmap='gray')
+	plt.title('Actual Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax4 = fig.add_subplot(334)
+	plt.imshow(img2, cmap='gray')
+	plt.title('Original Image')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax5 = fig.add_subplot(335)
+	plt.imshow(gaussian_filter(errmap2), cmap='gray')
+	plt.title('Predicted Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax6 = fig.add_subplot(336)
+	plt.imshow(sal2,cmap='gray')
+	plt.title('Actual Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax7 = fig.add_subplot(337)
+	plt.imshow(img3, cmap='gray')
+	plt.title('Original Image')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax8 = fig.add_subplot(338)
+	plt.imshow(gaussian_filter(errmap3), cmap='gray')
+	plt.title('Predicted Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax9 = fig.add_subplot(339)
+	plt.imshow(sal3,cmap='gray')
+	plt.title('Actual Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+	
+	plt.tight_layout()
+	plt.show(fig)
+	
+	
+	
+	
+
 	
 
 def show_all_error_maps_with_original_imgs(fname="testimages_combined_imgs_preds_errmaps", sal_fname="testsaliences_combined",img_nums=(180,181,182)):
@@ -501,6 +602,10 @@ def show_all_error_maps_with_original_imgs(fname="testimages_combined_imgs_preds
 	#plt.show()
 	num = 151
 	num2 = 152
+
+	img1 = imgs[num]
+
+	#let's define these nums exactly and resize them and prettify them!
 	
 	#now we plot to test if it works
 	fig = plt.figure()
@@ -598,7 +703,7 @@ if __name__ =='__main__':
 
 	#load_show_colour_split_images()
 	#show_colour_split_images()
-	load_and_show_colour_split_images("datasets/Benchmark/BenchmarkIMAGES/i5.jpg")
+	#load_and_show_colour_split_images("datasets/Benchmark/BenchmarkIMAGES/i5.jpg")
 
 	#oay, let's try to recreate everything here, and with a better cropping and see if it helps?
 	#h1 = load_array('hyperparam_test_imgs_preds_errmaps')
@@ -651,6 +756,8 @@ if __name__ =='__main__':
 	#sals = np.reshape(sals, (shape[0], shape[1], shape[2]))
 	##print sals.shape
 	#save_array(sals, "just_test_saliences")
+
+	show_all_error_maps_with_original_imgs_3()
 	
 
 
