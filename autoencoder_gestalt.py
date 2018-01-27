@@ -24,6 +24,7 @@ from utils import *
 from experiments import *
 from gestalt import *
 import matplotlib.pyplot as plt
+from keras.models import load_model
 
 
 def split_first_test_train(data, frac_train = 0.9):
@@ -393,7 +394,7 @@ if __name__ =='__main__':
 	#test_cifar()
 	#test_gestalt(both=True, epochs=500, fname="BCE_gestalt_results",save_model_fname="gestalt/BCE_SimpleConvBatchNormModel", loss_func='binary_crossentropy')
 
-	test_gestalt_single_model(epochs=500)
+	#test_gestalt_single_model(epochs=500)
 	"""
 	imgs = load_array('testsaliences_combined')
 	imgs = imgs[:,:,:,0]
@@ -414,7 +415,6 @@ if __name__ =='__main__':
 	plt.show()
 	"""
 
-	#this also works too incredibly well, which I do not trust or understand what I'm doing wrong here. I'mvery sure the arrays are going in at the correct time and it's not just learning the images it's given, at least here it had no choice, it was predicting, and the graphing is in the right place too, I'm pretty sure so I literally do not understand how thi sworks! it's WAY WAY WAY WAY WAY too good at learning and understanding the images... dagnabbit!
 	"""
 	preds = load_array("gestalt/BenchmarkDataTestSetGestaltPrediction")
 	benchmark_imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
@@ -428,8 +428,65 @@ if __name__ =='__main__':
 	benchmark_test2 = np.concatenate((rightslice, leftslice), axis=0)
 	plot_three_image_comparison(benchmark_test, preds, benchmark_test2, N=100)
 	"""
+	
+	#let's try loading the model
+	model = load_model("gestalt/default_single_model_32px")
+	benchmark_imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
+	benchmark_imgs = benchmark_imgs.astype('float32')/255.
+	benchmark_imgs = benchmark_imgs[:,:,:,0]
+	sh = benchmark_imgs.shape
+	benchmark_imgs = np.reshape(benchmark_imgs, (sh[0], sh[1],sh[2],1))
+	leftslice, rightslice = split_dataset_center_slice(benchmark_imgs, 32)
+	benchmark_test = np.concatenate((leftslice, rightslice), axis=0)
+	sh = benchmark_test.shape
+	for i in xrange(20):
+		img = np.reshape(benchmark_test[i], (1, sh[1],sh[2],1))
+		pred = model.predict(img)
+		display_img = np.reshape(img, (sh[1],sh[2]))
+		pred = np.reshape(pred, (sh[1],sh[2]))
+		compare_two_images(pred, display_img)
 	#preds1, preds2, history, half1test, half2test = load_array("gestalt/single_model_test")
 	#plot_three_image_comparison(half1test, preds2, half2test)
+	# okay, yeah, so as I suspect all it tries to do is just straight up predict the image it's given
+	#as it can't realistically display the thing. and with the 32 it's not necessarily any better tbh - 
+	# so yeah, this straight up doesn't work? because it just learns to predict it's own image
+	# I'm kind of confused about what it's learning to do as it never learns totaly successfully
+	#and usually the learning just straight up doesn't work. Let's try it with the vae's instead, as could be interesting! let's try to figure out the vae and get that working?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	#this also works too incredibly well, which I do not trust or understand what I'm doing wrong here. I'mvery sure the arrays are going in at the correct time and it's not just learning the images it's given, at least here it had no choice, it was predicting, and the graphing is in the right place too, I'm pretty sure so I literally do not understand how thi sworks! it's WAY WAY WAY WAY WAY too good at learning and understanding the images... dagnabbit!
+
+
 	# okay, so this isrealy strange here!? this time it fails completely the wrong way around # but on the supposed test set it doesn't? I'm so confused. On this test set it just learns the image it's given, which also makes no sense to be perfectly honest, but on the benchmark image set it somehow doesn't do that. I'm just so utterly and totally confused here, and undoubtedly the dissapointing one is that it learns the iamge it's given, but that's still really strange to be honest in this test set, maybe it'sj ust traing in a really rubbish way?
 	
 
