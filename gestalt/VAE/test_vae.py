@@ -279,8 +279,17 @@ def predict_display(N, testslices, actuals):
 		#print(z)
 	#let's just do this with completely standard multivariate normal. see if there's decent results
 		z = np.random.multivariate_normal([0,0],[[1,0],[0,1]])
+		z = np.reshape(z, (1,2))
 		pred = generator.predict(z,batch_size=1)
-		plot_three_image_comparison(testslices[i], pred, actuals[i])
+		sh = pred.shape
+		pred = np.reshape(pred, (sh[1],sh[2]))
+		print("PRED")
+		print(pred.shape)
+		print("testslice")
+		print(testslices[i].shape)
+		print("actual")
+		print(actuals[i].shape)
+		plot_three_image_comparison(testslices[i], pred, actuals[i], reshape=False)
 
 
 predict_display(20, lefttest, x_test)
