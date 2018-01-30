@@ -44,7 +44,6 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	rows, cols, channels = input_shape
 
 
-
 	x = Input(shape=input_shape)
 	conv_1 = Conv2D(img_chns,
 		            kernel_size=(2, 2),
@@ -121,6 +120,8 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	x_decoded_relu = decoder_deconv_3_upsamp(deconv_2_decoded)
 	x_decoded_mean_squash = decoder_mean_squash(x_decoded_relu)
 
+	#y = Input(shape=input_shape)
+
 	# instantiate VAE model
 	vae = Model(x, x_decoded_mean_squash)
 
@@ -134,10 +135,10 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	# okay, so loss is decreasing. it's just enormous at the moment, and I don't know why!
 	 # it seems very unstable and we almost certainly don't have enough image data to learn this properly... ah! I could obtain more first probably - via imagenet or something?
 	#the loss is decreasing though. Who will know what will happen in the end?
-	xent_loss = reconstruction_loss(rows, cols, x, x_decoded_mean_squash)
+	#xent_loss = reconstruction_loss(rows, cols, x, x_decoded_mean_squash)
 	kl = kl_loss(z_mean, z_log_var)
-	vae_loss = K.mean(xent_loss + kl)
-	vae.add_loss(vae_loss)
+	#vae_loss = K.mean(xent_loss + kl)
+	vae.add_loss(kl)
 
 	# build a model to project inputs on the latent space
 	encoder = Model(x, z_mean)
@@ -159,13 +160,18 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	#okay, so at the moment the loss is utterly enormous. It's probably a problem with the loss function? but I'm not totally sure?
 
 #split out the losses into functions. This seems to have worked so far!
-def reconstruction_loss(rows, cols, x, x_decoded):
-	return rows * cols * metrics.binary_crossentropy(K.flatten(x), K.flatten(x_decoded))
+def reconstruction_loss(rows, cols, y, x_decoded):
+	return rows * cols * metrics.binary_crossentropy(K.flatten(y), K.flatten(x_decoded))
+
+def unnormalised_reconstruction_loss(x_decoded, y):
+	return metrics.binary_crossentropy(K.flatten(x_decoded), K.flatten(y))
 
 def kl_loss(z_mean, z_log_var):
 	return -0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
 
 
+# oh wow!!! this might be working!!!!! I guess only time will tell here?!!?!?!??!
+# we have a reasonable lack of loss, which is good. but oh wow. If this works it could unlock the whole gestalt thing properly, which would be fantastic!
 
 # train the VAE on MNIST digits
 # so, let's try it on other images. for instance the benchmark image set, and so generalise it to take in any image size. If it still works then, then I'm doing well!
@@ -183,8 +189,8 @@ x_train = x_train.reshape((x_train.shape[0],) + original_img_size)
 x_test = x_test.astype('float32') / 255.
 x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
 
-lefttrain, righttrain = split_dataset_center_slice(x_train, 14)
-lefttest, righttest = split_dataset_center_slice(x_test, 14)
+lefttrain, righttrain = split_dataset_center_slice(x_train, 12)
+lefttest, righttest = split_dataset_center_slice(x_test, 12)
 print(lefttrain.shape)
 #plot_three_image_comparison(lefttrain, righttrain, x_train)
 
@@ -203,11 +209,16 @@ plt.show()
 #print(imgs.shape)
 #x_train, x_test = split_first_test_train(imgs)
 print('x_train.shape:', x_train.shape)
-shape = x_train.shape[1:]
+#shape = x_train.shape[1:]
+shape=lefttrain.shape[1:]
 
 vae, encoder, generator = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
-vae.compile(optimizer='rmsprop',loss=None)
+vae.compile(optimizer='rmsprop',loss=unnormalised_reconstruction_loss)
 vae.summary()
+
+# another thing we could work on is active inference in the standard sense in rl environments. first we need to get a working framework to work in though, so that's really the challenge of this week
+
+# I think I know why the other gestalt network was not working... we didn't actually have it learning the ys, so they did nothing. That was useful
 
 
 #vae.fit(x_train,
@@ -216,9 +227,15 @@ vae.summary()
     #    batch_size=batch_size,
     #    validation_data=(x_test, None))
 
-vae.fit(lefttrain, righttrain,
+vae.fit(lefttrain,righttrain,
 		shuffle=True,epochs=epochs, batch_size=batch_size,
 		validation_data=(lefttest, righttest))
+
+#just for quick tests of the thing
+x_test = lefttest
+
+# the next step is figuring out how to train this in a reasonable manner so it works with things
+# instead of just decoding itself, and comparing with itself
 
 
 
@@ -242,8 +259,9 @@ plt.show()
 
 # display a 2D manifold of the digits
 n = 15  # figure with 15x15 digits
-digit_size = shape[1]
-figure = np.zeros((digit_size * n, digit_size * n))
+digit_width = shape[0]
+digit_height = shape[1]
+figure = np.zeros((digit_width * n, digit_height * n))
 # linearly spaced coordinates on the unit square were transformed through the inverse CDF (ppf) of the Gaussian
 # to produce values of the latent variables z, since the prior of the latent space is Gaussian
 grid_x = norm.ppf(np.linspace(0.05, 0.95, n))
@@ -254,9 +272,9 @@ for i, yi in enumerate(grid_x):
         z_sample = np.array([[xi, yi]])
         z_sample = np.tile(z_sample, batch_size).reshape(batch_size, 2)
         x_decoded = generator.predict(z_sample, batch_size=batch_size)
-        digit = x_decoded[0,:,:,0].reshape(digit_size, digit_size)
-        figure[i * digit_size: (i + 1) * digit_size,
-               j * digit_size: (j + 1) * digit_size] = digit
+        digit = x_decoded[0,:,:,0].reshape(digit_width, digit_height)
+        figure[i * digit_width: (i + 1) * digit_width,
+               j * digit_height: (j + 1) * digit_height] = digit
 
 plt.figure(figsize=(10, 10))
 plt.imshow(figure, cmap='Greys_r')
