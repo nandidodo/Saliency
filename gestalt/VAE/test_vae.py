@@ -155,7 +155,7 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	_x_decoded_mean_squash = decoder_mean_squash(_x_decoded_relu)
 	generator = Model(decoder_input, _x_decoded_mean_squash)
 
-	return vae, encoder, generator
+	return vae, encoder, generator, z_mean, z_log_var
 
 	#okay, so at the moment the loss is utterly enormous. It's probably a problem with the loss function? but I'm not totally sure?
 
@@ -212,7 +212,7 @@ print('x_train.shape:', x_train.shape)
 #shape = x_train.shape[1:]
 shape=lefttrain.shape[1:]
 
-vae, encoder, generator = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
+vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
 vae.compile(optimizer='rmsprop',loss=unnormalised_reconstruction_loss)
 vae.summary()
 
@@ -256,6 +256,26 @@ plt.show()
 #_x_decoded_relu = decoder_deconv_3_upsamp(_deconv_2_decoded)
 #_x_decoded_mean_squash = decoder_mean_squash(_x_decoded_relu)
 #generator = Model(decoder_input, _x_decoded_mean_squash)
+
+def predict_display(N, testslices, actuals):
+	testsh = testslices.shape
+	actualsh = actuals.shape
+	testslices = np.reshape(testslices,(testsh[0], testsh[1], testsh[2]))
+	actuals = np.reshape(actuals, (actualsh[0], actualsh[1], actualsh[2]))
+
+	#epsilon_std = 1.0
+	for i in xrange(N):
+		epsilon = K.random_normal(shape=(K.shape(z_mean)[0], latent_dim),
+		                          mean=0., stddev=epsilon_std)
+		z =  z_mean + K.exp(z_log_var) * epsilon
+		pred = generator.predict(z,batch_size=1)
+		plot_three_image_comparison(testslices[i], pred, actuals[i])
+
+
+predict_display(20, lefttest, x_test)
+		
+	
+
 
 # display a 2D manifold of the digits
 n = 15  # figure with 15x15 digits
