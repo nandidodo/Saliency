@@ -5,6 +5,7 @@ import cPickle as pickle
 import sys
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, TensorBoard, TerminateOnNaN, ReduceLROnPlateau
 import os
+import matplotlib.pyplot as plt
 
 def get_run_num():
 	if len(sys.argv)>1:
@@ -113,5 +114,46 @@ def split_dataset_center_slice(dataset, split_width):
 		rightslice = dataset[:,:,half: half+split_width]
 		return leftslice, rightslice
 	
+
+
+
+
+def plot_three_image_comparison(slices, predicted_slices,other_slices,N=20):
+	slice_shape = slices.shape
+	pred_shape = predicted_slices.shape
+	other_shape = other_slices.shape
+	preds = np.reshape(predicted_slices, (pred_shape[0], pred_shape[1], pred_shape[2]))
+	rightslice = np.reshape(other_slices,(other_shape[0], other_shape[1], other_shape[2]))
+	leftslice = np.reshape(slices, (slice_shape[0], slice_shape[1], slice_shape[2]))
+	for i in xrange(N):
+		print "in three image cmoparison loop"
+		fig = plt.figure()
+
+		#originalcolour
+		ax1 = fig.add_subplot(131)
+		plt.imshow(leftslice[i],cmap='gray')
+		plt.title('Input Slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		#red
+		ax2 = fig.add_subplot(132)
+		plt.imshow(preds[i],cmap='gray')
+		plt.title('Predicted Other Slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		#green
+		ax3 = fig.add_subplot(133)
+		plt.imshow(rightslice[i],cmap='gray')
+		plt.title('Actual Other Slice')
+		plt.xticks([])
+		plt.yticks([])
+
+		
+		plt.tight_layout()
+		plt.show(fig)
+		#return fig
+
 
 

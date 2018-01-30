@@ -60,7 +60,7 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	conv_4 = Conv2D(filters,
 		            kernel_size=num_conv,
 		            padding='same', activation=activation,
-		            strides=1)(conv_3)
+		            strides=2)(conv_3)
 	flat = Flatten()(conv_4)
 	hidden = Dense(intermediate_dim, activation=activation)(flat)
 
@@ -81,12 +81,12 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	# we instantiate these layers separately so as to reuse them later
 	decoder_hid = Dense(intermediate_dim, activation=activation)
 	#decoder_upsample = Dense(filters * 14 * 14, activation=activation)
-	decoder_upsample = Dense(filters * rows/2 * cols/2, activation=activation)
+	decoder_upsample = Dense(filters * rows/4 * cols/4, activation=activation)
 
 	if K.image_data_format() == 'channels_first':
-		output_shape = (batch_size, filters, rows/2, cols/2)
+		output_shape = (batch_size, filters, rows/4, cols/4)
 	else:
-		output_shape = (batch_size, rows/2, cols/2, filters)
+		output_shape = (batch_size, rows/4, cols/4, filters)
 
 	decoder_reshape = Reshape(output_shape[1:])
 	decoder_deconv_1 = Conv2DTranspose(filters,
@@ -97,7 +97,7 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	decoder_deconv_2 = Conv2DTranspose(filters,
 		                               kernel_size=num_conv,
 		                               padding='same',
-		                               strides=1,
+		                               strides=2,
 		                               activation=activation)
 	if K.image_data_format() == 'channels_first':
 		output_shape = (batch_size, filters, rows+1, cols+1)
@@ -169,7 +169,11 @@ def kl_loss(z_mean, z_log_var):
 
 # train the VAE on MNIST digits
 # so, let's try it on other images. for instance the benchmark image set, and so generalise it to take in any image size. If it still works then, then I'm doing well!
-"""
+
+# okay, so I'm pretty sure my altered network works for mnist. The question then is that it simply does not scale to the larger images. Let's try to solve this initially by scaling down our images, and see if we can get interesting gestalt effects. It might be even more interesting just to try this out on mnist first, which we KNOW actually works! and then if we get interesting gestalt effects, try to get it on the proper images!
+
+# it works for mnist. So now I need to try doing the splitting in half image to see if that works
+
 (x_train, _), (x_test, y_test) = mnist.load_data()
 
 
@@ -178,32 +182,51 @@ x_train = x_train.astype('float32') / 255.
 x_train = x_train.reshape((x_train.shape[0],) + original_img_size)
 x_test = x_test.astype('float32') / 255.
 x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
+
+lefttrain, righttrain = split_dataset_center_slice(x_train, 14)
+lefttest, righttest = split_dataset_center_slice(x_test, 14)
+print(lefttrain.shape)
+#plot_three_image_comparison(lefttrain, righttrain, x_train)
+
+"""
+plt.imshow(np.reshape(lefttrain[0],(28,14)))
+plt.show()
+plt.imshow(np.reshape(righttrain[0], (28,14))eft)
+plt.show()
+plt.imshow(np.reshape(x_train[0], (28,28)))
+plt.show()
 """
 
-imgs= load_array("testimages_combined")
-imgs = imgs.astype('float32')/255. # normalise here. This might solve some issues
-print(imgs.shape)
-x_train, x_test = split_first_test_train(imgs)
-print('x_train.shape:', x_train.shape)
 
-vae, encoder, generator = vae_model(x_train.shape[1:],epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
+#imgs= load_array("testimages_combined")
+#imgs = imgs.astype('float32')/255. # normalise here. This might solve some issues
+#print(imgs.shape)
+#x_train, x_test = split_first_test_train(imgs)
+print('x_train.shape:', x_train.shape)
+shape = x_train.shape[1:]
+
+vae, encoder, generator = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
 vae.compile(optimizer='rmsprop',loss=None)
 vae.summary()
 
 
-vae.fit(x_train,
-        shuffle=True,
-        epochs=epochs,
-        batch_size=batch_size,
-        validation_data=(x_test, None))
+#vae.fit(x_train,
+   #     shuffle=True,
+    #    epochs=epochs,
+    #    batch_size=batch_size,
+    #    validation_data=(x_test, None))
+
+vae.fit(lefttrain, righttrain,
+		shuffle=True,epochs=epochs, batch_size=batch_size,
+		validation_data=(lefttest, righttest))
 
 
 
 # display a 2D plot of the digit classes in the latent space
 x_test_encoded = encoder.predict(x_test, batch_size=batch_size)
 plt.figure(figsize=(6, 6))
-plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1], c=y_test)
-plt.colorbar()
+plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1])
+#plt.colorbar()
 plt.show()
 
 # build a digit generator that can sample from the learned distribution
@@ -219,7 +242,7 @@ plt.show()
 
 # display a 2D manifold of the digits
 n = 15  # figure with 15x15 digits
-digit_size = 28
+digit_size = shape[1]
 figure = np.zeros((digit_size * n, digit_size * n))
 # linearly spaced coordinates on the unit square were transformed through the inverse CDF (ppf) of the Gaussian
 # to produce values of the latent variables z, since the prior of the latent space is Gaussian
@@ -231,7 +254,7 @@ for i, yi in enumerate(grid_x):
         z_sample = np.array([[xi, yi]])
         z_sample = np.tile(z_sample, batch_size).reshape(batch_size, 2)
         x_decoded = generator.predict(z_sample, batch_size=batch_size)
-        digit = x_decoded[0].reshape(digit_size, digit_size)
+        digit = x_decoded[0,:,:,0].reshape(digit_size, digit_size)
         figure[i * digit_size: (i + 1) * digit_size,
                j * digit_size: (j + 1) * digit_size] = digit
 
