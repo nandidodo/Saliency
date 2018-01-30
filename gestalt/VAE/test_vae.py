@@ -39,12 +39,13 @@ epsilon_std = 1.0
 activation = 'relu'
 
 
-def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std, activation='relu'):
+def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std, activation='relu'):
 	# input image dimensions
+	rows, cols, channels = input_shape
 
 
 
-	x = Input(shape=original_img_size)
+	x = Input(shape=input_shape)
 	conv_1 = Conv2D(img_chns,
 		            kernel_size=(2, 2),
 		            padding='same', activation=activation)(x)
@@ -79,12 +80,13 @@ def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_di
 
 	# we instantiate these layers separately so as to reuse them later
 	decoder_hid = Dense(intermediate_dim, activation=activation)
-	decoder_upsample = Dense(filters * 14 * 14, activation=activation)
+	#decoder_upsample = Dense(filters * 14 * 14, activation=activation)
+	decoder_upsample = Dense(filters * rows/2 * cols/2, activation=activation)
 
 	if K.image_data_format() == 'channels_first':
-		output_shape = (batch_size, filters, 14, 14)
+		output_shape = (batch_size, filters, rows/2, cols/2)
 	else:
-		output_shape = (batch_size, 14, 14, filters)
+		output_shape = (batch_size, rows/2, cols/2, filters)
 
 	decoder_reshape = Reshape(output_shape[1:])
 	decoder_deconv_1 = Conv2DTranspose(filters,
@@ -98,15 +100,15 @@ def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_di
 		                               strides=1,
 		                               activation=activation)
 	if K.image_data_format() == 'channels_first':
-		output_shape = (batch_size, filters, 29, 29)
+		output_shape = (batch_size, filters, rows+1, cols+1)
 	else:
-		output_shape = (batch_size, 29, 29, filters)
+		output_shape = (batch_size, rows+1, cols+1, filters)
 	decoder_deconv_3_upsamp = Conv2DTranspose(filters,
 		                                      kernel_size=(3, 3),
 		                                      strides=(2, 2),
 		                                      padding='valid',
 		                                      activation=activation)
-	decoder_mean_squash = Conv2D(img_chns,
+	decoder_mean_squash = Conv2D(channels,
 		                         kernel_size=2,
 		                         padding='valid',
 		                         activation='sigmoid')
@@ -127,7 +129,12 @@ def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_di
 	#	K.flatten(x),
 	#	K.flatten(x_decoded_mean_squash))
 	#kl_loss = - 0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
-	xent_loss = reconstruction_loss(img_rows, img_cols, x, x_decoded_mean_squash)
+	#this straight up isn't working. The loss is going crazy and I don't know why?
+	# I literally haven't changed anything except the sizes of the images? I'm not sure why it's suddenly broken here. This is really annoying?
+	# okay, so loss is decreasing. it's just enormous at the moment, and I don't know why!
+	 # it seems very unstable and we almost certainly don't have enough image data to learn this properly... ah! I could obtain more first probably - via imagenet or something?
+	#the loss is decreasing though. Who will know what will happen in the end?
+	xent_loss = reconstruction_loss(rows, cols, x, x_decoded_mean_squash)
 	kl = kl_loss(z_mean, z_log_var)
 	vae_loss = K.mean(xent_loss + kl)
 	vae.add_loss(vae_loss)
@@ -149,6 +156,8 @@ def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_di
 
 	return vae, encoder, generator
 
+	#okay, so at the moment the loss is utterly enormous. It's probably a problem with the loss function? but I'm not totally sure?
+
 #split out the losses into functions. This seems to have worked so far!
 def reconstruction_loss(rows, cols, x, x_decoded):
 	return rows * cols * metrics.binary_crossentropy(K.flatten(x), K.flatten(x_decoded))
@@ -157,9 +166,6 @@ def kl_loss(z_mean, z_log_var):
 	return -0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
 
 
-vae, encoder, generator = vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
-vae.compile(optimizer='rmsprop',loss=None)
-vae.summary()
 
 # train the VAE on MNIST digits
 # so, let's try it on other images. for instance the benchmark image set, and so generalise it to take in any image size. If it still works then, then I'm doing well!
@@ -175,9 +181,15 @@ x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
 """
 
 imgs= load_array("testimages_combined")
+imgs = imgs.astype('float32')/255. # normalise here. This might solve some issues
 print(imgs.shape)
 x_train, x_test = split_first_test_train(imgs)
 print('x_train.shape:', x_train.shape)
+
+vae, encoder, generator = vae_model(x_train.shape[1:],epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
+vae.compile(optimizer='rmsprop',loss=None)
+vae.summary()
+
 
 vae.fit(x_train,
         shuffle=True,
