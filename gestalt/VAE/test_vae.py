@@ -265,15 +265,27 @@ def predict_display(N, testslices, actuals):
 
 	#epsilon_std = 1.0
 	for i in xrange(N):
-		epsilon = K.random_normal(shape=(K.shape(z_mean)[0], latent_dim),
-		                          mean=0., stddev=epsilon_std)
-		z =  z_mean + K.exp(z_log_var) * epsilon
+		#epsilon = K.random_normal(shape=(K.shape(z_mean)[0], latent_dim),
+		                          #mean=0., stddev=epsilon_std)
+		#epsilon = np.random.multivariate_normal(z_mean, np.exp(z_log_var))
+		#print("Z MEAN")
+		##print(z_mean)
+		#print("Z LOG VAR")
+		#print(z_log_var)
+		#z =  z_mean + K.exp(z_log_var) * epsilon
+		#print(z)
+		##try evaling it
+		#z = K.eval(z)
+		#print(z)
+	#let's just do this with completely standard multivariate normal. see if there's decent results
+		z = np.random.multivariate_normal([0,0],[[1,0],[0,1]])
 		pred = generator.predict(z,batch_size=1)
 		plot_three_image_comparison(testslices[i], pred, actuals[i])
 
 
 predict_display(20, lefttest, x_test)
-		
+	#Tensor("add_1:0", shape=(?, 2), dtype=float32)
+
 	
 
 
@@ -291,6 +303,7 @@ for i, yi in enumerate(grid_x):
     for j, xi in enumerate(grid_y):
         z_sample = np.array([[xi, yi]])
         z_sample = np.tile(z_sample, batch_size).reshape(batch_size, 2)
+       # print(z_sample)
         x_decoded = generator.predict(z_sample, batch_size=batch_size)
         digit = x_decoded[0,:,:,0].reshape(digit_width, digit_height)
         figure[i * digit_width: (i + 1) * digit_width,
