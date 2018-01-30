@@ -1,9 +1,4 @@
-# just the tutorial example, let's then repurpose this, for not mnist, butshouldn't be too hard
 
-# so the plan here is quite simple, we just slowly build up our VAEs from building blocks that we know work, and hope for the best! see if we can get any kind of uesful gestalt stuff going on
-# also... we can then continue on to build the predictive processing layer. let's do that now until 12 or so, then Enyo!
-
-# first we need to see if it owrks
 '''This script demonstrates how to build a variational autoencoder
 with Keras and deconvolution layers.
 # Reference
@@ -22,6 +17,7 @@ from keras.models import Model
 from keras import backend as K
 from keras import metrics
 from keras.datasets import mnist
+from utils import *
 
 img_rows, img_cols, img_chns = 28, 28, 1
 if K.image_data_format() == 'channels_first':
@@ -40,9 +36,10 @@ num_conv = 3
 latent_dim = 2
 intermediate_dim = 128
 epsilon_std = 1.0
+activation = 'relu'
 
 
-def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std):
+def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std, activation='relu'):
 	# input image dimensions
 
 
@@ -50,21 +47,21 @@ def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_di
 	x = Input(shape=original_img_size)
 	conv_1 = Conv2D(img_chns,
 		            kernel_size=(2, 2),
-		            padding='same', activation='relu')(x)
+		            padding='same', activation=activation)(x)
 	conv_2 = Conv2D(filters,
 		            kernel_size=(2, 2),
-		            padding='same', activation='relu',
+		            padding='same', activation=activation,
 		            strides=(2, 2))(conv_1)
 	conv_3 = Conv2D(filters,
 		            kernel_size=num_conv,
-		            padding='same', activation='relu',
+		            padding='same', activation=activation,
 		            strides=1)(conv_2)
 	conv_4 = Conv2D(filters,
 		            kernel_size=num_conv,
-		            padding='same', activation='relu',
+		            padding='same', activation=activation,
 		            strides=1)(conv_3)
 	flat = Flatten()(conv_4)
-	hidden = Dense(intermediate_dim, activation='relu')(flat)
+	hidden = Dense(intermediate_dim, activation=activation)(flat)
 
 	z_mean = Dense(latent_dim)(hidden)
 	z_log_var = Dense(latent_dim)(hidden)
@@ -81,8 +78,8 @@ def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_di
 	z = Lambda(sampling, output_shape=(latent_dim,))([z_mean, z_log_var])
 
 	# we instantiate these layers separately so as to reuse them later
-	decoder_hid = Dense(intermediate_dim, activation='relu')
-	decoder_upsample = Dense(filters * 14 * 14, activation='relu')
+	decoder_hid = Dense(intermediate_dim, activation=activation)
+	decoder_upsample = Dense(filters * 14 * 14, activation=activation)
 
 	if K.image_data_format() == 'channels_first':
 		output_shape = (batch_size, filters, 14, 14)
@@ -94,12 +91,12 @@ def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_di
 		                               kernel_size=num_conv,
 		                               padding='same',
 		                               strides=1,
-		                               activation='relu')
+		                               activation=activation)
 	decoder_deconv_2 = Conv2DTranspose(filters,
 		                               kernel_size=num_conv,
 		                               padding='same',
 		                               strides=1,
-		                               activation='relu')
+		                               activation=activation)
 	if K.image_data_format() == 'channels_first':
 		output_shape = (batch_size, filters, 29, 29)
 	else:
@@ -108,7 +105,7 @@ def vae_model(original_img_size,epochs, batch_size, filters, num_conv, latent_di
 		                                      kernel_size=(3, 3),
 		                                      strides=(2, 2),
 		                                      padding='valid',
-		                                      activation='relu')
+		                                      activation=activation)
 	decoder_mean_squash = Conv2D(img_chns,
 		                         kernel_size=2,
 		                         padding='valid',
@@ -165,13 +162,21 @@ vae.compile(optimizer='rmsprop',loss=None)
 vae.summary()
 
 # train the VAE on MNIST digits
+# so, let's try it on other images. for instance the benchmark image set, and so generalise it to take in any image size. If it still works then, then I'm doing well!
+"""
 (x_train, _), (x_test, y_test) = mnist.load_data()
+
+
 
 x_train = x_train.astype('float32') / 255.
 x_train = x_train.reshape((x_train.shape[0],) + original_img_size)
 x_test = x_test.astype('float32') / 255.
 x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
+"""
 
+imgs= load_array("testimages_combined")
+print(imgs.shape)
+x_train, x_test = split_first_test_train(imgs)
 print('x_train.shape:', x_train.shape)
 
 vae.fit(x_train,
