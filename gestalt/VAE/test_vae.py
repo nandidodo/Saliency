@@ -39,7 +39,7 @@ epsilon_std = 1.0
 activation = 'relu'
 
 
-def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std, activation='relu'):
+def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std, activation='relu', save=True, save_fname="results/gestalt_VAE"):
 	# input image dimensions
 	rows, cols, channels = input_shape
 
@@ -155,6 +155,12 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	_x_decoded_mean_squash = decoder_mean_squash(_x_decoded_relu)
 	generator = Model(decoder_input, _x_decoded_mean_squash)
 
+	#implement model saving simply here
+	if save:
+		vae.save(save_fname + "_VAE")
+		encoder.save(save_fname+ "_encoder")
+		generator.save(save_fname + "_generator")
+
 	return vae, encoder, generator, z_mean, z_log_var
 
 	#okay, so at the moment the loss is utterly enormous. It's probably a problem with the loss function? but I'm not totally sure?
@@ -227,12 +233,17 @@ vae.summary()
     #    batch_size=batch_size,
     #    validation_data=(x_test, None))
 
-vae.fit(lefttrain,righttrain,
+callbacks = build_callbacks("results/callbacks/")
+
+his = vae.fit(lefttrain,righttrain,
 		shuffle=True,epochs=epochs, batch_size=batch_size,
-		validation_data=(lefttest, righttest))
+		validation_data=(lefttest, righttest), callbacks=callbacks)
 
 #just for quick tests of the thing
 x_test = lefttest
+
+history = serialize_class_object(his)
+save_array(history, "results/VAE_train_history")
 
 # the next step is figuring out how to train this in a reasonable manner so it works with things
 # instead of just decoding itself, and comparing with itself
