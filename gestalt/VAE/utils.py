@@ -6,6 +6,7 @@ import sys
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, TensorBoard, TerminateOnNaN, ReduceLROnPlateau
 import os
 import matplotlib.pyplot as plt
+from callbacks import *
 
 def get_run_num():
 	if len(sys.argv)>1:
@@ -47,7 +48,9 @@ def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0
 	
 	tensorboard = TensorBoard(log_dir=(os.path.join(save_path, '_tensorboard_logs')), histogram_freq=histogram_freq, write_grads=(histogram_freq>0))
 
-	terminator = TerminateOnNaN()
+	#terminator = TerminateOnNaN()
+	#my own!!!
+	terminator = TerminateOnNaNMultipleLosses()
 	
 	reduceLR = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience= patience, verbose=1, mode='auto', min_lr = 1e-8)
 
@@ -118,34 +121,39 @@ def split_dataset_center_slice(dataset, split_width):
 
 
 
-def plot_three_image_comparison(slices, predicted_slices,other_slices,N=20):
-	slice_shape = slices.shape
-	pred_shape = predicted_slices.shape
-	other_shape = other_slices.shape
-	preds = np.reshape(predicted_slices, (pred_shape[0], pred_shape[1], pred_shape[2]))
-	rightslice = np.reshape(other_slices,(other_shape[0], other_shape[1], other_shape[2]))
-	leftslice = np.reshape(slices, (slice_shape[0], slice_shape[1], slice_shape[2]))
+def plot_three_image_comparison(slices, predicted_slices,other_slices,N=20, reshape=True):
+	if reshape:
+		slice_shape = slices.shape
+		pred_shape = predicted_slices.shape
+		other_shape = other_slices.shape
+		predicted_slices = np.reshape(predicted_slices, (pred_shape[0], pred_shape[1], pred_shape[2]))
+		other_slices = np.reshape(other_slices,(other_shape[0], other_shape[1], other_shape[2]))
+		slices = np.reshape(slices, (slice_shape[0], slice_shape[1], slice_shape[2]))
 	for i in xrange(N):
 		print "in three image cmoparison loop"
 		fig = plt.figure()
 
+		print slices[i].shape
+		print predicted_slices.shape
+		print other_slices.shape
+
 		#originalcolour
 		ax1 = fig.add_subplot(131)
-		plt.imshow(leftslice[i],cmap='gray')
+		plt.imshow(slices,cmap='gray')
 		plt.title('Input Slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		#red
 		ax2 = fig.add_subplot(132)
-		plt.imshow(preds[i],cmap='gray')
+		plt.imshow(predicted_slices,cmap='gray')
 		plt.title('Predicted Other Slice')
 		plt.xticks([])
 		plt.yticks([])
 
 		#green
 		ax3 = fig.add_subplot(133)
-		plt.imshow(rightslice[i],cmap='gray')
+		plt.imshow(other_slices,cmap='gray')
 		plt.title('Actual Other Slice')
 		plt.xticks([])
 		plt.yticks([])

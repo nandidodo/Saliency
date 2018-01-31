@@ -1,10 +1,9 @@
 import numpy as np
 import keras
-import keras.callbacks.Callback as Callback
 
 #Just a simple custom callback for terminating on NaN but when there are multiple losses
 
-class TerminateOnNaNMultipleLosses(Callback):
+class TerminateOnNaNMultipleLosses(keras.callbacks.Callback):
 	def _init__(self):
 		super(TerminateOnNaNMultipleLosses,self).__init__()
 
