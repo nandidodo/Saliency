@@ -189,11 +189,12 @@ def kl_loss(z_mean, z_log_var):
 
 
 
-def predict_display(N, testslices, actuals):
+def predict_display(N, testslices, actuals,generator):
 	testsh = testslices.shape
 	actualsh = actuals.shape
-	testslices = np.reshape(testslices,(testsh[0], testsh[1], testsh[2]))
-	actuals = np.reshape(actuals, (actualsh[0], actualsh[1], actualsh[2]))
+	if len(testsh) ==3:
+		testslices = np.reshape(testslices,(testsh[0], testsh[1], testsh[2]))
+		actuals = np.reshape(actuals, (actualsh[0], actualsh[1], actualsh[2]))
 
 	#epsilon_std = 1.0
 	for i in xrange(N):
@@ -279,7 +280,7 @@ def mnist_experiment():
 	preds = vae.predict(x_test)
 	save_array(preds, "results/mnist_vae_preds")
 			
-	predict_display(20, lefttest, x_test)
+	predict_display(20, lefttest, x_test, generator)
 	#Tensor("add_1:0", shape=(?, 2), dtype=float32)
 
 
@@ -309,15 +310,17 @@ def mnist_experiment():
 
 
 def cifar10_experiment():
-	slice_width = 20
+	slice_width = 12
 	epochs=1
 	(xtrain, ytrain),(xtest, ytest) = cifar10.load_data()
 	xtrain = xtrain.astype('float32')/255.
 	xtest = xtest.astype('float32')/255.
 	lefttrain, righttrain = split_dataset_center_slice(xtrain, slice_width)
 	lefttest, righttest = split_dataset_center_slice(xtest, slice_width)
+	
+	shape = lefttrain.shape[1:]
 
-	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std,save_name="results/vae_cifar_model")
+	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std,save_fname="results/vae_cifar_model")
 	vae.compile(optimizer='rmsprop',loss=unnormalised_reconstruction_loss)
 	vae.summary()
 
@@ -344,7 +347,7 @@ def cifar10_experiment():
 	preds = vae.predict(x_test)
 	save_array(preds, "results/cifar_vae_preds")
 			
-	predict_display(20, lefttest, x_test)
+	predict_display(20, lefttest, x_test, generator)
 
 
 
