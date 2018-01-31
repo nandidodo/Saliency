@@ -17,6 +17,7 @@ from keras.models import Model
 from keras import backend as K
 from keras import metrics
 from keras.datasets import mnist
+from keras.datasets import cifar10
 from utils import *
 
 img_rows, img_cols, img_chns = 28, 28, 1
@@ -186,87 +187,7 @@ def kl_loss(z_mean, z_log_var):
 
 # it works for mnist. So now I need to try doing the splitting in half image to see if that works
 
-(x_train, _), (x_test, y_test) = mnist.load_data()
 
-
-
-x_train = x_train.astype('float32') / 255.
-x_train = x_train.reshape((x_train.shape[0],) + original_img_size)
-x_test = x_test.astype('float32') / 255.
-x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
-
-lefttrain, righttrain = split_dataset_center_slice(x_train, 12)
-lefttest, righttest = split_dataset_center_slice(x_test, 12)
-print(lefttrain.shape)
-#plot_three_image_comparison(lefttrain, righttrain, x_train)
-
-"""
-plt.imshow(np.reshape(lefttrain[0],(28,14)))
-plt.show()
-plt.imshow(np.reshape(righttrain[0], (28,14))eft)
-plt.show()
-plt.imshow(np.reshape(x_train[0], (28,28)))
-plt.show()
-"""
-
-
-#imgs= load_array("testimages_combined")
-#imgs = imgs.astype('float32')/255. # normalise here. This might solve some issues
-#print(imgs.shape)
-#x_train, x_test = split_first_test_train(imgs)
-print('x_train.shape:', x_train.shape)
-#shape = x_train.shape[1:]
-shape=lefttrain.shape[1:]
-
-vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
-vae.compile(optimizer='rmsprop',loss=unnormalised_reconstruction_loss)
-vae.summary()
-
-# another thing we could work on is active inference in the standard sense in rl environments. first we need to get a working framework to work in though, so that's really the challenge of this week
-
-# I think I know why the other gestalt network was not working... we didn't actually have it learning the ys, so they did nothing. That was useful
-
-
-#vae.fit(x_train,
-   #     shuffle=True,
-    #    epochs=epochs,
-    #    batch_size=batch_size,
-    #    validation_data=(x_test, None))
-
-callbacks = build_callbacks("results/callbacks/")
-
-his = vae.fit(lefttrain,righttrain,
-		shuffle=True,epochs=epochs, batch_size=batch_size,
-		validation_data=(lefttest, righttest), callbacks=callbacks)
-
-#just for quick tests of the thing
-x_test = lefttest
-
-history = serialize_class_object(his)
-save_array(history, "results/VAE_train_history")
-
-# the next step is figuring out how to train this in a reasonable manner so it works with things
-# instead of just decoding itself, and comparing with itself
-
-
-
-# display a 2D plot of the digit classes in the latent space
-x_test_encoded = encoder.predict(x_test, batch_size=batch_size)
-plt.figure(figsize=(6, 6))
-plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1])
-#plt.colorbar()
-plt.show()
-
-# build a digit generator that can sample from the learned distribution
-#decoder_input = Input(shape=(latent_dim,))
-#_hid_decoded = decoder_hid(decoder_input)
-#_up_decoded = decoder_upsample(_hid_decoded)
-#_reshape_decoded = decoder_reshape(_up_decoded)
-#_deconv_1_decoded = decoder_deconv_1(_reshape_decoded)
-#_deconv_2_decoded = decoder_deconv_2(_deconv_1_decoded)
-#_x_decoded_relu = decoder_deconv_3_upsamp(_deconv_2_decoded)
-#_x_decoded_mean_squash = decoder_mean_squash(_x_decoded_relu)
-#generator = Model(decoder_input, _x_decoded_mean_squash)
 
 def predict_display(N, testslices, actuals):
 	testsh = testslices.shape
@@ -302,33 +223,140 @@ def predict_display(N, testslices, actuals):
 		print(actuals[i].shape)
 		plot_three_image_comparison(testslices[i], pred, actuals[i], reshape=False)
 
+def mnist_experiment():
+	(x_train, _), (x_test, y_test) = mnist.load_data()
+	x_train = x_train.astype('float32') / 255.
+	x_train = x_train.reshape((x_train.shape[0],) + original_img_size)
+	x_test = x_test.astype('float32') / 255.
+	x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
 
-predict_display(20, lefttest, x_test)
+	lefttrain, righttrain = split_dataset_center_slice(x_train, 12)
+	lefttest, righttest = split_dataset_center_slice(x_test, 12)
+	#print(lefttrain.shape
+	#imgs= load_array("testimages_combined")
+	#imgs = imgs.astype('float32')/255. # normalise here. This might solve some issues
+	#print(imgs.shape)
+	#x_train, x_test = split_first_test_train(imgs)
+	#print('x_train.shape:', x_train.shape)
+	#shape = x_train.shape[1:]
+	shape=lefttrain.shape[1:]
+
+	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
+	vae.compile(optimizer='rmsprop',loss=unnormalised_reconstruction_loss)
+	vae.summary()
+
+	callbacks = build_callbacks("results/callbacks/")
+
+	his = vae.fit(lefttrain,righttrain,
+		shuffle=True,epochs=epochs, batch_size=batch_size,
+		validation_data=(lefttest, righttest))
+
+	#just for quick tests of the thing
+	x_test = lefttest
+
+	history = serialize_class_object(his)
+	save_array(history, "results/VAE_train_history")
+
+
+	# display a 2D plot of the digit classes in the latent space
+	x_test_encoded = encoder.predict(x_test, batch_size=batch_size)
+	plt.figure(figsize=(6, 6))
+	plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1])
+	#plt.colorbar()
+	plt.show()
+
+	# build a digit generator that can sample from the learned distribution
+	#decoder_input = Input(shape=(latent_dim,))
+	#_hid_decoded = decoder_hid(decoder_input)
+	#_up_decoded = decoder_upsample(_hid_decoded)
+	#_reshape_decoded = decoder_reshape(_up_decoded)
+	#_deconv_1_decoded = decoder_deconv_1(_reshape_decoded)
+	#_deconv_2_decoded = decoder_deconv_2(_deconv_1_decoded)
+	#_x_decoded_relu = decoder_deconv_3_upsamp(_deconv_2_decoded)
+	#_x_decoded_mean_squash = decoder_mean_squash(_x_decoded_relu)
+	#generator = Model(decoder_input, _x_decoded_mean_squash)
+
+	preds = vae.predict(x_test)
+	save_array(preds, "results/mnist_vae_preds")
+			
+	predict_display(20, lefttest, x_test)
 	#Tensor("add_1:0", shape=(?, 2), dtype=float32)
 
-	
+
+	# display a 2D manifold of the digits
+	n = 15  # figure with 15x15 digits
+	digit_width = shape[0]
+	digit_height = shape[1]
+	figure = np.zeros((digit_width * n, digit_height * n))
+	# linearly spaced coordinates on the unit square were transformed through the inverse CDF (ppf) of the Gaussian
+	# to produce values of the latent variables z, since the prior of the latent space is Gaussian
+	grid_x = norm.ppf(np.linspace(0.05, 0.95, n))
+	grid_y = norm.ppf(np.linspace(0.05, 0.95, n))
+
+	for i, yi in enumerate(grid_x):
+		for j, xi in enumerate(grid_y):
+		    z_sample = np.array([[xi, yi]])
+		    z_sample = np.tile(z_sample, batch_size).reshape(batch_size, 2)
+		   # print(z_sample)
+		    x_decoded = generator.predict(z_sample, batch_size=batch_size)
+		    digit = x_decoded[0,:,:,0].reshape(digit_width, digit_height)
+		    figure[i * digit_width: (i + 1) * digit_width,
+		           j * digit_height: (j + 1) * digit_height] = digit
+
+	plt.figure(figsize=(10, 10))
+	plt.imshow(figure, cmap='Greys_r')
+	plt.show()
 
 
-# display a 2D manifold of the digits
-n = 15  # figure with 15x15 digits
-digit_width = shape[0]
-digit_height = shape[1]
-figure = np.zeros((digit_width * n, digit_height * n))
-# linearly spaced coordinates on the unit square were transformed through the inverse CDF (ppf) of the Gaussian
-# to produce values of the latent variables z, since the prior of the latent space is Gaussian
-grid_x = norm.ppf(np.linspace(0.05, 0.95, n))
-grid_y = norm.ppf(np.linspace(0.05, 0.95, n))
+def cifar10_experiment():
+	slice_width = 20
+	epochs=1
+	(xtrain, ytrain),(xtest, ytest) = cifar10.load_data()
+	xtrain = xtrain.astype('float32')/255.
+	xtest = xtest.astype('float32')/255.
+	lefttrain, righttrain = split_dataset_center_slice(xtrain, slice_width)
+	lefttest, righttest = split_dataset_center_slice(xtest, slice_width)
 
-for i, yi in enumerate(grid_x):
-    for j, xi in enumerate(grid_y):
-        z_sample = np.array([[xi, yi]])
-        z_sample = np.tile(z_sample, batch_size).reshape(batch_size, 2)
-       # print(z_sample)
-        x_decoded = generator.predict(z_sample, batch_size=batch_size)
-        digit = x_decoded[0,:,:,0].reshape(digit_width, digit_height)
-        figure[i * digit_width: (i + 1) * digit_width,
-               j * digit_height: (j + 1) * digit_height] = digit
+	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std,save_name="results/vae_cifar_model")
+	vae.compile(optimizer='rmsprop',loss=unnormalised_reconstruction_loss)
+	vae.summary()
 
-plt.figure(figsize=(10, 10))
-plt.imshow(figure, cmap='Greys_r')
-plt.show()
+	callbacks = build_callbacks("results/callbacks/")
+
+	his = vae.fit(lefttrain,righttrain,
+		shuffle=True,epochs=epochs, batch_size=batch_size,
+		validation_data=(lefttest, righttest))
+
+	#just for quick tests of the thing
+	x_test = lefttest
+
+	history = serialize_class_object(his)
+	save_array(history, "results/VAE_train_history_cifar")
+
+
+	# display a 2D plot of the digit classes in the latent space
+	x_test_encoded = encoder.predict(x_test, batch_size=batch_size)
+	plt.figure(figsize=(6, 6))
+	plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1])
+	#plt.colorbar()
+	plt.show()
+
+	preds = vae.predict(x_test)
+	save_array(preds, "results/cifar_vae_preds")
+			
+	predict_display(20, lefttest, x_test)
+
+
+
+# another thing we could work on is active inference in the standard sense in rl environments. first we need to get a working framework to work in though, so that's really the challenge of this week
+
+# I think I know why the other gestalt network was not working... we didn't actually have it learning the ys, so they did nothing. That was useful
+
+
+# the next step is figuring out how to train this in a reasonable manner so it works with things
+# instead of just decoding itself, and comparing with itself
+
+if __name__ == '__main__':
+	cifar10_experiment()
+	#mnist_experiment()
+
