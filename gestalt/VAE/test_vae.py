@@ -26,7 +26,7 @@ if K.image_data_format() == 'channels_first':
 else:
 		original_img_size = (img_rows, img_cols, img_chns)
 
-epochs = 1
+epochs = 10
 batch_size = 100
 # number of convolutional filters to use
 filters = 64
@@ -215,7 +215,9 @@ def predict_display(N, testslices, actuals,generator):
 		z = np.reshape(z, (1,2))
 		pred = generator.predict(z,batch_size=1)
 		sh = pred.shape
-		pred = np.reshape(pred, (sh[1],sh[2]))
+		pred = np.reshape(pred, (sh[1], sh[2],sh[3]))
+		if sh[3] ==1:
+			pred = np.reshape(pred, (sh[1],sh[2]))
 		print("PRED")
 		print(pred.shape)
 		print("testslice")
@@ -248,7 +250,7 @@ def mnist_experiment():
 
 	callbacks = build_callbacks("results/callbacks/")
 
-	his = vae.fit(lefttrain,righttrain,
+	his = vae.fit(lefttrain,lefttrain,
 		shuffle=True,epochs=epochs, batch_size=batch_size,
 		validation_data=(lefttest, righttest))
 
@@ -310,23 +312,45 @@ def mnist_experiment():
 
 
 def cifar10_experiment():
+	# so cifar isn't workingat all. but mnist does, if I'm not mistaken. We've got to figure out therefore ,what is wrong with the CIFAR code
 	slice_width = 12
-	epochs=1
+	epochs=50
 	(xtrain, ytrain),(xtest, ytest) = cifar10.load_data()
 	xtrain = xtrain.astype('float32')/255.
 	xtest = xtest.astype('float32')/255.
+	sh = xtrain.shape
+	#let's reshape to only be 2d like mnist. that could be causing the issues
+	# yes! that's working a little better. except no. it's just getting stuck at 0.6933 vs mnist. I'm not sure why this is the case, but it's infuriating as it's not working at all
+	#could be an issue with the learning rate?
+	xtrain = np.reshape(xtrain[:,:,:,0],(len(xtrain), sh[1], sh[2],1))
+	xtest = np.reshape(xtest[:,:,:,0], (len(xtest), sh[1],sh[2],1))
+	print(xtrain.shape)
 	lefttrain, righttrain = split_dataset_center_slice(xtrain, slice_width)
 	lefttest, righttest = split_dataset_center_slice(xtest, slice_width)
+	print(lefttrain.shape)
+	#let's print them to make sure we're doing okay
+	"""
+	for i in xrange(20):
+		fig = plt.figure()
+		print(lefttrain[i].shape)
+		l = np.reshape(lefttrain[i], (32,12))
+		r = np.reshape(righttrain[i], (32,12))
+		ax1 = fig.add_subplot(121)
+		plt.imshow(l)
+		ax2 = fig.add_subplot(122)
+		plt.imshow(r)
+		plt.show(fig)
 	
+	"""
 	shape = lefttrain.shape[1:]
 
 	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std,save_fname="results/vae_cifar_model")
-	vae.compile(optimizer='rmsprop',loss=unnormalised_reconstruction_loss)
+	vae.compile(optimizer='sgd',loss=unnormalised_reconstruction_loss)
 	vae.summary()
 
 	callbacks = build_callbacks("results/callbacks/")
 
-	his = vae.fit(lefttrain,righttrain,
+	his = vae.fit(lefttrain,lefttrain,
 		shuffle=True,epochs=epochs, batch_size=batch_size,
 		validation_data=(lefttest, righttest))
 
@@ -360,6 +384,7 @@ def cifar10_experiment():
 # instead of just decoding itself, and comparing with itself
 
 if __name__ == '__main__':
-	cifar10_experiment()
-	#mnist_experiment()
+	#cifar10_experiment()
+	mnist_experiment()
+	#right so it learns absolutely nothing with the cifar. tomorrow's job is figuring out why
 
