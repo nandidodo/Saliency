@@ -10,9 +10,13 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-import Math
+import math
 
-def testnet(z, input_dims, output_dims):
+
+input_dims = 1
+intermediate_dim = 5
+output_dims = 1
+def testnet(z):
 	with tf.variable_scope('network'):
 		intermediate_dim = 10
 
@@ -34,11 +38,11 @@ def prob_func(x, params):
 		#for now try it with a single univariate gaussian
 		#so I just need to implement the gaussian equation here
 		mu, sigma = params
-		return (1/np.sqrt(2*Math.pi * sigma**2)) * np.exp(((x-mu)**2)/2*sigma**2)
+		return (1/tf.sqrt(2*math.pi * sigma**2)) * tf.exp(((x-mu)**2)/2*sigma**2)
 
 def euclid_distance_loss_func(x,y):
-	assert len(x) == len(y),'network and probability function have different dimensions!'
-	return np.sqrt(np.sum(x-y)**2)
+	#assert len(x) == len(y),'network and probability function have different dimensions!'
+	return tf.sqrt(tf.reduce_sum(x-y)**2)
 
 
 def plot_sample_acceptance_rate(samples,bin_width):
@@ -50,7 +54,6 @@ def plot_sample_acceptance_rate(samples,bin_width):
 	avgs = np.array(avgs)
 	plt.plot(avgs)
 	plt.show()
-
 
 
 
@@ -69,7 +72,7 @@ def train_and_sample():
 	num_rejections = 0
 
 	with tf.variable_scope('placeholder'):
-		X = tf.placeholder(tf.float32, [None, input_dim])
+		X = tf.placeholder(tf.float32, [None,1])
 		tf.summary.histogram('input', X)
 
 	# at the moment this will only work when everythign is single dimensional
@@ -79,13 +82,13 @@ def train_and_sample():
 		res = testnet(X)
 
 	with tf.variable_scope('loss'):
-		loss = euclid_distance_loss_func(testnet(X), prob_func(x, params))
+		loss = euclid_distance_loss_func(testnet(X), prob_func(X, params))
 	
 	with tf.variable_scope('train'):
 		train_step = tf.train.AdamOptimizer().minimize(loss)
 
 	with tf.variable_scope('prob'):
-		prob_height = prob_func(X)
+		prob_height = prob_func(X, params)
 
 	sess = tf.Session()
 	init = tf.global_variables_initializer()
@@ -98,7 +101,7 @@ def train_and_sample():
 			sample = np.random.uniform(low=-10, high=10,size=1)
 			height = np.random.uniform(low=0, high=1, size=1)
 			result, loss_val, _ ,actual_height= sess.run([res, loss, train_step, prob_height], feed_dict={X: sample})
-			print("Epochs: %i runs: %i loss: %f",%(i,j,loss))
+			print "Epochs: " + str(i) + "runs: " + str(j) + "loss: " + str(loss_val)
 			sample_height = result*height
 			#now for the sampling step
 			if sample_height <= actual_height:
@@ -108,6 +111,17 @@ def train_and_sample():
 			if sample_height > actual_height:
 				#rejection, discard samlpe
 				num_rejections +=1
+
+	#not sure what to do now as mycah's music is really distracting... dagnabbit!
+
+	# I need to plot all the samples presumably
+	plt.hist(samples)
+	plt.show()
+
+
+
+if __name__ == '__main__':
+	train_and_sample()
 
 
 
