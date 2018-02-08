@@ -41,6 +41,19 @@ def euclid_distance_loss_func(x,y):
 	return np.sqrt(np.sum(x-y)**2)
 
 
+def plot_sample_acceptance_rate(samples,bin_width):
+	avgs = []
+	for i in xrange(len(samples)//bin_width):
+		samps = samples[i*bin_width: (i+1)*bin_width]
+		avg = np.mean(samps)
+		avgs.append(avg)
+	avgs = np.array(avgs)
+	plt.plot(avgs)
+	plt.show()
+
+
+
+
 def train_and_sample():
 	input_dim = 1
 	output_dim = 1
