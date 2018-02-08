@@ -6,6 +6,7 @@
 # hopefully it can but I'm not sure. I should test it out with a simple gaussian
 # or something first to get an idea
 
+from __future__ import division
 
 import tensorflow as tf
 import numpy as np
@@ -26,9 +27,9 @@ def testnet(z):
 		W2 = tf.get_variable('w2', [intermediate_dim, output_dims], initializer=tf.random_normal_initializer(stddev=0.1))
 		B2 = tf.get_variable('b2', [output_dims], initializer=tf.constant_initializer())
 
-		fc1 = tf.nn.relu(tf.matmul(z, W1) + B1)
+		fc1 = tf.nn.relu(tf.matmul(z,W1) + B1)
 		#not sure what activation functoin... I definitely don't want probabilities/sigmoids here
-		fc2 = tf.matmul(fc1, W2) + B2
+		fc2 = tf.abs(tf.matmul(fc1, W2) + B2)
 		return fc2 # can't think of anything better to do
 
 		# I'm gonig to try it with 1 D gaussian!
@@ -38,7 +39,7 @@ def prob_func(x, params):
 		#for now try it with a single univariate gaussian
 		#so I just need to implement the gaussian equation here
 		mu, sigma = params
-		return (1/tf.sqrt(2*math.pi * sigma**2)) * tf.exp(((x-mu)**2)/2*sigma**2)
+		return (1/tf.sqrt(2*math.pi * sigma**2)) * tf.exp(-((x-mu)**2)/2*sigma**2)
 
 def euclid_distance_loss_func(x,y):
 	#assert len(x) == len(y),'network and probability function have different dimensions!'
@@ -55,13 +56,24 @@ def plot_sample_acceptance_rate(samples,bin_width):
 	plt.plot(avgs)
 	plt.show()
 
+def percent_acceptances(acceptances, rejects):
+	return (acceptances/(acceptances + rejects)) * 100
+
+def plot_sample_histogram(samples, bins=100):
+	print type(samples)
+	print samples.shape
+	plt.hist(samples, bins, normed=1, facecolor="blue")
+	plt.xlabel("x")
+	plt.ylabel("Probability")
+	plt.title('histogram')
+	plt.show()
 
 
 def train_and_sample():
 	input_dim = 1
 	output_dim = 1
 	num_samples = 100000
-	epochs = 100
+	epochs = 5
 	mu = 0
 	sigma = 1
 	#samples= np.random.uniform(low=-10, high=10, size=num_samples)
@@ -100,23 +112,36 @@ def train_and_sample():
 		for j in xrange(runs):
 			sample = np.random.uniform(low=-10, high=10,size=1)
 			height = np.random.uniform(low=0, high=1, size=1)
+			sample = np.reshape(sample,(1,1))
 			result, loss_val, _ ,actual_height= sess.run([res, loss, train_step, prob_height], feed_dict={X: sample})
-			print "Epochs: " + str(i) + "runs: " + str(j) + "loss: " + str(loss_val)
+			print "Epochs: " + str(i) + "runs: " + str(j) + "loss: " + str(loss_val) + " Sample: " + str(sample)
+			print "Result: " + str(result) + "Actual height: " + str(actual_height)
 			sample_height = result*height
 			#now for the sampling step
 			if sample_height <= actual_height:
 				#this means acceptance
 				samples.append(sample)
 				num_acceptances +=1
+				print "ACCEPTED"
 			if sample_height > actual_height:
 				#rejection, discard samlpe
 				num_rejections +=1
+				print "Rejected"
 
 	#not sure what to do now as mycah's music is really distracting... dagnabbit!
 
 	# I need to plot all the samples presumably
-	plt.hist(samples)
-	plt.show()
+
+	samples = np.array(samples)
+	samples = np.reshape(samples, (len(samples)))
+	plot_sample_histogram(samples)
+	print "Percent acceptances: " + str(percent_acceptances(num_acceptances, num_rejections))
+	print "Num acceptances: " + str(num_acceptances)
+	print "Num rejections: " + str(num_rejections)
+	bin_width = 10
+	plot_sample_acceptance_rate(samples, bin_width)
+
+
 
 
 
