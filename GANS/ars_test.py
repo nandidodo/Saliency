@@ -68,6 +68,13 @@ def plot_sample_histogram(samples, bins=100):
 	plt.title('histogram')
 	plt.show()
 
+def plot_losses(losses):
+	plt.plot(losses)
+	plt.title('loss values over time')
+	plt.xlabel('iteration')
+	plt.ylabel('loss value')
+	plt.show()
+
 
 def train_and_sample():
 	input_dim = 1
@@ -79,6 +86,8 @@ def train_and_sample():
 	#samples= np.random.uniform(low=-10, high=10, size=num_samples)
 	params = [mu, sigma]
 	runs = 10000
+	losses = []
+	accept_rejects = []
 
 	num_acceptances = 0
 	num_rejections = 0
@@ -118,15 +127,18 @@ def train_and_sample():
 			print "Result: " + str(result) + "Actual height: " + str(actual_height)
 			sample_height = result*height
 			#now for the sampling step
+			losses.append(loss_val)
 			if sample_height <= actual_height:
 				#this means acceptance
 				samples.append(sample)
 				num_acceptances +=1
 				print "ACCEPTED"
+				accept_rejects.append(1)
 			if sample_height > actual_height:
 				#rejection, discard samlpe
 				num_rejections +=1
 				print "Rejected"
+				accept_rejects.append(0)
 
 	#not sure what to do now as mycah's music is really distracting... dagnabbit!
 
@@ -134,12 +146,14 @@ def train_and_sample():
 
 	samples = np.array(samples)
 	samples = np.reshape(samples, (len(samples)))
+	losses = np.array(losses)
+	accept_rejects = np.array(accept_rejects)
 	plot_sample_histogram(samples)
 	print "Percent acceptances: " + str(percent_acceptances(num_acceptances, num_rejections))
 	print "Num acceptances: " + str(num_acceptances)
 	print "Num rejections: " + str(num_rejections)
 	bin_width = 10
-	plot_sample_acceptance_rate(samples, bin_width)
+	plot_sample_acceptance_rate(accept_rejects, bin_width)
 
 
 
