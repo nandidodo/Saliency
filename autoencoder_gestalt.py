@@ -407,9 +407,9 @@ def test_cifar():
 	model.compile(optimizer='sgd', loss=test_loss_func)
 
 
-	his = model.fit(slicelefttrain, slicerighttrain, nb_epoch=10, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	his = model.fit(slicelefttrain, slicerighttrain, nb_epoch=1, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	history = serialize_class_object(his)
-	preds = mode.predict(x_test)
+	preds = model.predict(slicelefttest)
 	save_array(preds, 'gestalt/TEST_MNIST_PREDS')
 	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
 	#okay, let's see if this simple cifar test works at all!
