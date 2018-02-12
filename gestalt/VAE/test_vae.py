@@ -26,7 +26,7 @@ if K.image_data_format() == 'channels_first':
 else:
 		original_img_size = (img_rows, img_cols, img_chns)
 
-epochs = 10
+epochs = 20
 batch_size = 100
 # number of convolutional filters to use
 filters = 64
@@ -192,9 +192,9 @@ def kl_loss(z_mean, z_log_var):
 def predict_display(N, testslices, actuals,generator):
 	testsh = testslices.shape
 	actualsh = actuals.shape
-	if len(testsh) ==3:
-		testslices = np.reshape(testslices,(testsh[0], testsh[1], testsh[2]))
-		actuals = np.reshape(actuals, (actualsh[0], actualsh[1], actualsh[2]))
+	#if len(testsh) ==3:
+	testslices = np.reshape(testslices,(testsh[0], testsh[1], testsh[2]))
+	actuals = np.reshape(actuals, (actualsh[0], actualsh[1], actualsh[2]))
 
 	#epsilon_std = 1.0
 	for i in xrange(N):
@@ -241,8 +241,8 @@ def mnist_experiment():
 	#print(imgs.shape)
 	#x_train, x_test = split_first_test_train(imgs)
 	#print('x_train.shape:', x_train.shape)
-	#shape = x_train.shape[1:]
-	shape=lefttrain.shape[1:]
+	shape = x_train.shape[1:]
+	#shape=lefttrain.shape[1:]
 
 	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
 	vae.compile(optimizer='rmsprop',loss=unnormalised_reconstruction_loss)
@@ -250,12 +250,12 @@ def mnist_experiment():
 
 	callbacks = build_callbacks("results/callbacks/")
 
-	his = vae.fit(lefttrain,lefttrain,
+	his = vae.fit(x_train,x_train,
 		shuffle=True,epochs=epochs, batch_size=batch_size,
-		validation_data=(lefttest, righttest))
+		validation_data=(x_test, x_test))
 
 	#just for quick tests of the thing
-	x_test = lefttest
+	#x_test = lefttest
 
 	history = serialize_class_object(his)
 	save_array(history, "results/VAE_train_history")
@@ -282,8 +282,8 @@ def mnist_experiment():
 	preds = vae.predict(x_test)
 	save_array(preds, "results/mnist_vae_preds")
 			
-	predict_display(20, lefttest, x_test, generator)
-	#Tensor("add_1:0", shape=(?, 2), dtype=float32)
+	#predict_display(20, lefttest, x_test, generator)
+	##Tensor("add_1:0", shape=(?, 2), dtype=float32)
 
 
 	# display a 2D manifold of the digits
@@ -386,5 +386,8 @@ def cifar10_experiment():
 if __name__ == '__main__':
 	#cifar10_experiment()
 	mnist_experiment()
+	#first thing to do is to check that it works absolutely. Not totally sure.
+	#second thing in the standard one is to check the loss func works directly as appropriate?
+	#I'm not sure how to implement it perfectly though, so I should look at this!
 	#right so it learns absolutely nothing with the cifar. tomorrow's job is figuring out why
 
