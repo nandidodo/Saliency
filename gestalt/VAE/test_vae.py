@@ -26,7 +26,7 @@ if K.image_data_format() == 'channels_first':
 else:
 		original_img_size = (img_rows, img_cols, img_chns)
 
-epochs = 20
+epochs = 5
 batch_size = 100
 # number of convolutional filters to use
 filters = 64
@@ -167,15 +167,22 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 	#okay, so at the moment the loss is utterly enormous. It's probably a problem with the loss function? but I'm not totally sure?
 
 #split out the losses into functions. This seems to have worked so far!
-def reconstruction_loss(rows, cols, y, x_decoded):
-	return rows * cols * metrics.binary_crossentropy(K.flatten(y), K.flatten(x_decoded))
-
+def reconstruction_loss(y, x_decoded):
+	#let's hard code this for now
+	rows = 28
+	cols = 28
+	rec_loss = rows * cols * metrics.binary_crossentropy(K.flatten(y), K.flatten(x_decoded))
+	print("Rec loss: " + str(rec_loss))
+	return rec_loss
 def unnormalised_reconstruction_loss(x_decoded, y):
-	return metrics.binary_crossentropy(K.flatten(x_decoded), K.flatten(y))
+	rec_loss = metrics.binary_crossentropy(K.flatten(x_decoded), K.flatten(y))
+	print("Rec loss: " + str(rec_loss))
+	return rec_loss
 
 def kl_loss(z_mean, z_log_var):
-	return -0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
-
+	klloss =  -0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
+	print("KL loss: " + str(klloss))
+	return klloss
 
 # oh wow!!! this might be working!!!!! I guess only time will tell here?!!?!?!??!
 # we have a reasonable lack of loss, which is good. but oh wow. If this works it could unlock the whole gestalt thing properly, which would be fantastic!
@@ -241,28 +248,35 @@ def mnist_experiment():
 	#print(imgs.shape)
 	#x_train, x_test = split_first_test_train(imgs)
 	#print('x_train.shape:', x_train.shape)
-	shape = x_train.shape[1:]
+	shape = lefttrain.shape[1:]
 	#shape=lefttrain.shape[1:]
 
 	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
-	vae.compile(optimizer='rmsprop',loss=unnormalised_reconstruction_loss)
+	vae.compile(optimizer='rmsprop',loss=reconstruction_loss)
 	vae.summary()
 
 	callbacks = build_callbacks("results/callbacks/")
 
-	his = vae.fit(x_train,x_train,
+	his = vae.fit(lefttrain,righttrain,
 		shuffle=True,epochs=epochs, batch_size=batch_size,
-		validation_data=(x_test, x_test))
+		validation_data=(lefttest, righttest))
 
+	#okay, so this totally fails even on the simplest and least demanding of mnist tasks
+	#I am entirely uncertain why it does so or what is going wrong? I guess the only thing to do is perhaps start again from the tutorial example and do more rigorous quality control at each step. dagnabbit. this is just really frustrating.
+	#maybe the trouble is that the kl loss massively outweights the reconstruction lsos
+	#so I just end up with a thing. let's try it with the normaliesd reconstruction loss!
+
+	#okay, this works now! that's pretty great!
 	#just for quick tests of the thing
 	#x_test = lefttest
+	#let's try it now with the split data, to see if there are any interesting results
 
 	history = serialize_class_object(his)
 	save_array(history, "results/VAE_train_history")
 
 
 	# display a 2D plot of the digit classes in the latent space
-	x_test_encoded = encoder.predict(x_test, batch_size=batch_size)
+	x_test_encoded = encoder.predict(leftslicetest, batch_size=batch_size)
 	plt.figure(figsize=(6, 6))
 	plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1])
 	#plt.colorbar()
@@ -372,6 +386,8 @@ def cifar10_experiment():
 	save_array(preds, "results/cifar_vae_preds")
 			
 	predict_display(20, lefttest, x_test, generator)
+	#okay, well then that's great. This doesn't work at all. even in the best of circumstances
+	#I don't understand why.. dagnabbit!? It was woring before!
 
 
 
