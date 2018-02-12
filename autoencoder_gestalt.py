@@ -25,6 +25,8 @@ from experiments import *
 from gestalt import *
 import matplotlib.pyplot as plt
 from keras.models import load_model
+from keras import backend as K
+from keras import metrics
 
 
 def split_first_test_train(data, frac_train = 0.9):
@@ -250,6 +252,27 @@ def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test_32px"
 	
 	return [model, preds1, preds2, history, benchmark_preds]
 
+
+def test_loss_func(x,y):
+	print "IN loss function"
+	#print x.shape
+	##print y.shape
+	#x = K.eval(x)
+	#y = K.eval(y)
+	#print "post eval!"
+	#print x.shape
+	#print y.shape
+	#print type(x)
+	#print type(y)
+	
+	#print x	
+	#print y
+
+	#compare_two_images(x,y)
+	#the above are sanity checks seeing if the correct images are actually fed into the loss functoin
+	#and now I'll just return an utterly standard binary cross-entropy loss functio
+	return metrics.binary_crossentropy(K.flatten(x), K.flatten(y))
+
 def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Model=SimpleConvDropoutBatchNorm, save_model=True, save_model_fname="gestalt/default_gestalt_model", loss_func = 'mse'):
 	# has model function for additional generality here, which is great!
 	imgs = load_array("testimages_combined")
@@ -282,7 +305,6 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 		plt.show(fig)
 
 	"""
-	# okay, so oru slices are correct and we're fitting it right... I think. let's have another examine of this
 
 	print "SHAPES OF INPUTS:"
 	print slicelefttrain.shape
@@ -368,7 +390,7 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 
 # okay, this is really really weird.  have no idea how it actually manages to do it.. .argh!?
 #like how can it know??? those are test images it's showing... wtf?? how does it manage to know that... argh?
-	
+
 
 def test_cifar():
 	(xtrain, ytrain), (xtest, ytest) = cifar10.load_data()
@@ -376,13 +398,22 @@ def test_cifar():
 	xtest = xtest[:,:,:,0].astype('float32')/255.
 	xtrain = np.reshape(xtrain, (len(xtrain), 32,32,1))
 	xtest = np.reshape(xtest, (len(xtest), 32,32,1))
+	slicelefttrain, slicerighttrain = split_dataset_center_slice(xtrain, 16)
+	slicelefttest, slicerighttest= split_dataset_center_slice(xtest,16)
 	print xtrain.shape
 	#model = SimpleAutoencoder((28,28,1))
-	model=SimpleConvDropoutBatchNorm((32,32,1))
-	model.compile(optimizer='sgd', loss='mse')
+	
+	model=SimpleConvDropoutBatchNorm((32,16,1))
+	model.compile(optimizer='sgd', loss=test_loss_func)
 
 
-	model.fit(xtrain, xtrain, nb_epoch=500, batch_size=128, shuffle=True, validation_data=(xtest, xtest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	his = model.fit(slicelefttrain, slicerighttrain, nb_epoch=10, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	history = serialize_class_object(his)
+	preds = mode.predict(x_test)
+	save_array(preds, 'gestalt/TEST_MNIST_PREDS')
+	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
+	#okay, let's see if this simple cifar test works at all!
+	#okay, our experiments are running.  Let's get some of this sorted!
 	
 
 # it actually seems to have worked really well!!! our model is really niec and good! that's awesome! next steps are getting more images, getting gestalt images, telling richard about it, and seeing what he says, and experimenting with different settings but the basic hyperparams seem to work really well this time, which is great!
@@ -391,7 +422,7 @@ def test_cifar():
 #let's get this show on the road!
 
 if __name__ =='__main__':
-	#test_cifar()
+	test_cifar()
 	#test_gestalt(both=True, epochs=500, fname="BCE_gestalt_results",save_model_fname="gestalt/BCE_SimpleConvBatchNormModel", loss_func='binary_crossentropy')
 
 	#test_gestalt_single_model(epochs=500)
@@ -428,7 +459,8 @@ if __name__ =='__main__':
 	benchmark_test2 = np.concatenate((rightslice, leftslice), axis=0)
 	plot_three_image_comparison(benchmark_test, preds, benchmark_test2, N=100)
 	"""
-	
+
+	"""	
 	#let's try loading the model
 	model = load_model("gestalt/default_single_model_32px")
 	benchmark_imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
@@ -452,6 +484,7 @@ if __name__ =='__main__':
 	# so yeah, this straight up doesn't work? because it just learns to predict it's own image
 	# I'm kind of confused about what it's learning to do as it never learns totaly successfully
 	#and usually the learning just straight up doesn't work. Let's try it with the vae's instead, as could be interesting! let's try to figure out the vae and get that working?
+	"""
 
 
 
