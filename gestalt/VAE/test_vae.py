@@ -335,7 +335,7 @@ def mnist_experiment():
 def cifar10_experiment():
 	# so cifar isn't workingat all. but mnist does, if I'm not mistaken. We've got to figure out therefore ,what is wrong with the CIFAR code
 	slice_width = 16
-	epochs=50
+	epochs=20
 	(xtrain, ytrain),(xtest, ytest) = cifar10.load_data()
 	xtrain = xtrain.astype('float32')/255.
 	xtest = xtest.astype('float32')/255.
@@ -380,11 +380,11 @@ def cifar10_experiment():
 	#let's try it now with the split data, to see if there are any interesting results
 
 	history = serialize_class_object(his)
-	save_array(history, "results/VAE_train_history_2")
+	save_array(history, "results/VAE_train_history_cifar_1")
 	#save models
-	vae.save('results/VAE_vae_model_1')
-	generator.save('results/VAE_generator_model_1')
-	encoder.save('results/VAE_encoder_model_1')
+	vae.save('results/VAE_vae_model_1_cifar')
+	generator.save('results/VAE_generator_model_1_cifar')
+	encoder.save('results/VAE_encoder_model_1_cifar')
 
 
 	# display a 2D plot of the digit classes in the latent space
@@ -406,9 +406,9 @@ def cifar10_experiment():
 	#generator = Model(decoder_input, _x_decoded_mean_squash)
 
 	preds = vae.predict(lefttest)
-	save_array(preds, "results/mnist_vae_preds_2")
+	save_array(preds, "results/cifar_vae_preds_1")
 			
-	predict_display(20, lefttest, x_test, generator)
+	predict_display(20, lefttest, xtest, generator)
 	##Tensor("add_1:0", shape=(?, 2), dtype=float32)
 
 
@@ -501,8 +501,8 @@ def cifar10_experiment():
 # instead of just decoding itself, and comparing with itself
 
 if __name__ == '__main__':
-	#cifar10_experiment()
-	mnist_experiment()
+	cifar10_experiment()
+	#mnist_experiment()
 	#first thing to do is to check that it works absolutely. Not totally sure.
 	#second thing in the standard one is to check the loss func works directly as appropriate?
 	#I'm not sure how to implement it perfectly though, so I should look at this!
