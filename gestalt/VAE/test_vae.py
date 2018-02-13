@@ -17,6 +17,7 @@ from keras.models import Model
 from keras import backend as K
 from keras import metrics
 from keras.datasets import mnist
+from keras.models import load_model
 from keras.datasets import cifar10
 from utils import *
 
@@ -26,7 +27,7 @@ if K.image_data_format() == 'channels_first':
 else:
 		original_img_size = (img_rows, img_cols, img_chns)
 
-epochs = 5
+epochs = 25
 batch_size = 100
 # number of convolutional filters to use
 filters = 64
@@ -252,7 +253,7 @@ def mnist_experiment():
 	#shape=lefttrain.shape[1:]
 
 	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
-	vae.compile(optimizer='rmsprop',loss=reconstruction_loss)
+	vae.compile(optimizer='adam',loss=reconstruction_loss)
 	vae.summary()
 
 	callbacks = build_callbacks("results/callbacks/")
@@ -260,6 +261,8 @@ def mnist_experiment():
 	his = vae.fit(lefttrain,righttrain,
 		shuffle=True,epochs=epochs, batch_size=batch_size,
 		validation_data=(lefttest, righttest))
+
+	#okay, yay!!! it works really really really wel with all of mnist. That's great. Now I need to try to apply it to cifar... see if it can be done in the slightest. One would hope that it could!!
 
 	#okay, so this totally fails even on the simplest and least demanding of mnist tasks
 	#I am entirely uncertain why it does so or what is going wrong? I guess the only thing to do is perhaps start again from the tutorial example and do more rigorous quality control at each step. dagnabbit. this is just really frustrating.
@@ -272,11 +275,15 @@ def mnist_experiment():
 	#let's try it now with the split data, to see if there are any interesting results
 
 	history = serialize_class_object(his)
-	save_array(history, "results/VAE_train_history")
+	save_array(history, "results/VAE_train_history_2")
+	#save models
+	vae.save('results/VAE_vae_model_1')
+	generator.save('results/VAE_generator_model_1')
+	encoder.save('results/VAE_encoder_model_1')
 
 
 	# display a 2D plot of the digit classes in the latent space
-	x_test_encoded = encoder.predict(leftslicetest, batch_size=batch_size)
+	x_test_encoded = encoder.predict(lefttest, batch_size=batch_size)
 	plt.figure(figsize=(6, 6))
 	plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1])
 	#plt.colorbar()
@@ -293,10 +300,10 @@ def mnist_experiment():
 	#_x_decoded_mean_squash = decoder_mean_squash(_x_decoded_relu)
 	#generator = Model(decoder_input, _x_decoded_mean_squash)
 
-	preds = vae.predict(x_test)
-	save_array(preds, "results/mnist_vae_preds")
+	preds = vae.predict(lefttest)
+	save_array(preds, "results/mnist_vae_preds_2")
 			
-	#predict_display(20, lefttest, x_test, generator)
+	predict_display(20, lefttest, x_test, generator)
 	##Tensor("add_1:0", shape=(?, 2), dtype=float32)
 
 
@@ -327,7 +334,7 @@ def mnist_experiment():
 
 def cifar10_experiment():
 	# so cifar isn't workingat all. but mnist does, if I'm not mistaken. We've got to figure out therefore ,what is wrong with the CIFAR code
-	slice_width = 12
+	slice_width = 16
 	epochs=50
 	(xtrain, ytrain),(xtest, ytest) = cifar10.load_data()
 	xtrain = xtrain.astype('float32')/255.
@@ -338,12 +345,106 @@ def cifar10_experiment():
 	#could be an issue with the learning rate?
 	xtrain = np.reshape(xtrain[:,:,:,0],(len(xtrain), sh[1], sh[2],1))
 	xtest = np.reshape(xtest[:,:,:,0], (len(xtest), sh[1],sh[2],1))
+
+	lefttrain, righttrain = split_dataset_center_slice(xtrain, slice_width)
+	lefttest, righttest = split_dataset_center_slice(xtest, slice_width)
+	#print(lefttrain.shape
+	#imgs= load_array("testimages_combined")
+	#imgs = imgs.astype('float32')/255. # normalise here. This might solve some issues
+	#print(imgs.shape)
+	#x_train, x_test = split_first_test_train(imgs)
+	#print('x_train.shape:', x_train.shape)
+	shape = lefttrain.shape[1:]
+	#shape=lefttrain.shape[1:]
+
+	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
+	vae.compile(optimizer='adam',loss=reconstruction_loss)
+	vae.summary()
+
+	callbacks = build_callbacks("results/callbacks/")
+
+	his = vae.fit(lefttrain,righttrain,
+		shuffle=True,epochs=epochs, batch_size=batch_size,
+		validation_data=(lefttest, righttest))
+
+	#okay, yay!!! it works really really really wel with all of mnist. That's great. Now I need to try to apply it to cifar... see if it can be done in the slightest. One would hope that it could!!
+
+	#okay, so this totally fails even on the simplest and least demanding of mnist tasks
+	#I am entirely uncertain why it does so or what is going wrong? I guess the only thing to do is perhaps start again from the tutorial example and do more rigorous quality control at each step. dagnabbit. this is just really frustrating.
+	#maybe the trouble is that the kl loss massively outweights the reconstruction lsos
+	#so I just end up with a thing. let's try it with the normaliesd reconstruction loss!
+
+	#okay, this works now! that's pretty great!
+	#just for quick tests of the thing
+	#x_test = lefttest
+	#let's try it now with the split data, to see if there are any interesting results
+
+	history = serialize_class_object(his)
+	save_array(history, "results/VAE_train_history_2")
+	#save models
+	vae.save('results/VAE_vae_model_1')
+	generator.save('results/VAE_generator_model_1')
+	encoder.save('results/VAE_encoder_model_1')
+
+
+	# display a 2D plot of the digit classes in the latent space
+	x_test_encoded = encoder.predict(lefttest, batch_size=batch_size)
+	plt.figure(figsize=(6, 6))
+	plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1])
+	#plt.colorbar()
+	plt.show()
+
+	# build a digit generator that can sample from the learned distribution
+	#decoder_input = Input(shape=(latent_dim,))
+	#_hid_decoded = decoder_hid(decoder_input)
+	#_up_decoded = decoder_upsample(_hid_decoded)
+	#_reshape_decoded = decoder_reshape(_up_decoded)
+	#_deconv_1_decoded = decoder_deconv_1(_reshape_decoded)
+	#_deconv_2_decoded = decoder_deconv_2(_deconv_1_decoded)
+	#_x_decoded_relu = decoder_deconv_3_upsamp(_deconv_2_decoded)
+	#_x_decoded_mean_squash = decoder_mean_squash(_x_decoded_relu)
+	#generator = Model(decoder_input, _x_decoded_mean_squash)
+
+	preds = vae.predict(lefttest)
+	save_array(preds, "results/mnist_vae_preds_2")
+			
+	predict_display(20, lefttest, x_test, generator)
+	##Tensor("add_1:0", shape=(?, 2), dtype=float32)
+
+
+	# display a 2D manifold of the digits
+	n = 15  # figure with 15x15 digits
+	digit_width = shape[0]
+	digit_height = shape[1]
+	figure = np.zeros((digit_width * n, digit_height * n))
+	# linearly spaced coordinates on the unit square were transformed through the inverse CDF (ppf) of the Gaussian
+	# to produce values of the latent variables z, since the prior of the latent space is Gaussian
+	grid_x = norm.ppf(np.linspace(0.05, 0.95, n))
+	grid_y = norm.ppf(np.linspace(0.05, 0.95, n))
+
+	for i, yi in enumerate(grid_x):
+		for j, xi in enumerate(grid_y):
+		    z_sample = np.array([[xi, yi]])
+		    z_sample = np.tile(z_sample, batch_size).reshape(batch_size, 2)
+		   # print(z_sample)
+		    x_decoded = generator.predict(z_sample, batch_size=batch_size)
+		    digit = x_decoded[0,:,:,0].reshape(digit_width, digit_height)
+		    figure[i * digit_width: (i + 1) * digit_width,
+		           j * digit_height: (j + 1) * digit_height] = digit
+
+	plt.figure(figsize=(10, 10))
+	plt.imshow(figure, cmap='Greys_r')
+	plt.show()
+
+
+
+	"""
 	print(xtrain.shape)
 	lefttrain, righttrain = split_dataset_center_slice(xtrain, slice_width)
 	lefttest, righttest = split_dataset_center_slice(xtest, slice_width)
 	print(lefttrain.shape)
 	#let's print them to make sure we're doing okay
-	"""
+	
 	for i in xrange(20):
 		fig = plt.figure()
 		print(lefttrain[i].shape)
@@ -355,7 +456,7 @@ def cifar10_experiment():
 		plt.imshow(r)
 		plt.show(fig)
 	
-	"""
+	
 	shape = lefttrain.shape[1:]
 
 	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std,save_fname="results/vae_cifar_model")
@@ -388,7 +489,7 @@ def cifar10_experiment():
 	predict_display(20, lefttest, x_test, generator)
 	#okay, well then that's great. This doesn't work at all. even in the best of circumstances
 	#I don't understand why.. dagnabbit!? It was woring before!
-
+	"""
 
 
 # another thing we could work on is active inference in the standard sense in rl environments. first we need to get a working framework to work in though, so that's really the challenge of this week
