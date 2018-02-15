@@ -14,6 +14,23 @@ import matplotlib.pyplot as plt
 import math
 
 
+def variable_summaries(var):
+	with tf.name_scope('summaries'):
+		with tf.name_scope('mean'):
+			mean = tf.reduce_mean(var)
+			tf.summary.scalar('mean', mean)
+		with tf.name_scope('stddev'):
+			mean = tf.reduce_mean(var)
+			stddev = tf.sqrt(tf.reduce_mean(tf.square(var-mean)))
+			tf.summary.scalar('stddev', stddev)
+		with tf.name_scope('max'):
+			tf.summary.scalar('max', tf.reduce_max(var))
+		with tf.name_scope('min'):
+			tf.summary.scalar('min', tf.reduce_min(var))
+		tf.summary.histogram('histogram', var)
+	
+
+
 input_dims = 1
 intermediate_dim = 10
 output_dims = 1
@@ -22,19 +39,27 @@ def testnet(z):
 		#intermediate_dim = 10
 
 		W1 = tf.get_variable('w1', [input_dims, intermediate_dim], initializer=tf.random_normal_initializer(stddev=0.1))
+		variable_summaries(W1)
 		B1 = tf.get_variable('b1', [intermediate_dim], initializer=tf.constant_initializer())
+		variable_summaries(B1)
 
 		W2 = tf.get_variable('w2', [intermediate_dim, intermediate_dim], initializer=tf.random_normal_initializer(stddev=0.1))
+		variable_summaries(W2)
 		B2 = tf.get_variable('b2', [intermediate_dim], initializer=tf.constant_initializer())
+		variable_summaries(B2)
 
 		W3 = tf.get_variable('w3', [intermediate_dim, output_dims], initializer=tf.random_normal_initializer(stddev=0.1))
+		variable_summaries(W3)
 		B3 = tf.get_variable('b3', [output_dims], initializer=tf.constant_initializer())
-
+		variable_summaries(B3)
 
 		fc1 = tf.nn.relu(tf.matmul(z,W1) + B1)
+		tf.summary.histogram('activations layer 1', fc1)
 		#not sure what activation functoin... I definitely don't want probabilities/sigmoids here
 		fc2 = tf.nn.relu(tf.matmul(fc1, W2) + B2)
+		tf.summary.histogram('activations layer 2', fc2)
 		fc3 = tf.abs(tf.matmul(fc2, W3) + B3)
+		tf.summary.histogram('activations final layer', fc3)
 
 		return fc3 # can't think of anything better to do
 
@@ -65,11 +90,17 @@ def relu1D(x, inflection):
 	#it is basiclaly just it's own language with really bad syntax
 	#dagnabbit!
 	inflection = tf.convert_to_tensor(inflection,dtype='float32')
-	if tf.less(x, inflection):
-		return tf.convert_to_tensor(0)
-	return x
+	print x
+	print inflection
+	return tf.cond(tf.less(x,inflection), lambda: tf_convert_to_tensor(0), lambda: x)
+	#if tf.less(x, inflection):
+	#	return tf.convert_to_tensor(0)
+	#return x	
 
-	
+
+def retx(x,params):
+	return tf.abs(x)
+
 
 def prob_func(x, params):
 		#do something here to return a vector of correct dim size)
@@ -80,7 +111,9 @@ def prob_func(x, params):
 
 		#let's try a simpler one - a unifomr function
 		#return tf.convert_to_tensor(1/20)
-		return relu1D(x, params)
+		#return relu1D(x, params)
+	#return retx(x,params)
+	return gaussian1D(x,params)
 
 	#not sure what to do now to improve this... argh!?
 
@@ -89,7 +122,12 @@ def prob_func(x, params):
 
 def euclid_distance_loss_func(x,y):
 	#assert len(x) == len(y),'network and probability function have different dimensions!'
-	return tf.sqrt(tf.reduce_sum(x-y)**2)
+	#return tf.sqrt(tf.reduce_sum(x-y)**2)
+	#I think this isimplemented wrong. let's try
+	#return tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(x,y))))
+	#return x
+	#let's just test thi sto see if it helps the network at all. it doesn't seem to be and it doesn't enjoy actually increasing the size of its predictions ever, so I'm not sure why it doesn't accept?
+	return tf.losses.mean_squared_error(y,x)
 
 
 def plot_sample_acceptance_rate(samples,bin_width):
@@ -133,8 +171,8 @@ def train_and_sample():
 	mu = 0
 	sigma = 1
 	#samples= np.random.uniform(low=-10, high=10, size=num_samples)
-	#params = [mu, sigma]
-	params = 0
+	params = [mu, sigma]
+	#params = 0
 	runs = 10000
 	losses = []
 	accept_rejects = []
@@ -143,6 +181,12 @@ def train_and_sample():
 	num_rejections = 0
 
 	lr = 0.0001
+
+	#sort out tensorboad stuff
+	merged = tf.summary.merge_all()
+	summaries_dir = '/tmp'
+	train_writer =tf.summary.FileWriter(summaries_dir + '/train', sess.grah)
+	test_writer=tf.summary.FileWriter(summaries_dir + '/test')
 
 	with tf.variable_scope('placeholder'):
 		X = tf.placeholder(tf.float32, [None,1])
@@ -156,9 +200,11 @@ def train_and_sample():
 
 	with tf.variable_scope('loss'):
 		loss = euclid_distance_loss_func(testnet(X), prob_func(X, params))
+		tf.summary_scalar(loss)
 	
 	with tf.variable_scope('train'):
 		train_step = tf.train.AdamOptimizer(learning_rate = lr).minimize(loss)
+		tf.summary_scalar(train_step)
 
 	with tf.variable_scope('prob'):
 		prob_height = prob_func(X, params)
@@ -175,10 +221,16 @@ def train_and_sample():
 			sample = np.random.uniform(low=-10, high=10,size=1)
 			height = np.random.uniform(low=0, high=1, size=1)
 			sample = np.reshape(sample,(1,1))
-			result, loss_val, _ ,actual_height= sess.run([res, loss, train_step, prob_height], feed_dict={X: sample})
+			run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+			run_metadata = tf.RunMetadata()
+			summary, result, loss_val, train_val ,actual_height= sess.run([merged, res, loss, train_step, prob_height], feed_dict={X: sample},options=run_options, run_metadata=run_metadata)
 			sample_height = result*height
 			print "Epochs: " + str(i) + "runs: " + str(j) + "loss: " + str(loss_val) + " Sample: " + str(sample)
 			print "Result: " + str(result) + "Actual height: " + str(actual_height)
+			print "Training val : " + str(train_val)
+			train_writer.add_summary(summary,j)
+			train_writer.add_runmetadata(run_metadata, str(i) + '|' + str(j))
+			
 			#now for the sampling step
 			losses.append(loss_val)
 			if sample_height <= actual_height:
@@ -196,6 +248,10 @@ def train_and_sample():
 	#not sure what to do now as mycah's music is really distracting... dagnabbit!
 
 	# I need to plot all the samples presumably
+
+	#close the writers
+	train_writer.close()
+	test_writer.close()
 
 	samples = np.array(samples)
 	samples = np.reshape(samples, (len(samples)))
