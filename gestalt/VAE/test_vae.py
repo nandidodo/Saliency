@@ -171,8 +171,8 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 #split out the losses into functions. This seems to have worked so far!
 def reconstruction_loss(y, x_decoded):
 	#let's hard code this for now
-	rows = 28
-	cols = 28
+	rows = 16
+	cols = 32
 	rec_loss = rows * cols * metrics.binary_crossentropy(K.flatten(y), K.flatten(x_decoded))
 	print("Rec loss: " + str(rec_loss))
 	return rec_loss
@@ -334,8 +334,8 @@ def mnist_experiment():
 
 
 def cifar10_experiment():
-	# so cifar isn't workingat all. but mnist does, if I'm not mistaken. We've got to figure out therefore ,what is wrong with the CIFAR code
-	slice_width = 12
+	# so cifar isn't workingat all. but mnist does, if I'm not mistaken. We've got to figure out therefor ,what is wrong with the CIFAR code
+	slice_width = 16
 	epochs=20
 	(xtrain, ytrain),(xtest, ytest) = cifar10.load_data()
 	xtrain = xtrain.astype('float32')/255.
@@ -374,7 +374,7 @@ def cifar10_experiment():
 	adam = optimizers.Adam(lr=adam_lr, beta_1=adam_beta_1, beta_2=adam_beta_2)
 
 
-	vae.compile(optimizer=sgd,loss=reconstruction_loss)
+	vae.compile(optimizer=adam,loss=reconstruction_loss)
 	vae.summary()
 
 	callbacks = build_callbacks("results/callbacks/")
@@ -384,6 +384,8 @@ def cifar10_experiment():
 		validation_data=(lefttest, righttest))
 
 	#so, sgd diverges, let's try to figure that out a little first
+	# I'm going to try playing aroudn with the optimisers and decreasing the slice width
+	#to see if that can get any results which could be useful!
 
 
 
@@ -432,7 +434,7 @@ def cifar10_experiment():
 	preds = vae.predict(lefttest)
 	save_array(preds, "results/cifar_vae_preds_1")
 			
-	predict_display(20, lefttest, xtest, generator)
+	predict_display(20, lefttest, righttest, generator)
 	##Tensor("add_1:0", shape=(?, 2), dtype=float32)
 
 
