@@ -335,7 +335,7 @@ def mnist_experiment():
 
 def cifar10_experiment():
 	# so cifar isn't workingat all. but mnist does, if I'm not mistaken. We've got to figure out therefore ,what is wrong with the CIFAR code
-	slice_width = 16
+	slice_width = 12
 	epochs=20
 	(xtrain, ytrain),(xtest, ytest) = cifar10.load_data()
 	xtrain = xtrain.astype('float32')/255.
@@ -362,11 +362,17 @@ def cifar10_experiment():
 	
 
 	#define optimisers here
-	learning_rate = 0.001
+	learning_rate = 0.00001
 	sgd_decay = 1e-6
 	sgd_momentum=0.9
 	nesterov=True
 	sgd = optimizers.SGD(lr = learning_rate, decay=sgd_decay, momentum=sgd_momentum, nesterov=nesterov)
+
+	adam_lr = 0.001
+	adam_beta_1 = 0.9
+	adam_beta_2=0.999
+	adam = optimizers.Adam(lr=adam_lr, beta_1=adam_beta_1, beta_2=adam_beta_2)
+
 
 	vae.compile(optimizer=sgd,loss=reconstruction_loss)
 	vae.summary()
