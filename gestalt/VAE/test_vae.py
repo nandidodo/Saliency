@@ -364,7 +364,7 @@ def cifar10_experiment():
 	#define optimisers here
 	learning_rate = 0.001
 	sgd_decay = 1e-6
-	momentum=0.9
+	sgd_momentum=0.9
 	nesterov=True
 	sgd = optimizers.SGD(lr = learning_rate, decay=sgd_decay, momentum=sgd_momentum, nesterov=nesterov)
 
