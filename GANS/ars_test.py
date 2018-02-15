@@ -40,6 +40,37 @@ def testnet(z):
 
 		# I'm gonig to try it with 1 D gaussian!
 
+#our probability functions here
+
+def uniform_func(divider):
+	return tf.convert_to_tensor(1/divider)
+
+def gaussian1D(x, params):
+	mu, sigma = params
+	return (1/tf.sqrt(2*math.pi * sigma**2)) * tf.exp(-((x-mu)**2)/2*sigma**2)
+	
+
+def delta_peak1D(x, params):
+	center, width = params
+	center = tf.convert_to_tensor(center)
+	width = tf.convert_to_tensor(width)
+	if tf.greater_equal(x, (center-width)) and tf.less_equal(x, (center+width)):
+		return tf.convert_to_tensor(1/width)
+	return tf.convert_to_tensor(0)
+
+#I've got to check a variaty of distributions of some sort, I feel
+def relu1D(x, inflection):
+
+	#dagnabbit, this is stupid, I've got to use tensorflow cond for all of this
+	#it is basiclaly just it's own language with really bad syntax
+	#dagnabbit!
+	inflection = tf.convert_to_tensor(inflection,dtype='float32')
+	if tf.less(x, inflection):
+		return tf.convert_to_tensor(0)
+	return x
+
+	
+
 def prob_func(x, params):
 		#do something here to return a vector of correct dim size)
 		#for now try it with a single univariate gaussian
@@ -48,7 +79,14 @@ def prob_func(x, params):
 		#return (1/tf.sqrt(2*math.pi * sigma**2)) * tf.exp(-((x-mu)**2)/2*sigma**2)
 
 		#let's try a simpler one - a unifomr function
-		return tf.convert_to_tensor(1/20)
+		#return tf.convert_to_tensor(1/20)
+		return relu1D(x, params)
+
+	#not sure what to do now to improve this... argh!?
+
+
+
+
 def euclid_distance_loss_func(x,y):
 	#assert len(x) == len(y),'network and probability function have different dimensions!'
 	return tf.sqrt(tf.reduce_sum(x-y)**2)
@@ -95,7 +133,8 @@ def train_and_sample():
 	mu = 0
 	sigma = 1
 	#samples= np.random.uniform(low=-10, high=10, size=num_samples)
-	params = [mu, sigma]
+	#params = [mu, sigma]
+	params = 0
 	runs = 10000
 	losses = []
 	accept_rejects = []
