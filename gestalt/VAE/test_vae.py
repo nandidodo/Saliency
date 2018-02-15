@@ -19,6 +19,7 @@ from keras import metrics
 from keras.datasets import mnist
 from keras.models import load_model
 from keras.datasets import cifar10
+from keras import optimizers
 from utils import *
 
 img_rows, img_cols, img_chns = 28, 28, 1
@@ -358,7 +359,16 @@ def cifar10_experiment():
 	#shape=lefttrain.shape[1:]
 
 	vae, encoder, generator, z_mean, z_log_var = vae_model(shape,epochs, batch_size, filters, num_conv, latent_dim, intermediate_dim, epsilon_std)
-	vae.compile(optimizer='adam',loss=reconstruction_loss)
+	
+
+	#define optimisers here
+	learning_rate = 0.001
+	sgd_decay = 1e-6
+	momentum=0.9
+	nesterov=True
+	sgd = optimizers.SGD(lr = learning_rate, decay=sgd_decay, momentum=sgd_momentum, nesterov=nesterov)
+
+	vae.compile(optimizer=sgd,loss=reconstruction_loss)
 	vae.summary()
 
 	callbacks = build_callbacks("results/callbacks/")
@@ -367,6 +377,14 @@ def cifar10_experiment():
 		shuffle=True,epochs=epochs, batch_size=batch_size,
 		validation_data=(lefttest, righttest))
 
+	#so, sgd diverges, let's try to figure that out a little first
+
+
+
+# So... I'm not sure what I should do with this... I could try variosu different things.
+#First I could try slice width perhaps?
+
+	#I'm beginning to think that this just probably isn't possible with cifar. it's too difficult, althoguh I could finesse the architecture and so forth?
 	#okay, yay!!! it works really really really wel with all of mnist. That's great. Now I need to try to apply it to cifar... see if it can be done in the slightest. One would hope that it could!!
 
 	#okay, so this totally fails even on the simplest and least demanding of mnist tasks
