@@ -407,13 +407,34 @@ def test_cifar():
 	model.compile(optimizer='sgd', loss=test_loss_func)
 
 
-	his = model.fit(slicelefttrain, slicerighttrain, nb_epoch=1, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	his = model.fit(slicelefttrain, slicerighttrain, nb_epoch=25, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	history = serialize_class_object(his)
 	preds = model.predict(slicelefttest)
-	save_array(preds, 'gestalt/TEST_MNIST_PREDS')
+	save_array(preds, 'gestalt/TEST_CIFAR_PREDS_2')
 	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
 	#okay, let's see if this simple cifar test works at all!
 	#okay, our experiments are running.  Let's get some of this sorted!
+
+# okay, lets do the simplest thing possible = go back to mnist!!
+def test_mnist():
+	(x_train, _), (x_test, y_test) = mnist.load_data()
+	x_train = x_train.astype('float32') / 255.
+	x_train = x_train.reshape((x_train.shape[0],) + original_img_size)
+	x_test = x_test.astype('float32') / 255.
+	x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
+
+	lefttrain, righttrain = split_dataset_center_slice(x_train, 12)
+	lefttest, righttest = split_dataset_center_slice(x_test, 12)
+
+	model=SimpleConvDropoutBatchNorm((28,12,1))
+	model.compile(optimizer='sgd', loss=test_loss_func)
+
+
+	his = model.fit(slicelefttrain, slicerighttrain, epochs=1, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	history = serialize_class_object(his)
+	preds = model.predict(slicelefttest)
+	save_array(preds, 'gestalt/TEST_MNIST_PREDS_3')
+	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
 	
 
 # it actually seems to have worked really well!!! our model is really niec and good! that's awesome! next steps are getting more images, getting gestalt images, telling richard about it, and seeing what he says, and experimenting with different settings but the basic hyperparams seem to work really well this time, which is great!
@@ -422,7 +443,8 @@ def test_cifar():
 #let's get this show on the road!
 
 if __name__ =='__main__':
-	test_cifar()
+	#test_cifar()
+	test_mnist()
 	#test_gestalt(both=True, epochs=500, fname="BCE_gestalt_results",save_model_fname="gestalt/BCE_SimpleConvBatchNormModel", loss_func='binary_crossentropy')
 
 	#test_gestalt_single_model(epochs=500)
