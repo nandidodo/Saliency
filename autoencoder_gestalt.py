@@ -419,9 +419,9 @@ def test_cifar():
 def test_mnist():
 	(x_train, _), (x_test, y_test) = mnist.load_data()
 	x_train = x_train.astype('float32') / 255.
-	x_train = x_train.reshape((x_train.shape[0],) + original_img_size)
+	x_train = np.reshape(x_train, (len(x_train), 28,28,1))
 	x_test = x_test.astype('float32') / 255.
-	x_test = x_test.reshape((x_test.shape[0],) + original_img_size)
+	x_test = np.reshape(x_test, (len(x_test), 28,28,1))
 
 	lefttrain, righttrain = split_dataset_center_slice(x_train, 12)
 	lefttest, righttest = split_dataset_center_slice(x_test, 12)
@@ -430,11 +430,11 @@ def test_mnist():
 	model.compile(optimizer='sgd', loss=test_loss_func)
 
 
-	his = model.fit(slicelefttrain, slicerighttrain, epochs=1, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	his = model.fit(lefttrain, righttrain, epochs=10, batch_size=128, shuffle=True, validation_data=(lefttest, righttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	history = serialize_class_object(his)
-	preds = model.predict(slicelefttest)
+	preds = model.predict(lefttest)
 	save_array(preds, 'gestalt/TEST_MNIST_PREDS_3')
-	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
+	plot_four_image_comparison(preds, lefttest, righttest, 20)
 	
 
 # it actually seems to have worked really well!!! our model is really niec and good! that's awesome! next steps are getting more images, getting gestalt images, telling richard about it, and seeing what he says, and experimenting with different settings but the basic hyperparams seem to work really well this time, which is great!
