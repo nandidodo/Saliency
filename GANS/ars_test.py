@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+sess = tf.InteractiveSession()
 
 def variable_summaries(var):
 	with tf.name_scope('summaries'):
@@ -182,13 +183,9 @@ def train_and_sample():
 
 	lr = 0.0001
 
-	#sort out tensorboad stuff
-	merged = tf.summary.merge_all()
-	summaries_dir = '/tmp'
-	train_writer =tf.summary.FileWriter(summaries_dir + '/train', sess.grah)
-	test_writer=tf.summary.FileWriter(summaries_dir + '/test')
 
-	with tf.variable_scope('placeholder'):
+
+	with tf.variable_scope('input'):
 		X = tf.placeholder(tf.float32, [None,1])
 		tf.summary.histogram('input', X)
 
@@ -198,18 +195,25 @@ def train_and_sample():
 	with tf.variable_scope('result'):
 		res = testnet(X)
 
-	with tf.variable_scope('loss'):
-		loss = euclid_distance_loss_func(testnet(X), prob_func(X, params))
-		tf.summary_scalar(loss)
-	
-	with tf.variable_scope('train'):
-		train_step = tf.train.AdamOptimizer(learning_rate = lr).minimize(loss)
-		tf.summary_scalar(train_step)
-
 	with tf.variable_scope('prob'):
 		prob_height = prob_func(X, params)
 
-	sess = tf.Session()
+	with tf.variable_scope('loss'):
+		loss = euclid_distance_loss_func(res, prob_height)
+		tf.summary.scalar('loss', loss)
+	
+	with tf.variable_scope('train'):
+		train_step = tf.train.AdamOptimizer(learning_rate = lr).minimize(loss)
+		#tf.summary.scalar('train',train_step)
+
+
+
+		#sort out tensorboad stuff
+	summaries_dir = 'tmp'
+	train_writer =tf.summary.FileWriter(summaries_dir + '/train', sess.graph)
+	test_writer=tf.summary.FileWriter(summaries_dir + '/test')
+	merged = tf.summary.merge_all()
+	print merged
 	init = tf.global_variables_initializer()
 	sess.run(init)
 	samples = []
@@ -221,15 +225,15 @@ def train_and_sample():
 			sample = np.random.uniform(low=-10, high=10,size=1)
 			height = np.random.uniform(low=0, high=1, size=1)
 			sample = np.reshape(sample,(1,1))
-			run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-			run_metadata = tf.RunMetadata()
-			summary, result, loss_val, train_val ,actual_height= sess.run([merged, res, loss, train_step, prob_height], feed_dict={X: sample},options=run_options, run_metadata=run_metadata)
+			#run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+			#run_metadata = tf.RunMetadata()
+			summary, result, loss_val, train_val ,actual_height= sess.run([merged, res, loss, train_step, prob_height], feed_dict={X: sample})
 			sample_height = result*height
 			print "Epochs: " + str(i) + "runs: " + str(j) + "loss: " + str(loss_val) + " Sample: " + str(sample)
 			print "Result: " + str(result) + "Actual height: " + str(actual_height)
 			print "Training val : " + str(train_val)
 			train_writer.add_summary(summary,j)
-			train_writer.add_runmetadata(run_metadata, str(i) + '|' + str(j))
+			#train_writer.add_runmetadata(run_metadata, str(i) + '|' + str(j))
 			
 			#now for the sampling step
 			losses.append(loss_val)
