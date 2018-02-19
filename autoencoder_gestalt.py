@@ -122,7 +122,7 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 		#originalcolour
 		ax1 = fig.add_subplot(221)
-		plt.imshow(leftslice[i])
+		plt.imshow(leftslice[i],cmap='gray')
 		plt.title('Left slice')
 		if reverse:
 			plt.title('Right slice')
@@ -131,7 +131,7 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 		#red
 		ax2 = fig.add_subplot(222)
-		plt.imshow(preds[i])
+		plt.imshow(preds[i],cmap='gray')
 		plt.title('Predicted Right Slice')
 		if reverse:
 			plt.title('Predicted Left Slice')
@@ -140,7 +140,7 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 		#green
 		ax3 = fig.add_subplot(223)
-		plt.imshow(leftslice[i])
+		plt.imshow(leftslice[i],cmap='gray')
 		plt.title('Left slice')
 		if reverse:
 			plt.title('Right Slice')
@@ -149,7 +149,7 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 		##blue
 		ax4 = fig.add_subplot(224)
-		plt.imshow(rightslice[i])
+		plt.imshow(rightslice[i],cmap='gray')
 		plt.title('Actual Right slice')
 		if reverse:
 			plt.title('Actual Left Slice')
@@ -158,7 +158,7 @@ def plot_four_image_comparison(preds, rightslice, leftslice,N=10, reverse=False)
 
 		plt.tight_layout()
 		plt.show(fig)
-		return fig
+	#return fig
 
 def plot_three_image_comparison(slices, predicted_slices,other_slices,N=20):
 	shape = slices.shape
@@ -400,20 +400,42 @@ def test_cifar():
 	xtest = np.reshape(xtest, (len(xtest), 32,32,1))
 	slicelefttrain, slicerighttrain = split_dataset_center_slice(xtrain, 16)
 	slicelefttest, slicerighttest= split_dataset_center_slice(xtest,16)
-	print xtrain.shape
 	#model = SimpleAutoencoder((28,28,1))
 	
 	model=SimpleConvDropoutBatchNorm((32,16,1))
 	model.compile(optimizer='sgd', loss=test_loss_func)
 
 
-	his = model.fit(slicelefttrain, slicerighttrain, nb_epoch=25, batch_size=128, shuffle=True, validation_data=(slicelefttest, slicerighttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	his = model.fit(slicerighttrain, slicelefttrain, nb_epoch=25, batch_size=128, shuffle=True, validation_data=(slicerighttest, slicelefttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	history = serialize_class_object(his)
 	preds = model.predict(slicelefttest)
 	save_array(preds, 'gestalt/TEST_CIFAR_PREDS_2')
-	plot_four_image_comparison(preds, slicelefttest, slicerighttest, 20)
+	plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
 	#okay, let's see if this simple cifar test works at all!
 	#okay, our experiments are running.  Let's get some of this sorted!
+
+def invert_preds_image(pred):
+	sh = pred.shape
+	width = sh[0]
+	height = sh[1]
+	#not sure if this the right way around!
+	new_pred = np.zeros(sh)
+	for i in xrange(width):
+		for j in xrange(height):
+			val = pred[i][j]
+			if val <=0.1:
+				new_pred[i][j]=0.9
+			if val >0.1:
+				new_pred[i][j] = 0
+	return new_pred
+
+def invert_preds(preds):
+	new_preds = []
+	for i in xrange(len(preds)):
+		new_preds.append(invert_preds_image(preds[i]))
+	new_preds = np.array(new_preds)
+	return new_preds
+		
 
 # okay, lets do the simplest thing possible = go back to mnist!!
 def test_mnist():
@@ -432,11 +454,17 @@ def test_mnist():
 	model.compile(optimizer=optimizer, loss=test_loss_func)
 
 
-	his = model.fit(lefttrain, righttrain, epochs=10, batch_size=128, shuffle=True, validation_data=(lefttest, righttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
-	history = serialize_class_object(his)
-	preds = model.predict(lefttest)
-	save_array(preds, 'gestalt/TEST_MNIST_PREDS_3')
-	plot_four_image_comparison(preds, lefttest, righttest, 20)
+	#his = model.fit(righttrain, lefttrain, epochs=20, batch_size=128, shuffle=True, validation_data=(righttest, lefttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	#history = serialize_class_object(his)
+	#preds = model.predict(righttest)
+	#save_array(preds, 'gestalt/TEST_MNIST_PREDS_3')
+	preds = load_array('gestalt/TEST_MNIST_PREDS_3')
+	#print preds.shape
+	#print preds[0]
+	new_preds = invert_preds(preds)
+	print "NEW PREDS"
+	#print new_preds[0]
+	plot_four_image_comparison(new_preds, righttest, lefttest, N=20)
 	
 
 # it actually seems to have worked really well!!! our model is really niec and good! that's awesome! next steps are getting more images, getting gestalt images, telling richard about it, and seeing what he says, and experimenting with different settings but the basic hyperparams seem to work really well this time, which is great!
@@ -447,6 +475,9 @@ def test_mnist():
 if __name__ =='__main__':
 	#test_cifar()
 	test_mnist()
+
+	#preds = load_array('gestalt/TEST_MNIST_PREDS_3')
+	#print preds.shape
 	#test_gestalt(both=True, epochs=500, fname="BCE_gestalt_results",save_model_fname="gestalt/BCE_SimpleConvBatchNormModel", loss_func='binary_crossentropy')
 
 	#test_gestalt_single_model(epochs=500)
