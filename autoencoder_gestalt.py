@@ -427,7 +427,9 @@ def test_mnist():
 	lefttest, righttest = split_dataset_center_slice(x_test, 12)
 
 	model=SimpleConvDropoutBatchNorm((28,12,1))
-	model.compile(optimizer='sgd', loss=test_loss_func)
+	sgd_learn = 0.0001
+	optimizer = keras.optimizers.SGD(lr=sgd_learn)
+	model.compile(optimizer=optimizer, loss=test_loss_func)
 
 
 	his = model.fit(lefttrain, righttrain, epochs=10, batch_size=128, shuffle=True, validation_data=(lefttest, righttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
