@@ -98,3 +98,15 @@ class SOM(object):
 
 	def update(self, x, win, t):
 		#update the weights of the neuron!
+		eta = self._decay_function(self._learning_rate, t, self.T)
+		sig = self._decay_function(self._sigma, t, self.T)
+		#improves performance
+		g = self.neighbourhood(win, sig)*eta
+		it = np.nditer(g, flags=['multi_index'])
+		while not it.finished:
+			x_w = (x-self.(_weifhts[it.multi_index[)
+			self._weights[it.multi_index] += g[it.multi_index] * x_w
+			#normalisation
+			norm = fast_norm(self._weights[it.multi_index])
+			self._weights[it.multi_index] = self._weights[it.multi_index]/norm
+			it.iternext()
