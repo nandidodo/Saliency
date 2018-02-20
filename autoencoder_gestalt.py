@@ -392,28 +392,6 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 #like how can it know??? those are test images it's showing... wtf?? how does it manage to know that... argh?
 
 
-def test_cifar():
-	(xtrain, ytrain), (xtest, ytest) = cifar10.load_data()
-	xtrain = xtrain[:,:,:,0].astype('float32')/255.
-	xtest = xtest[:,:,:,0].astype('float32')/255.
-	xtrain = np.reshape(xtrain, (len(xtrain), 32,32,1))
-	xtest = np.reshape(xtest, (len(xtest), 32,32,1))
-	slicelefttrain, slicerighttrain = split_dataset_center_slice(xtrain, 16)
-	slicelefttest, slicerighttest= split_dataset_center_slice(xtest,16)
-	#model = SimpleAutoencoder((28,28,1))
-	
-	model=SimpleConvDropoutBatchNorm((32,16,1))
-	model.compile(optimizer='sgd', loss=test_loss_func)
-
-
-	his = model.fit(slicerighttrain, slicelefttrain, nb_epoch=25, batch_size=128, shuffle=True, validation_data=(slicerighttest, slicelefttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
-	history = serialize_class_object(his)
-	preds = model.predict(slicelefttest)
-	save_array(preds, 'gestalt/TEST_CIFAR_PREDS_2')
-	plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
-	#okay, let's see if this simple cifar test works at all!
-	#okay, our experiments are running.  Let's get some of this sorted!
-
 def invert_preds_image(pred):
 	sh = pred.shape
 	width = sh[0]
@@ -429,13 +407,47 @@ def invert_preds_image(pred):
 				new_pred[i][j] = 0
 	return new_pred
 
-def invert_preds(preds):
+def invert_preds(preds, gaussian=False):
 	new_preds = []
 	for i in xrange(len(preds)):
-		new_preds.append(invert_preds_image(preds[i]))
+		new_pred = invert_preds_image(preds[i])
+		if gaussian:
+			new_pred = gaussian_filter(new_pred, sigma=1)
+		new_preds.append(new_pred)
 	new_preds = np.array(new_preds)
 	return new_preds
 		
+
+def test_cifar():
+	(xtrain, ytrain), (xtest, ytest) = cifar10.load_data()
+	xtrain = xtrain[:,:,:,0].astype('float32')/255.
+	xtest = xtest[:,:,:,0].astype('float32')/255.
+	xtrain = np.reshape(xtrain, (len(xtrain), 32,32,1))
+	xtest = np.reshape(xtest, (len(xtest), 32,32,1))
+	slicelefttrain, slicerighttrain = split_dataset_center_slice(xtrain, 16)
+	slicelefttest, slicerighttest= split_dataset_center_slice(xtest,16)
+	#model = SimpleAutoencoder((28,28,1))
+	
+	sgd_lr = 0.0001
+	optimizer = keras.optimizers.SGD(lr=sgd_lr)
+
+	model=SimpleConvDropoutBatchNorm((32,16,1))
+	model.compile(optimizer=optimizer, loss=test_loss_func)
+
+
+	his = model.fit(slicerighttrain, slicelefttrain, nb_epoch=25, batch_size=128, shuffle=True, validation_data=(slicerighttest, slicelefttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	history = serialize_class_object(his)
+	preds = model.predict(slicelefttest)
+	save_array(preds, 'gestalt/TEST_CIFAR_PREDS_2')
+
+	#check the inversion
+	new_preds = invert_preds(preds, gaussian=True)
+	
+	plot_four_image_comparison(new_preds, slicerighttest, slicelefttest, 20)
+	#okay, let's see if this simple cifar test works at all!
+	#okay, our experiments are running.  Let's get some of this sorted!
+
+
 
 # okay, lets do the simplest thing possible = go back to mnist!!
 def test_mnist():
@@ -453,6 +465,18 @@ def test_mnist():
 	optimizer = keras.optimizers.SGD(lr=sgd_learn)
 	model.compile(optimizer=optimizer, loss=test_loss_func)
 
+	#okay, so it sort of works on mnist!!! that's really exciting. Now I've got to scale it up
+	#to cifar, like before, because that is where the main improvements will lie, I feel
+	#and if I can get that sorted, then that would be really really good
+	#hopefully!
+	#I'm not sure what to do to make that better off however, I really don't know... dagnabbit
+
+	#So this gives reasonable-ish results, although they need some preprocessing, on mnist. So that's good. expanding to cifar tends to be more difficult though, and that isannoying. Maybe later when plugged in I should try rerunning the cifar experiments but with the preprocessing steps. I really don't know if that would help. Not sure what else to be honest...
+# so, additionally, I've got to figure out how the rejection sampler is not working. At the moment ironically it's working too well in that the sample acceptance rate tends towards 100% too rapidly, and I think I'm missing a key piece of logic as the whole point is that otherwise normal ARS wouldn't work either with the current logic since the better it is, the higher the acceptance rate, and then from there, the closer the sample ditribution wouldapproximate the normal initial sampling pre-rejection distribution. I need to look this up how it works. maybe it's something to do with the ars being solely a hull above the actual distribution, and having it below distorts the sampling, and I wonder if neural networks can be applied with that constraint, but that still does not help that much as the pint is it "learns" a piecewise linear function to approximate to an ultimate arbitrary closeness the real distribution, presuming it's convex and log bounded and so forth, and so they should run into the same problem as I have. I need to fogire out what is wrong, and most likely it is just a simple and fixable issue which is quite easily done, and hoefully this method could be serious useful now I've got the tensorflow network actually working which is good! maybe I'm just not understanding hwo the ars samples in a ifferent way to the standard rejecion sampler, since if it's uniform, the rejections are a huge part of the method t obe honest! i.e. rally what it plots at each point is not the actul samples but the empirical ratio between acceptances and rejects, and that approximates the distribution if the conditoins hold for obvious reasons, but the point of ars is to distort that ratio, so I'm not sure how it can possibly work? or in fact any kind of rejection sampling other than that bounded by a q of a standard uniform above the support, and really, it needs to be above to some special degree also, since that will change the scale?
+
+
+# okay, so what do I need to do with regard to this? that is the questoin??? 
+# I guess I could expand the model but to work on this productively, I guess I kind of need to actually run the models to test on cifar and so forth. and then ultiamtely the actual image data. More importantly, hwoever, is how to expand on the models, but I'm not sure I actually have a way to expand on the models either, except to twak learning rates and stuff when it diverges, which, again, I need to run it for!
 
 	#his = model.fit(righttrain, lefttrain, epochs=20, batch_size=128, shuffle=True, validation_data=(righttest, lefttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	#history = serialize_class_object(his)
@@ -461,7 +485,7 @@ def test_mnist():
 	preds = load_array('gestalt/TEST_MNIST_PREDS_3')
 	#print preds.shape
 	#print preds[0]
-	new_preds = invert_preds(preds)
+	new_preds = invert_preds(preds, gaussian=True)
 	print "NEW PREDS"
 	#print new_preds[0]
 	plot_four_image_comparison(new_preds, righttest, lefttest, N=20)
@@ -473,8 +497,8 @@ def test_mnist():
 #let's get this show on the road!
 
 if __name__ =='__main__':
-	#test_cifar()
-	test_mnist()
+	test_cifar()
+	#test_mnist()
 
 	#preds = load_array('gestalt/TEST_MNIST_PREDS_3')
 	#print preds.shape
