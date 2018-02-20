@@ -28,7 +28,7 @@ if K.image_data_format() == 'channels_first':
 else:
 		original_img_size = (img_rows, img_cols, img_chns)
 
-epochs = 25
+epochs = 1
 batch_size = 100
 # number of convolutional filters to use
 filters = 64
@@ -406,11 +406,11 @@ def cifar10_experiment():
 	#let's try it now with the split data, to see if there are any interesting results
 
 	history = serialize_class_object(his)
-	save_array(history, "results/VAE_train_history_cifar_1")
+	save_array(history, "results/VAE_train_history_cifar_2")
 	#save models
 	vae.save('results/VAE_vae_model_1_cifar')
-	generator.save('results/VAE_generator_model_1_cifar')
-	encoder.save('results/VAE_encoder_model_1_cifar')
+	generator.save('results/VAE_generator_model_2_cifar')
+	encoder.save('results/VAE_encoder_model_2_cifar')
 
 
 	# display a 2D plot of the digit classes in the latent space
@@ -432,7 +432,7 @@ def cifar10_experiment():
 	#generator = Model(decoder_input, _x_decoded_mean_squash)
 
 	preds = vae.predict(lefttest)
-	save_array(preds, "results/cifar_vae_preds_1")
+	save_array(preds, "results/cifar_vae_preds_2")
 			
 	predict_display(20, lefttest, righttest, generator)
 	##Tensor("add_1:0", shape=(?, 2), dtype=float32)

@@ -40,7 +40,7 @@ class TerminateOnIncreasedLoss(keras.callbacks.Callback):
 
 	def on_epoch_end(self, epoch, logs=None):
 		current = logs.get(self.monitor)
-		if current + diff > min_loss
+		if current + diff > min_loss:
 			self.stopped_epochs = epoch
 			print('Loss increased: stopping training')
 			self.model.stop_training= True	
