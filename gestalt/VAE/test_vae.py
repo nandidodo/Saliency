@@ -28,7 +28,7 @@ if K.image_data_format() == 'channels_first':
 else:
 		original_img_size = (img_rows, img_cols, img_chns)
 
-epochs = 1
+epochs = 50
 batch_size = 100
 # number of convolutional filters to use
 filters = 64
@@ -171,7 +171,7 @@ def vae_model(input_shape,epochs, batch_size, filters, num_conv, latent_dim, int
 #split out the losses into functions. This seems to have worked so far!
 def reconstruction_loss(y, x_decoded):
 	#let's hard code this for now
-	rows = 16
+	rows = 8
 	cols = 32
 	rec_loss = rows * cols * metrics.binary_crossentropy(K.flatten(y), K.flatten(x_decoded))
 	print("Rec loss: " + str(rec_loss))
@@ -335,7 +335,7 @@ def mnist_experiment():
 
 def cifar10_experiment():
 	# so cifar isn't workingat all. but mnist does, if I'm not mistaken. We've got to figure out therefor ,what is wrong with the CIFAR code
-	slice_width = 16
+	slice_width = 8
 	epochs=20
 	(xtrain, ytrain),(xtest, ytest) = cifar10.load_data()
 	xtrain = xtrain.astype('float32')/255.
@@ -406,11 +406,11 @@ def cifar10_experiment():
 	#let's try it now with the split data, to see if there are any interesting results
 
 	history = serialize_class_object(his)
-	save_array(history, "results/VAE_train_history_cifar_2")
+	save_array(history, "results/VAE_train_history_cifar_3")
 	#save models
 	vae.save('results/VAE_vae_model_1_cifar')
-	generator.save('results/VAE_generator_model_2_cifar')
-	encoder.save('results/VAE_encoder_model_2_cifar')
+	generator.save('results/VAE_generator_model_3_cifar')
+	encoder.save('results/VAE_encoder_model_3_cifar')
 
 
 	# display a 2D plot of the digit classes in the latent space
