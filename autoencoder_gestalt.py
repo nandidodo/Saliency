@@ -412,7 +412,7 @@ def invert_preds(preds, gaussian=False):
 	for i in xrange(len(preds)):
 		new_pred = invert_preds_image(preds[i])
 		if gaussian:
-			new_pred = gaussian_filter(new_pred, sigma=1)
+			new_pred = gaussian_filter(new_pred, sigma=0.5)
 		new_preds.append(new_pred)
 	new_preds = np.array(new_preds)
 	return new_preds
@@ -431,19 +431,26 @@ def test_cifar():
 	sgd_lr = 0.0001
 	optimizer = keras.optimizers.SGD(lr=sgd_lr)
 
+	adam_lr = 0.001
+	adam_beta_1 = 0.9
+	adam_beta_2=0.999
+	adam = optimizers.Adam(lr=adam_lr, beta_1=adam_beta_1, beta_2=adam_beta_2)
+
 	model=SimpleConvDropoutBatchNorm((32,16,1))
-	model.compile(optimizer=optimizer, loss=test_loss_func)
+	model.compile(optimizer=adam, loss=test_loss_func)
 
 
-	his = model.fit(slicerighttrain, slicelefttrain, nb_epoch=25, batch_size=128, shuffle=True, validation_data=(slicerighttest, slicelefttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+	his = model.fit(slicerighttrain, slicelefttrain, nb_epoch=75, batch_size=128, shuffle=True, validation_data=(slicerighttest, slicelefttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	history = serialize_class_object(his)
 	preds = model.predict(slicelefttest)
-	save_array(preds, 'gestalt/TEST_CIFAR_PREDS_2')
+	save_array(preds, 'gestalt/TEST_CIFAR_PREDS_4_adam')
 
 	#check the inversion
-	new_preds = invert_preds(preds, gaussian=True)
+	preds = load_array('gestalt/TEST_CIFAR_PREDS_4_adam')
+	preds = gaussian_filter(preds, 1)
+	#new_preds = invert_preds(preds, gaussian=True)
 	
-	plot_four_image_comparison(new_preds, slicerighttest, slicelefttest, 20)
+	plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
 	#okay, let's see if this simple cifar test works at all!
 	#okay, our experiments are running.  Let's get some of this sorted!
 
@@ -463,7 +470,13 @@ def test_mnist():
 	model=SimpleConvDropoutBatchNorm((28,12,1))
 	sgd_learn = 0.0001
 	optimizer = keras.optimizers.SGD(lr=sgd_learn)
-	model.compile(optimizer=optimizer, loss=test_loss_func)
+
+	adam_lr = 0.001
+	adam_beta_1 = 0.9
+	adam_beta_2=0.999
+	adam = optimizers.Adam(lr=adam_lr, beta_1=adam_beta_1, beta_2=adam_beta_2)
+
+	model.compile(optimizer=adam, loss=test_loss_func)
 
 	#okay, so it sort of works on mnist!!! that's really exciting. Now I've got to scale it up
 	#to cifar, like before, because that is where the main improvements will lie, I feel
@@ -478,6 +491,9 @@ def test_mnist():
 # okay, so what do I need to do with regard to this? that is the questoin??? 
 # I guess I could expand the model but to work on this productively, I guess I kind of need to actually run the models to test on cifar and so forth. and then ultiamtely the actual image data. More importantly, hwoever, is how to expand on the models, but I'm not sure I actually have a way to expand on the models either, except to twak learning rates and stuff when it diverges, which, again, I need to run it for!
 
+#okay, so the vae doesn't work still on cifar, and this one gives well, not especially great results, although I think I can discern some kind of working in there. I'm not sure how to progress with this really, which is very unfortunte, and I'm generally not making good progress in life. Not sure how to progress with this at all really. dagnabbit! I'm really inefficient at this stuff. dagnabbit. I just can't focus today, it seems. I need to get some results here. dagnabbit! I need to figure out how to prioritize and work efficiently as there's so much I need to do and relatively little time to do it, at least if I want to be decent. So, what steps do I need with the phd? first, check out the SOM, then try to figure out what's wrong with the other networks. let' sdo that. then perhaps spend some time again (although really I should spend a whole day on this!) with the predictive processing model, or reading about ARS. I think the rejection sampling is the better approach, as I can then figure out the actual model, hoepfully!
+	#so this actually worked the autoencoder gestalt kind of did. I'm going to try with adam optimizer now, I think!
+
 	#his = model.fit(righttrain, lefttrain, epochs=20, batch_size=128, shuffle=True, validation_data=(righttest, lefttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	#history = serialize_class_object(his)
 	#preds = model.predict(righttest)
@@ -489,12 +505,6 @@ def test_mnist():
 	print "NEW PREDS"
 	#print new_preds[0]
 	plot_four_image_comparison(new_preds, righttest, lefttest, N=20)
-	
-
-# it actually seems to have worked really well!!! our model is really niec and good! that's awesome! next steps are getting more images, getting gestalt images, telling richard about it, and seeing what he says, and experimenting with different settings but the basic hyperparams seem to work really well this time, which is great!
-
-# okay, everthing with our model works, we can now test... yay!
-#let's get this show on the road!
 
 if __name__ =='__main__':
 	test_cifar()
