@@ -1,5 +1,6 @@
 import numpy as np
 import scipy 
+import matplotlib.pyplot as plt
 
 
 def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
@@ -12,7 +13,7 @@ def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top
 	#I could do this as a giant loop, but figuring out the array slice notation
 	#is probably better!
 	#new_img[left:viewport_width-right, bottom:viewport_height-top]=panorama[nw-vw+left:nw+vw-right, nh-vh+bottom:nh+vh-top]
-	new_img[bottom:viewport_height-top, left:viewport_width-right] = panorama[nh-vh+botom:nh+vh-top, nw-vw+left:nw+vw-right]
+	new_img[bottom:viewport_height-top, left:viewport_width-right] = panorama[nh-vh+bottom:nh+vh-top, nw-vw+left:nw+vw-right]
 	return new_img
 	#that wasn't actually that nasty at all, which is nice!
 	#the wrap is going to be significantly more difficult, dagnabbit!
@@ -80,7 +81,7 @@ def wrap_horizontal_and_vertical(panorama, centre, viewport_width, viewport_heig
 
 
 
-def highlight_viewport(panorama_img, centre, viewport_width, viewport_height):
+def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, border_width=10):
 	#this just returns the panorama img with the viewport highlighted
 	#I should probably do it as part of the other function, but I don't need to have
 	#it should be easy
@@ -93,19 +94,22 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height):
 	assert viewport_height<=nh and viewport_height>0, 'Viewport height cannot be 0 or larger than the panoram image'
 	assert ch >=0 and ch<=nh, 'Centre height must be within panorama image'
 	assert cw>=0 and cw<=nw, 'Centre width must be within panorama image'
+
+	assert type(border_width)==int and border_width>0 and border_width<viewport_width and border_width < viewport_height, 'Border width must be a positive integer and not larger than the viewport (which would be silly!)'
+
 	vh = viewport_height//2
 	vw = viewport_height//2
 
 	#get max value
 	max_val = np.amax(panorama_img)
 	#left slice
-	panorama_img[ch-vh:ch+vh, cw-vw] = np.full((viewport_height, 1), max_val)
+	panorama_img[ch-vh:ch+vh, cw-vw-border_width:cw-vw] = np.full((viewport_height,border_width), max_val)
 	#right slice
-	panorama_img[ch-vh:ch+vh, cw+vw] = np.full((viewoprt_height, 1),max_val)
+	panorama_img[ch-vh:ch+vh, cw+vw:cw+vw+border_width] = np.full((viewport_height,border_width),max_val)
 	#top slice
-	panorama_img[ch+vh, cw-vw:cw+vw] = np.full((viewport_width, 1),max_val)
+	panorama_img[ch+vh:ch+vh+border_width, cw-vw:cw+vw] = np.full((border_width, viewport_width),max_val)
 	#bottom slice
-	panorama_img[ch-vh, cw-vw:cw+vw] = np.full((viewport_width,1), max_val)
+	panorama_img[ch-vh-border_width:ch-vh, cw-vw:cw+vw] = np.full((border_width,viewport_width), max_val)
 	
 	#sorted!
 	return panorama_img
@@ -191,10 +195,10 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 def show_panorama_and_viewport(panorama, viewport,figsize=None,cmap=None):
 	
 	assert len(panorama.shape)==2, 'Panorama image must be two dimensional'
-	asset len(viewport.shape)==2, 'Viewport image must be two dimensional'
+	assert len(viewport.shape)==2, 'Viewport image must be two dimensional'
 
 	if figsize is None:
-		figsize=(32,32)
+		figsize=32
 
 	if cmap is None:
 		cmap='gray'
