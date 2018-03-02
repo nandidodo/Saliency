@@ -184,6 +184,37 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 			return new_img, highlight_viewport(panorama_img,new_centre, viewport_width, viewport_height)
 
 		return new_img
+
+
+
+
+def show_panorama_and_viewport(panorama, viewport,figsize=None,cmap=None):
+	
+	assert len(panorama.shape)==2, 'Panorama image must be two dimensional'
+	asset len(viewport.shape)==2, 'Viewport image must be two dimensional'
+
+	if figsize is None:
+		figsize=(32,32)
+
+	if cmap is None:
+		cmap='gray'
+
+	fig = plt.figure(figsize)
+	ax1 = fig.add_subplot(121)
+	plt.imshow(panorama)
+	plt.title('Panorama Image')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax2 = fig.add_subplot(122)
+	plt.imshow(viewport)
+	plt.title('Viewport Image')
+	plt.xticks([])
+	plt.yticks([])
+	
+	plt.show()
+	return fig
+	
 		
 
 
