@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 
 
 def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
+	assert len(panorama.shape)==2, 'Panorama image must be two dimensional'
 	h,w = panorama.shape
+	assert len(centre.shape)==2, 'Centre point must be two dimensional'
 	nh, nw = centre
 	vw = viewport_width//2
 	vh = viewport_height//2
@@ -17,6 +19,7 @@ def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top
 
 
 def pad_vertical_wrap_horizontal(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
+	assert len(panorama.shape)==2, 'Panorama image must be two dimensional'
 	w,h = panorama.shape
 	assert len(centre)==2,'Centre point must be two dimensional'
 	nh, nw = centre
