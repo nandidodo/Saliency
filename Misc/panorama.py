@@ -20,7 +20,7 @@ def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top
 
 def pad_vertical_wrap_horizontal(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
 	assert len(panorama.shape)==2, 'Panorama image must be two dimensional'
-	w,h = panorama.shape
+	h,w= panorama.shape
 	assert len(centre)==2,'Centre point must be two dimensional'
 	nh, nw = centre
 	vw = viewport_width//2
@@ -48,7 +48,7 @@ def wrap_horizontal_and_vertical(panorama, centre, viewport_width, viewport_heig
 	assert len(panorama.shape)==2, 'Panorama image must be two dimensional'
 	h,w = panorama.shape
 	assert len(centre)==2,' Centre point must be two dimensional'
-	nw, nh = center
+	nh,nw = center
 	vw = viewport_width//2
 	vh = viewport_width//2
 	#initialise the new viewport with zeros
