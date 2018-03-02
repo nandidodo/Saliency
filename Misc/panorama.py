@@ -8,7 +8,7 @@ import Math
 #movement features which should make sense, a couple of the functions that returns
 # a new image when required!
 
-def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edge_func=pad_edge):
+def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edge_func=pad_edge, move_outside_img=True):
 	assert len(panorama_img.shape)==2, 'Panorama image must be two dimensional'
 	pan_width, pan_height = panorama_img.shape
 	assert viewport_width >0 and viewport_width <=pan_width, 'viewport width must be greater than zero and less or equal to the covering panoramic image width'
@@ -39,6 +39,14 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 	if new_height -vh < 0:
 		bottom_overextension = np.abs(new_height - vh)
 
+
+
+	#If can't move outside image, check asserts that all overextensions are the same
+	if move_outside_img==False:
+		assert left_overextension==0, 'This would move the viewport outside the left of the image'
+		assert right_overextenion==0, 'This would move the viewport outside the right of the image'
+		assert top_overextension==0,'This would move the viewport above the top of the image'
+		assert bottom_overextension==0, 'This would move the viewport below the bottom of the image'
 	#assert there haven't been any strange errors in which there are negative overextensions
 	assert left_overextension >=0, 'Left overextension cannot be negative. Check this'
 	assert right_overextension >=0, 'Right overextension cannot be negative. Check this'
