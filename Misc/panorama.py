@@ -11,7 +11,7 @@ def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top
 	new_img = np.zeros((viewport_width, viewport_height))
 	#I could do this as a giant loop, but figuring out the array slice notation
 	#is probably better!
-	new_img[left:viewport_width-right][bottom:viewport_height-top]=panorama[nw-vw+left:nw+vw-right][nh-vh+bottom:nh+vh-top]
+	new_img[left:viewport_width-right, bottom:viewport_height-top]=panorama[nw-vw+left:nw+vw-right, nh-vh+bottom:nh+vh-top]
 	return new_img
 	#that wasn't actually that nasty at all, which is nice!
 	#the wrap is going to be significantly more difficult, dagnabbit!
@@ -33,14 +33,14 @@ def pad_vertical_wrap_horizontal(panorama, centre, viewport_width, viewport_heig
 		#create larger, zeroed panorama
 		panorama = np.zeros((w, h + bottom + top))
 		#situate the actual panorama within this!
-		panorama[0:w][bottom:bottom+h] = old_panorama[0:w][0:h]
+		panorama[0:w, bottom:bottom+h] = old_panorama[0:w, 0:h]
 	#now that top/bottom are wrapped fill in the panorama
-	new_img[left:viewport_width-right][bottom:viewport_height-top] = panorama[nw-vw+left:nw+vw-right][nh-vh+bottom:nh+vh-top]
+	new_img[left:viewport_width-right, bottom:viewport_height-top] = panorama[nw-vw+left:nw+vw-right, nh-vh+bottom:nh+vh-top]
 	#now begin the wrap
 	if left>0:
-		new_img[0:left][:] = panorama[0:left][:]
+		new_img[0:left, :] = panorama[0:left, :]
 	if right>0:
-		new_img[vh-right:vh][:] = panorama[h-right:h]
+		new_img[vh-right:vh, :] = panorama[h-right:h, :]
 
 	#hopefully this should be enough, so return!
 	return new_img
@@ -54,16 +54,16 @@ def wrap_horizontal_and_vertical(panorama, centre, viewport_width, viewport_heig
 	#initialise the new viewport with zeros
 	new_img = np.zeros((viewport_width, viewport_height))
 	#first fill in the panorama
-	new_img[left:viewport_width-right][bottom:viewport_height-top] = panorama[nw-vw+left:nw+vw-right][nh-vh+bottom:nh+vh-top]
+	new_img[left:viewport_width-right,bottom:viewport_height-top] = panorama[nw-vw+left:nw+vw-right,nh-vh+bottom:nh+vh-top]
 	#begin the wrap
 	if left>0:
-		new_img[0:left][:] = panorama[w-left:w][:]
+		new_img[0:left,:] = panorama[w-left:w, :]
 	if right>0:
-		new_img[vh-right:vh] = panorama[0:right][:]
+		new_img[vh-right:vh, :] = panorama[0:right, :]
 	if top>0:
-		new_img[:][h-top:h] = panorama[:][0:top]
+		new_img[:, h-top:h] = panorama[:, 0:top]
 	if bottom>0:
-		new_img[:][0:bottom] = panorama[:][h-bottom:h]
+		new_img[:, 0:bottom] = panorama[:, h-bottom:h]
 	return new_img
 
 
@@ -120,8 +120,13 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 
 	if left_overextension ==0 and right_overextension==0 and top_overextension==0 and bottom_overextension==0:
 		#no edges reached so it is easy to return
-		new_img = panorama_img[new_width-vw: new_width+vw][new_height-vh: new_height+vh]
-		#hopefully this will work
+		print "no edges reached in viewport"
+		print new_width-vw
+		print new_width+vw
+		print new_height-vh
+		print new_height+vh
+		#new_img = np.zeros((viewport_width, viewport_height))
+		new_img = panorama_img[new_width-vw: new_width+vw, new_height-vh: new_height+vh]
 		return new_img
 	else:
 		#this is where it gets nasty... dagnabbit
