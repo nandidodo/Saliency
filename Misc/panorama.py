@@ -8,25 +8,12 @@ def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top
 	nh, nw = centre
 	vw = viewport_width//2
 	vh = viewport_height//2
-	print "in pad edge"
-	print left
-	print right
-	print top	
-	print bottom
 
 	#setup the base image as all zeros, as that's the padding!
 	new_img = np.zeros((viewport_height, viewport_width))
 	#I could do this as a giant loop, but figuring out the array slice notation
 	#is probably better!
 	#new_img[left:viewport_width-right, bottom:viewport_height-top]=panorama[nw-vw+left:nw+vw-right, nh-vh+bottom:nh+vh-top]
-	print "viewport changes!"
-	print nh-vh+bottom
-	print nh+vh -top
-	print nw-vw+left
-	print nw+vw-right
-	print "new img coordinates"
-	print str(bottom) + ":" + str(viewport_height - top)
-	print str(left) + ":" + str(viewport_width - right)
 	new_img[bottom:viewport_height-top, left:viewport_width-right] = panorama[nh-vh+bottom:nh+vh-top, nw-vw+left:nw+vw-right]
 	return new_img
 	#that wasn't actually that nasty at all, which is nice!
@@ -129,27 +116,33 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 	vwr = vw
 	#check for overruns. This is really ugly!
 	#and entirely and completely cryptic!
+	#this is actually a bit of a hack! It won't give perfect borders
+	#but it shuold work the majority of the time!
 	if ch + vh > nh:
-		vht = nh-ch
+		vht = nh-ch-border_width
 	if ch -vh < 0:
-		vhb = ch
+		vhb = ch - border_width
 	if cw - vw <0:
-		vwl = cw
+		vwl = cw - border_width
 	if cw + vw >nw:
-		vwr = nw-cw
+		vwr = nw-cw - border_width
 
 	#this is perhaps the most cryptic code I've ever written.dagnabbit
 	#at least this is kind of meant to be an opaque library!
+	#this can't yet deal with the wrapping, and probably never will!
+	#the wrapping will be an utter nightmare to figur out with this
+	#I think jsut the zero padding will be best!
 	
 	#the border widths will still give me problems ... dagnabbit!
 	#left slice
-	highlighted_img[ch-vhb:ch+vht, cw-vwl-border_width:cw-vwl] = np.full((viewport_height,border_width), max_val)
+	highlighted_img[ch-vhb:ch+vht, cw-vwl-border_width:cw-vwl] = np.full((vht + vhb,border_width), max_val)
 	#right slice
-	highlighted_img[ch-vhb:ch+vht, cw+vwr:cw+vwr+border_width] = np.full((viewport_height,border_width),max_val)
+	highlighted_img[ch-vhb:ch+vht, cw+vwr:cw+vwr+border_width] = np.full((vht+vhb,border_width),max_val)
 	#top slice
-	highlighted_img[ch+vht:ch+vht+border_width, cw-vwl:cw+vwr] = np.full((border_width, viewport_width),max_val)
+	highlighted_img[ch+vht:ch+vht+border_width, cw-vwl:cw+vwr] = np.full((border_width, vwl+vwr),max_val)
 	#bottom slice
-	highlighted_img[ch-vh-bordber_width:ch-vhb, cw-vwl:cw+vwr] = np.full((border_width,viewport_width), max_val)
+	highlighted_img[ch-vhb-border_width:ch-vhb, cw-vwl:cw+vwr] = np.full((border_width,vwl+vwr), max_val)
+	
 	
 	"""
 	#left slice
@@ -197,12 +190,6 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 	top_overextension = 0
 	bottom_overextension =0
 
-	print "In move function"
-	print new_width
-	print new_height
-	print vw
-	print vh
-
 	if new_width -vw <0:
 		left_overextension = np.abs(new_width - vw)
 
@@ -230,11 +217,6 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 
 	if left_overextension ==0 and right_overextension==0 and top_overextension==0 and bottom_overextension==0:
 		#no edges reached so it is easy to return
-		print "no edges reached in viewport"
-		print new_width-vw
-		print new_width+vw
-		print new_height-vh
-		print new_height+vh
 		new_img = np.zeros((viewport_height, viewport_width))
 		#new_img = panorama_img[new_width-vw: new_width+vw, new_height-vh: new_height+vh]
 		new_img = panorama_img[new_height-vh:new_height+vh, new_width-vw:new_width+vw]
