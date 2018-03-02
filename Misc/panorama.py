@@ -122,6 +122,32 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height):
 	#I should probably do it as part of the other function, but I don't need to have
 	#it should be easy
 	#let's do asserts
+	assert len(panorama_img.shape)==2, 'Panorama image must be two dimensional'
+	nh, nw = panorama_img.shape
+	assert len(centre)==2, 'Centre point must be two dimensional'
+	ch, cw = centre
+	assert viewport_width <=nw and viewport_width >0, 'Viewport width cannot be 0 or larger than the panorama image'
+	assert viewport_height<=nh and viewport_height>0, 'Viewport height cannot be 0 or larger than the panoram image'
+	assert ch >=0 and ch<=nh, 'Centre height must be within panorama image'
+	assert cw>=0 and cw<=nw, 'Centre width must be within panorama image'
+	vh = viewport_height//2
+	vw = viewport_height//2
+
+	#get max value
+	max_val = np.amax(panorama_img)
+	#left slice
+	panorama_img[ch-vh:ch+vh, cw-vw] = np.full((viewport_height, 1), max_val)
+	#right slice
+	panorama_img[ch-vh:ch+vh, cw+vw] = np.full((viewoprt_height, 1),max_val)
+	#top slice
+	panorama_img[ch+vh, cw-vw:cw+vw] = np.full((viewport_width, 1),max_val)
+	#bottom slice
+	panorama_img[ch-vh, cw-vw:cw+vw] = np.full((viewport_width,1), max_val)
+	
+	#sorted!
+	return panorama_img
+	
+	
 
 
 
