@@ -102,17 +102,24 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 
 	#get max value
 	max_val = np.amax(panorama_img)
+	#copy the array since it is modifying in place and I don't want to mutate the original panorama image!
+	highlighted_img = np.copy(panorama_img)
+
 	#left slice
-	panorama_img[ch-vh:ch+vh, cw-vw-border_width:cw-vw] = np.full((viewport_height,border_width), max_val)
+	highlighted_img[ch-vh:ch+vh, cw-vw-border_width:cw-vw] = np.full((viewport_height,border_width), max_val)
 	#right slice
-	panorama_img[ch-vh:ch+vh, cw+vw:cw+vw+border_width] = np.full((viewport_height,border_width),max_val)
+	highlighted_img[ch-vh:ch+vh, cw+vw:cw+vw+border_width] = np.full((viewport_height,border_width),max_val)
 	#top slice
-	panorama_img[ch+vh:ch+vh+border_width, cw-vw:cw+vw] = np.full((border_width, viewport_width),max_val)
+	highlighted_img[ch+vh:ch+vh+border_width, cw-vw:cw+vw] = np.full((border_width, viewport_width),max_val)
 	#bottom slice
-	panorama_img[ch-vh-border_width:ch-vh, cw-vw:cw+vw] = np.full((border_width,viewport_width), max_val)
+	highlighted_img[ch-vh-border_width:ch-vh, cw-vw:cw+vw] = np.full((border_width,viewport_width), max_val)
+	#this mutates the panorama image, which is why it is problematic
+	#not totally sure what I shuold do about this other than copy it
+	#because the panorama image given to other people is seriously problematic
+	#it definitely should not mutate the array
 	
 	#sorted!
-	return panorama_img
+	return highlighted_img
 
 
 #so how this works is that there is a big image, and a viewport
@@ -177,7 +184,7 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 		new_img = panorama_img[new_height-vh:new_height+vh, new_width-vw:new_width+vw]
 		
 		if show_viewport:
-			return new_img, highlight_viewport(panorama_img,new_centre, viewport_width, viewport_height)
+			return new_img, highlight_viewport(panorama_img,new_centre, viewport_width, viewport_height), panorama_img
 
 		return new_img
 	else:
@@ -205,13 +212,13 @@ def show_panorama_and_viewport(panorama, viewport,figsize=None,cmap=None):
 
 	fig = plt.figure(figsize)
 	ax1 = fig.add_subplot(121)
-	plt.imshow(panorama)
+	plt.imshow(panorama, cmap=cmap)
 	plt.title('Panorama Image')
 	plt.xticks([])
 	plt.yticks([])
 
 	ax2 = fig.add_subplot(122)
-	plt.imshow(viewport)
+	plt.imshow(viewport, cmap=cmap)
 	plt.title('Viewport Image')
 	plt.xticks([])
 	plt.yticks([])

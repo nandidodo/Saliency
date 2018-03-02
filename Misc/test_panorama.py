@@ -35,10 +35,11 @@ print "Panoramic image shape: " + str(pan_img.shape)
 vw = 500
 vh = 500
 #the good thing is it's clear that the zero padding works
-viewport, highlighted_panorama = move_viewport(pan_img, (800, 600), vw, vh, show_viewport=True)
+viewport, highlighted_panorama, panorama_img = move_viewport(pan_img, (800, 600), vw, vh, show_viewport=True)
 print viewport.shape
-#plt.imshow(viewport, cmap='gray')
-#plt.show()
+plt.imshow(panorama_img, cmap='gray')
+plt.show()
+
 
 show_panorama_and_viewport(highlighted_panorama, viewport)
 
