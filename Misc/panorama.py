@@ -79,13 +79,45 @@ def wrap_horizontal_and_vertical(panorama, centre, viewport_width, viewport_heig
 	return new_img
 
 
+
+def highlight_viewport(panorama_img, centre, viewport_width, viewport_height):
+	#this just returns the panorama img with the viewport highlighted
+	#I should probably do it as part of the other function, but I don't need to have
+	#it should be easy
+	#let's do asserts
+	assert len(panorama_img.shape)==2, 'Panorama image must be two dimensional'
+	nh, nw = panorama_img.shape
+	assert len(centre)==2, 'Centre point must be two dimensional'
+	ch, cw = centre
+	assert viewport_width <=nw and viewport_width >0, 'Viewport width cannot be 0 or larger than the panorama image'
+	assert viewport_height<=nh and viewport_height>0, 'Viewport height cannot be 0 or larger than the panoram image'
+	assert ch >=0 and ch<=nh, 'Centre height must be within panorama image'
+	assert cw>=0 and cw<=nw, 'Centre width must be within panorama image'
+	vh = viewport_height//2
+	vw = viewport_height//2
+
+	#get max value
+	max_val = np.amax(panorama_img)
+	#left slice
+	panorama_img[ch-vh:ch+vh, cw-vw] = np.full((viewport_height, 1), max_val)
+	#right slice
+	panorama_img[ch-vh:ch+vh, cw+vw] = np.full((viewoprt_height, 1),max_val)
+	#top slice
+	panorama_img[ch+vh, cw-vw:cw+vw] = np.full((viewport_width, 1),max_val)
+	#bottom slice
+	panorama_img[ch-vh, cw-vw:cw+vw] = np.full((viewport_width,1), max_val)
+	
+	#sorted!
+	return panorama_img
+
+
 #so how this works is that there is a big image, and a viewport
 # this just deals with the various image transformations needed to view the other image
 #it's all done in coordinates, I think so this is just a couple of the image 
 #movement features which should make sense, a couple of the functions that returns
 # a new image when required!
 
-def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edge_func=pad_edge, move_outside_img=True):
+def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edge_func=pad_edge, move_outside_img=True,show_viewport=False):
 	assert len(panorama_img.shape)==2, 'Panorama image must be two dimensional'
 	pan_height, pan_width = panorama_img.shape
 	assert viewport_width >0 and viewport_width <=pan_width, 'viewport width must be greater than zero and less or equal to the covering panoramic image width'
@@ -117,40 +149,6 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 		bottom_overextension = np.abs(new_height - vh)
 
 
-def highlight_viewport(panorama_img, centre, viewport_width, viewport_height):
-	#this just returns the panorama img with the viewport highlighted
-	#I should probably do it as part of the other function, but I don't need to have
-	#it should be easy
-	#let's do asserts
-	assert len(panorama_img.shape)==2, 'Panorama image must be two dimensional'
-	nh, nw = panorama_img.shape
-	assert len(centre)==2, 'Centre point must be two dimensional'
-	ch, cw = centre
-	assert viewport_width <=nw and viewport_width >0, 'Viewport width cannot be 0 or larger than the panorama image'
-	assert viewport_height<=nh and viewport_height>0, 'Viewport height cannot be 0 or larger than the panoram image'
-	assert ch >=0 and ch<=nh, 'Centre height must be within panorama image'
-	assert cw>=0 and cw<=nw, 'Centre width must be within panorama image'
-	vh = viewport_height//2
-	vw = viewport_height//2
-
-	#get max value
-	max_val = np.amax(panorama_img)
-	#left slice
-	panorama_img[ch-vh:ch+vh, cw-vw] = np.full((viewport_height, 1), max_val)
-	#right slice
-	panorama_img[ch-vh:ch+vh, cw+vw] = np.full((viewoprt_height, 1),max_val)
-	#top slice
-	panorama_img[ch+vh, cw-vw:cw+vw] = np.full((viewport_width, 1),max_val)
-	#bottom slice
-	panorama_img[ch-vh, cw-vw:cw+vw] = np.full((viewport_width,1), max_val)
-	
-	#sorted!
-	return panorama_img
-	
-	
-
-
-
 	#If can't move outside image, check asserts that all overextensions are the same
 	if move_outside_img==False:
 		assert left_overextension==0, 'This would move the viewport outside the left of the image'
@@ -173,10 +171,18 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height):
 		new_img = np.zeros((viewport_height, viewport_width))
 		#new_img = panorama_img[new_width-vw: new_width+vw, new_height-vh: new_height+vh]
 		new_img = panorama_img[new_height-vh:new_height+vh, new_width-vw:new_width+vw]
+		
+		if show_viewport:
+			return new_img, highlight_viewport(panorama_img,new_centre, viewport_width, viewport_height)
+
 		return new_img
 	else:
 		#this is where it gets nasty... dagnabbit
 		new_img = edge_func(panorama_img, new_centre, viewport_width,viewport_height,left_overextension, right_overextension, top_overextension, bottom_overextension)
+
+		if show_viewport:
+			return new_img, highlight_viewport(panorama_img,new_centre, viewport_width, viewport_height)
+
 		return new_img
 		
 
