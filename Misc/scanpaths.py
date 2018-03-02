@@ -1,7 +1,6 @@
 # okay, so the aim here is to have a bunch of functions which, in the end can try to mimic actual scanpaths, so I can see what's up there to be honest. They should deal with 2d image arrays and produce 
 
 import numpy as np
-import Math
 import scipy
 
 def attempt_image_reshape_2d(img):
@@ -14,10 +13,8 @@ def attempt_image_reshape_2d(img):
 		dim = np.sqrt(sh[0])
 		#assert it's an integer or something here
 		try:
-			new_img = np.reshape(img, (dim, dim))
-			return new_img
-		except:
-			raise Exception as e
+			return np.reshape(img, (dim, dim))
+		except Exception as e:
 				print "Cannot reshape the single dimension: " + str(e)
 				return
 
@@ -25,18 +22,14 @@ def attempt_image_reshape_2d(img):
 		if sh[2] == 1 or sh[0] ==1:
 			if sh[2]==1:
 				try: 
-					new_img = np.reshape(img, (sh[0], sh[1])
-					return new_img
-				except:
-					raise Exception as e
+					return np.reshape(img, (sh[0], sh[1]))
+				except Exception as e:
 					print 'Cannot reshape img' + str(e)
 					return
 			if sh[0]==1:
 				try:
-					new_img = np.reshape(img, (sh[1], sh[2])	
-					return new_img
-				except:
-					raise Exception as e
+					return np.reshape(img, (sh[1], sh[2]))	
+				except Exception as e:
 					print "Cannot reshape the single dimenion according to first dimension: " + str(e)
 					return
 
@@ -47,10 +40,8 @@ def attempt_image_reshape_2d(img):
 	if length==4:
 		if sh[0] ==1 and sh[3] ==1:
 			try:
-				new_img = np.reshape(img, (sh[1], sh[2])
-				return new_img
-			except:
-				raise Exception as e
+				return np.reshape(img, (sh[1], sh[2]))
+			except Exception as e:
 				print "Cannot reshape 4d img with two one dimensions: " + str(e)
 				return
 		else:
@@ -67,7 +58,7 @@ def attempt_image_reshape_2d(img):
 
 
 def get_max_indices(img, return_val=False):
-	assert len(img.shape)==2, 'Image must be two dimensional. Please reshape if not')
+	assert len(img.shape)==2, 'Image must be two dimensional. Please reshape if not'
 	width, height = img.shape
 	max_val = 0
 	max_indices = (0,0)
@@ -123,7 +114,7 @@ def apply_gaussian_to_point(val, indices, centre_indices, sigma=2):
 	
 	gauss_exponent = -1 * np.dot((indices-centre_indices).T, np.dot(np.inv(sigma), (indices-centre_indices)))
 	gauss_diff = gauss_normalizer * np.exp(gauss_exponent)
-	new_ val = val - (val*gauss_diff)
+	new_val = val - (val*gauss_diff)
 	return new_val
 
 def gaussian_filter(img, sigma=2):
