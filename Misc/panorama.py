@@ -11,16 +11,9 @@ def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top
 
 	#setup the base image as all zeros, as that's the padding!
 	new_img = np.zeros((viewport_height, viewport_width))
-	#I could do this as a giant loop, but figuring out the array slice notation
-	#is probably better!
-	#new_img[left:viewport_width-right, bottom:viewport_height-top]=panorama[nw-vw+left:nw+vw-right, nh-vh+bottom:nh+vh-top]
+	#fill in the panorama image
 	new_img[bottom:viewport_height-top, left:viewport_width-right] = panorama[nh-vh+bottom:nh+vh-top, nw-vw+left:nw+vw-right]
 	return new_img
-	#that wasn't actually that nasty at all, which is nice!
-	#the wrap is going to be significantly more difficult, dagnabbit!
-	#but I'm going to just ignore that for now... yay!
-	#this is actually working perfectly lol!!!
-	#yay! it's in the highlighted image that the problem is yay!
 
 
 def pad_vertical_wrap_horizontal(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
@@ -34,28 +27,22 @@ def pad_vertical_wrap_horizontal(panorama, centre, viewport_width, viewport_heig
 	#If top or bottom is expanding need to expand the panorama to deal with this first
 	if bottom>0 or top>0:
 		#save old panorama
-		old_panorama = panorama
+		#old_panorama = np.copy(panorama)
 		#create larger, zeroed panorama
-		#panorama = np.zeros((w, h + bottom + top))
 		panorama = np.zeros((h+bottom+top, w))
 		#situate the actual panorama within this!
-		#panorama[0:w, bottom:bottom+h] = old_panorama[0:w, 0:h]
 		panorama[bottom:bottom+h, 0:w] = old_panorama[0:h, 0:w]
 	#now that top/bottom are wrapped fill in the panorama
-	#new_img[left:viewport_width-right, bottom:viewport_height-top] = panorama[nw-vw+left:nw+vw-right, nh-vh+bottom:nh+vh-top]
 	new_img[bottom:viewpot_height-top, left:viewport_width-right] = panorama[nh-vh+bottom: nh+vh-top, nw-vw+left:nw+vw-right]
 	#now begin the wrap
 	if left>0:
-		#new_img[0:left, :] = panorama[0:left, :]
 		new_img[:, 0:left] = panorama[:, w-left: w]
 	if right>0:
-		#new_img[vh-right:vh, :] = panorama[h-right:h, :]
-		new_img[:, vh-right:vh] = panorama[:, 0:right] #hopefully this shold work
-
-	#hopefully this should be enough, so return!
+		new_img[:, vh-right:vh] = panorama[:, 0:right]
 	return new_img
 
 def wrap_horizontal_and_vertical(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
+	assert len(panorama.shape)==2, 'Panorama image must be two dimensional'
 	h,w = panorama.shape
 	assert len(centre)==2,' Centre point must be two dimensional'
 	nw, nh = center
@@ -63,31 +50,22 @@ def wrap_horizontal_and_vertical(panorama, centre, viewport_width, viewport_heig
 	vh = viewport_width//2
 	#initialise the new viewport with zeros
 	new_img = np.zeros((viewport_height, viewport_width))
-	#first fill in the panorama
-
-	#new_img[left:viewport_width-right,bottom:viewport_height-top] = panorama[nw-vw+left:nw+vw-right,nh-vh+bottom:nh+vh-top]
-	#new_img[bottom:viewport_height-top, left:viewport_width-right] = panorama[nh-vh+bottom:nh+vh-top, nw-vw+left:nw+vw-right]
+	#first fill in the panorama as best I can
+	new_img[bottom:viewport_height-top, left:viewport_width-right] = panorama[nh-vh+bottom:nh+vh-top, nw-vw+left:nw+vw-right]
 	#begin the wrap
 	if left>0:
-		#new_img[0:left,:] = panorama[w-left:w, :]
 		new_img[:, 0:left] = panorama[:,w-left:w]
 	if right>0:
-		#new_img[vh-right:vh, :] = panorama[0:right, :]
 		new_img[:, vh-right:vh] = panorama[:, 0:right]
 	if top>0:
-		#new_img[:, h-top:h] = panorama[:, 0:top]
 		new_img[h-top:h, :] = panorama[0:top,:]
 	if bottom>0:
-		#new_img[:, 0:bottom] = panorama[:, h-bottom:h]
 		new_img[0:bottom,:] = panorama[h-bottom:h,:]
 	return new_img
 
 
 
 def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, border_width=10):
-	#this just returns the panorama img with the viewport highlighted
-	#I should probably do it as part of the other function, but I don't need to have
-	#it should be easy
 	#let's do asserts
 	assert len(panorama_img.shape)==2, 'Panorama image must be two dimensional'
 	nh, nw = panorama_img.shape
@@ -102,22 +80,18 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 
 	vh = viewport_height//2
 	vw = viewport_height//2
-
 	#get max value
 	max_val = np.amax(panorama_img)
 	#copy the array since it is modifying in place and I don't want to mutate the original panorama image!
 	highlighted_img = np.copy(panorama_img)
 
-	#check for overruns at the edges! and just foreshorten. But this would be innacurate in the other direction!
-	#this is a really ugly solution
+	#initialise values for overrun checks
 	vhb = vh
 	vht = vh
 	vwl = vw
 	vwr = vw
-	#check for overruns. This is really ugly!
-	#and entirely and completely cryptic!
-	#this is actually a bit of a hack! It won't give perfect borders
-	#but it shuold work the majority of the time!
+
+	#check for overruns into padding. If so the borders need to be cropped to fit within the truncated image
 	if ch + vh > nh:
 		vht = nh-ch-border_width
 	if ch -vh < 0:
@@ -127,13 +101,7 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 	if cw + vw >nw:
 		vwr = nw-cw - border_width
 
-	#this is perhaps the most cryptic code I've ever written.dagnabbit
-	#at least this is kind of meant to be an opaque library!
-	#this can't yet deal with the wrapping, and probably never will!
-	#the wrapping will be an utter nightmare to figur out with this
-	#I think jsut the zero padding will be best!
-	
-	#the border widths will still give me problems ... dagnabbit!
+	#now modify the image
 	#left slice
 	highlighted_img[ch-vhb:ch+vht, cw-vwl-border_width:cw-vwl] = np.full((vht + vhb,border_width), max_val)
 	#right slice
@@ -154,14 +122,6 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 	#bottom slice
 	highlighted_img[ch-vh-border_width:ch-vh, cw-vw:cw+vw] = np.full((border_width,viewport_width), max_val)
 	"""
-	#this mutates the panorama image, which is why it is problematic
-	#not totally sure what I shuold do about this other than copy it
-	#because the panorama image given to other people is seriously problematic
-	#it definitely should not mutate the array
-	
-	#this also only currently works with images which fit inside the viewport
-	#I'm going to need to decide what to do this. probably by doing asserts!
-	#sorted!
 	return highlighted_img
 
 
