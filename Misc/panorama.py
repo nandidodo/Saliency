@@ -4,20 +4,36 @@ import matplotlib.pyplot as plt
 
 
 def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
-	w,h = panorama.shape
-	nw, nh = centre
+	h,w = panorama.shape
+	nh, nw = centre
 	vw = viewport_width//2
 	vh = viewport_height//2
+	print "in pad edge"
+	print left
+	print right
+	print top	
+	print bottom
+
 	#setup the base image as all zeros, as that's the padding!
 	new_img = np.zeros((viewport_height, viewport_width))
 	#I could do this as a giant loop, but figuring out the array slice notation
 	#is probably better!
 	#new_img[left:viewport_width-right, bottom:viewport_height-top]=panorama[nw-vw+left:nw+vw-right, nh-vh+bottom:nh+vh-top]
+	print "viewport changes!"
+	print nh-vh+bottom
+	print nh+vh -top
+	print nw-vw+left
+	print nw+vw-right
+	print "new img coordinates"
+	print str(bottom) + ":" + str(viewport_height - top)
+	print str(left) + ":" + str(viewport_width - right)
 	new_img[bottom:viewport_height-top, left:viewport_width-right] = panorama[nh-vh+bottom:nh+vh-top, nw-vw+left:nw+vw-right]
 	return new_img
 	#that wasn't actually that nasty at all, which is nice!
 	#the wrap is going to be significantly more difficult, dagnabbit!
 	#but I'm going to just ignore that for now... yay!
+	#this is actually working perfectly lol!!!
+	#yay! it's in the highlighted image that the problem is yay!
 
 
 def pad_vertical_wrap_horizontal(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
@@ -105,6 +121,37 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 	#copy the array since it is modifying in place and I don't want to mutate the original panorama image!
 	highlighted_img = np.copy(panorama_img)
 
+	#check for overruns at the edges! and just foreshorten. But this would be innacurate in the other direction!
+	#this is a really ugly solution
+	vhb = vh
+	vht = vh
+	vwl = vw
+	vwr = vw
+	#check for overruns. This is really ugly!
+	#and entirely and completely cryptic!
+	if ch + vh > nh:
+		vht = nh-ch
+	if ch -vh < 0:
+		vhb = ch
+	if cw - vw <0:
+		vwl = cw
+	if cw + vw >nw:
+		vwr = nw-cw
+
+	#this is perhaps the most cryptic code I've ever written.dagnabbit
+	#at least this is kind of meant to be an opaque library!
+	
+	#the border widths will still give me problems ... dagnabbit!
+	#left slice
+	highlighted_img[ch-vhb:ch+vht, cw-vwl-border_width:cw-vwl] = np.full((viewport_height,border_width), max_val)
+	#right slice
+	highlighted_img[ch-vhb:ch+vht, cw+vwr:cw+vwr+border_width] = np.full((viewport_height,border_width),max_val)
+	#top slice
+	highlighted_img[ch+vht:ch+vht+border_width, cw-vwl:cw+vwr] = np.full((border_width, viewport_width),max_val)
+	#bottom slice
+	highlighted_img[ch-vh-bordber_width:ch-vhb, cw-vwl:cw+vwr] = np.full((border_width,viewport_width), max_val)
+	
+	"""
 	#left slice
 	highlighted_img[ch-vh:ch+vh, cw-vw-border_width:cw-vw] = np.full((viewport_height,border_width), max_val)
 	#right slice
@@ -113,11 +160,14 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 	highlighted_img[ch+vh:ch+vh+border_width, cw-vw:cw+vw] = np.full((border_width, viewport_width),max_val)
 	#bottom slice
 	highlighted_img[ch-vh-border_width:ch-vh, cw-vw:cw+vw] = np.full((border_width,viewport_width), max_val)
+	"""
 	#this mutates the panorama image, which is why it is problematic
 	#not totally sure what I shuold do about this other than copy it
 	#because the panorama image given to other people is seriously problematic
 	#it definitely should not mutate the array
 	
+	#this also only currently works with images which fit inside the viewport
+	#I'm going to need to decide what to do this. probably by doing asserts!
 	#sorted!
 	return highlighted_img
 
@@ -146,6 +196,12 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 	right_overextension = 0
 	top_overextension = 0
 	bottom_overextension =0
+
+	print "In move function"
+	print new_width
+	print new_height
+	print vw
+	print vh
 
 	if new_width -vw <0:
 		left_overextension = np.abs(new_width - vw)
@@ -184,7 +240,7 @@ def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edg
 		new_img = panorama_img[new_height-vh:new_height+vh, new_width-vw:new_width+vw]
 		
 		if show_viewport:
-			return new_img, highlight_viewport(panorama_img,new_centre, viewport_width, viewport_height), panorama_img
+			return new_img, highlight_viewport(panorama_img,new_centre, viewport_width, viewport_height)
 
 		return new_img
 	else:
