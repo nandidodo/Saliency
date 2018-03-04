@@ -10,14 +10,7 @@ import matplotlib.pyplot as plt
 import cPickle as pickle
 from panorama import *
 from scanpaths import *
-
-
-def save_array(obj, fname):
-	pickle.dump(obj, open(fname, 'wb'))
-
-def load_array(fname):
-	return pickle.load(open(fname, 'rb'))
-
+from utils import *
 
 def plot_panorama_step(pan_img, viewport, sal_map, centre, viewport_width, viewport_height, sigma=None, cmap='gray', border_width=10):
 	if sigma is not None:
@@ -115,6 +108,44 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 	viewports= np.array(viewports)
 	sal_maps = np.array(sal_maps)
 	return viewports, sal_maps, centres
+
+#First I'm going to need to train the model. For simplicity I've copied the function to do this here
+# and it will also adapt it slightly
+
+def plot_model_results(images, preds, N=10,cmap='gray'):
+	assert len(images.shape)==3, 'Image shape must be two dimensional'
+	assert len(preds.shape)==3,'Preds shape must be two dimensional'
+	assert images.shape == preds.shape, 'Images and preds Dont have the same dimensions. There is probably a mismatch of some kind here'
+	
+
+
+
+
+def train_panorama_model_prototype(fname,epochs=100, both=True):
+	imgs = load_array(fname)
+	imgs = imgs.astype('float32')/255.
+	#simply train on the green for ease
+	imgs = imgs[:,:,:,0]
+	shape = imgs.shape
+	train,test= split_into_test_train(imgs)
+
+	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
+	model.compile(optimizer='sgd',loss='mse')
+	callbacks = build_callbacks("./")
+	his=model.fit(train, train, epochs=epochs, batch_size=128, shuffle=True, validation_data=(test,test), callbacks=callbacks)
+
+	preds = model.predict(test)
+	history = serialize_class_object(his)
+	res = [history, preds, test]
+	save_array(res, "PANORAMA_PROTOTYPE_MODEL_RESULTS")
+	#save the model
+	model.save("PANORAM_PROTOTYPE_MODEL")
+	return res
+
+
+
+
+
 			
 
 
