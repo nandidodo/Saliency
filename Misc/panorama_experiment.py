@@ -91,13 +91,14 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 		viewport_img = move_viewport(panorama_img, centre, viewport_width, viewport_height)
 		#get saliency map predictoins
 		pred = mode.predict(viewport_img)
+		salmap = get_salmaps(viewport_img, pred)
 		#assume the pred is the sal map for now. Usually I average but I don't hav to do that here hopefully!
 		#reset centre
 		#if show
 		if show_results:
-			plot_panorama_step(pan_img, viewport_img, pred, centre viewport_width, viewport_height, sigma=sigma)
+			plot_panorama_step(pan_img, viewport_img,salmap, centre viewport_width, viewport_height, sigma=sigma)
 		
-		centre = get_max_indices(pred)
+		centre = get_max_indices(salmap)
 		#now append
 		viewports.append(viewport_img)
 		sal_maps.append(pred)
@@ -167,11 +168,12 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 	his=model.fit(train, train, epochs=epochs, batch_size=128, shuffle=True, validation_data=(test,test), callbacks=callbacks)
 
 	preds = model.predict(test)
+	#sal_maps = get_salmaps(test,preds)
 	history = serialize_class_object(his)
 	res = [history, preds, test]
 	save_array(res, "PANORAMA_PROTOTYPE_MODEL_RESULTS")
 	#save the model
-	model.save("PANORAM_PROTOTYPE_MODEL")
+	model.save("PANORAMA_PROTOTYPE_MODEL")
 	return res
 
 
@@ -183,6 +185,9 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 
 ## now test
 if __name__ =='__main__':
+	fname="testimages_combined"
+	train_panorama_model_prototype(fname, epochs=1)
+	
 	
 	
 	
