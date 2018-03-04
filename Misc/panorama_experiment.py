@@ -119,6 +119,8 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 
 
 ## now test
+if __name__ =='__main__':
+	
 	
 	
 
