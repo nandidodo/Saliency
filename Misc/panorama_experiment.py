@@ -112,10 +112,42 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 #First I'm going to need to train the model. For simplicity I've copied the function to do this here
 # and it will also adapt it slightly
 
-def plot_model_results(images, preds, N=10,cmap='gray'):
+def plot_model_results(images, preds,salmaps, N=10,cmap='gray', sigma=None):
 	assert len(images.shape)==3, 'Image shape must be two dimensional'
 	assert len(preds.shape)==3,'Preds shape must be two dimensional'
-	assert images.shape == preds.shape, 'Images and preds Dont have the same dimensions. There is probably a mismatch of some kind here'
+	assert len(salmaps.shape)==3,'Salmaps shape must be two dimensional'
+	assert images.shape == preds.shape==salmaps.shape, 'Images and preds and salmaps dont have the same dimensions. There is probably a mismatch of some kind here'
+
+	if sigma is not None:
+		assert sigma>0, 'Gaussian smooth sigma must be greater than 0'
+	
+	for i in xrange(N):
+		fig = plt.figure()
+	
+		ax1 = plt.subplot(121)
+		plt.imshow(images[i], cmap=cmap)
+		plt.title('Original Image')
+		plt.xticks([])
+		plt.yticks([])
+
+		ax2 = plt.subplot(132)
+		plt.imshow(preds[i])
+		plt.title('Predicted Image')
+		plt.xticks([])
+		plt.yticks([])
+
+		ax3 = plt.subplot(133)
+		salmap = salmaps[i]
+		if sigma is not None:
+			salmap = gaussian_flter(salmap, sigma)
+		plt.imshow(salmap)
+		plt.title('Salience Map')
+		plt.xticks([])
+		plt.yticks([])
+
+		plt.tight_layout()
+		plt.show()
+		
 	
 
 
