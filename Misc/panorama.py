@@ -114,27 +114,7 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 	#bottom slice
 	highlighted_img[ch-vhb-border_width:ch-vhb, cw-vwl:cw+vwr] = np.full((border_width,vwl+vwr), max_val)
 	
-	
-	"""
-	#left slice
-	highlighted_img[ch-vh:ch+vh, cw-vw-border_width:cw-vw] = np.full((viewport_height,border_width), max_val)
-	#right slice
-	highlighted_img[ch-vh:ch+vh, cw+vw:cw+vw+border_width] = np.full((viewport_height,border_width),max_val)
-	#top slice
-	highlighted_img[ch+vh:ch+vh+border_width, cw-vw:cw+vw] = np.full((border_width, viewport_width),max_val)
-	#bottom slice
-	highlighted_img[ch-vh-border_width:ch-vh, cw-vw:cw+vw] = np.full((border_width,viewport_width), max_val)
-	"""
 	return highlighted_img
-
-	#so now I've got this working, what do I need to have this work on? what is the next steps to do tomorrow? I'm not sure at all personally, and I just don't know!
-	#so, I need to wire this up to the network and see how it works, I've got the trained models saved somewhere, I suspect, so that's good. Then all I need to do is to get it to predict the viewports and look arond and see what sort of scan paths it makes. Which makes perfect sense and hopefully shouldn't be too bad. Next thing I should do is to test the scanpaths which is something else I should do today. Get some data and calculte scan paths off them and make sure hte methods are working, so lets do that
-
-#so how this works is that there is a big image, and a viewport
-# this just deals with the various image transformations needed to view the other image
-#it's all done in coordinates, I think so this is just a couple of the image 
-#movement features which should make sense, a couple of the functions that returns
-# a new image when required!
 
 def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edge_func=pad_edge, move_outside_img=True,show_viewport=False):
 	assert len(panorama_img.shape)==2, 'Panorama image must be two dimensional'
