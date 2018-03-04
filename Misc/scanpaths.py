@@ -110,7 +110,11 @@ def euclidean_distance(indices):
 
 def apply_gaussian_to_point(val, indices, centre_indices, sigma=2):
 	#dagnabbit, undoubtedly there's a numpy function which does this for me in a more efficient manner. But I'm not sure what it is! So I'll implement it like this for now
-	gauss_normalizer = (1/np.sqrt(2*Math.pi*sigma))
+	gauss_normalizer = (1/np.sqrt(2*np.pi*sigma))
+
+	#convert indices to numpy arrays
+	indices =np.array(indices)
+	centre_indices = np.array(centre_indices)
 	
 	gauss_exponent = -1 * np.dot((indices-centre_indices).T, np.dot(np.inv(sigma), (indices-centre_indices)))
 	gauss_diff = gauss_normalizer * np.exp(gauss_exponent)
@@ -127,7 +131,7 @@ def apply_gaussian(img, centre, sigma= 2):
 	width, height = img.shape
 	for i in range(width):
 		for j in range(height):
-			img[i][j] = apply_gaussian_to_point(img[i][j], (i,j), center, sigma=sigma)
+			img[i][j] = apply_gaussian_to_point(img[i][j], (i,j), centre, sigma=sigma)
 	return img
 
 def scanpaths_with_gaussian_inhibition(img, N= 10, sigma=2, scanpaths=True):
@@ -153,6 +157,7 @@ def scanpaths_with_gaussian_inhibition(img, N= 10, sigma=2, scanpaths=True):
 		
 		
 	
+#I relaly don't know what 
 		
 
 #not sure what else to do with this then... because the scan paths are actually sorted here, so it's difficult! I think this is a reasonable scan path algorithm
