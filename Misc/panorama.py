@@ -127,6 +127,8 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 	"""
 	return highlighted_img
 
+	#so now I've got this working, what do I need to have this work on? what is the next steps to do tomorrow? I'm not sure at all personally, and I just don't know!
+	#so, I need to wire this up to the network and see how it works, I've got the trained models saved somewhere, I suspect, so that's good. Then all I need to do is to get it to predict the viewports and look arond and see what sort of scan paths it makes. Which makes perfect sense and hopefully shouldn't be too bad. Next thing I should do is to test the scanpaths which is something else I should do today. Get some data and calculte scan paths off them and make sure hte methods are working, so lets do that
 
 #so how this works is that there is a big image, and a viewport
 # this just deals with the various image transformations needed to view the other image
