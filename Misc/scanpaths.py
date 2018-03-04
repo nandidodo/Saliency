@@ -33,7 +33,7 @@ def attempt_image_reshape_2d(img):
 					print "Cannot reshape the single dimenion according to first dimension: " + str(e)
 					return
 
-			else:
+		else:
 				raise AssertionError('3D images cannot be losslessly converted to 2D. You must implement the transition manually if that is what you want')
 				return
 
