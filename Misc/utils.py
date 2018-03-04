@@ -25,6 +25,22 @@ def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
 	return train, test
 
 
+#get salmap - I'm not sure if this is the way to do it, or just a simple way, but it's what I'm using for now. I can alter it later without changing the other code!
+def get_salmap(imgs, preds):
+	assert len(imgs.shape)==2 or len(imgs.shape)==3, 'Images must be two dimensional'
+	assert len(preds.shape)==2 or len(preds.shape)==3, 'Preds must be two dimensional'
+	assert imgs.shape==preds.shape, 'Preds and images must have same shape
+	if len(imgs.shape)==2:
+		return imgs - preds
+	
+	#begin loop
+	sal_maps = []
+	for i in xrange(len(imgs)):
+		#calculate the sal map by simple subtraction for now!
+		sal_maps.append(imgs[i] - preds[i])
+
+	sal_maps = np.array(sal_maps)
+	return sal_maps
 
 
 def serialize_class_object(f):
