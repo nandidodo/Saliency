@@ -49,14 +49,17 @@ def plot_panorama_step(pan_img, viewport, sal_map, centre, viewport_width, viewp
 def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=None, viewport_width=100, viewport_height=100, N=20, show_results=True, sigma=None):
 
 	#do asserts
-	assert type(pan_fname)=='string' and len(pan_fname)>1, 'Panorama fname invalid'
-	assert type(model_fname)=='string' and len(model_fname)>1, 'Panorama fname invalid'
-	assert len(first_centre)==2, 'Image centre must be two dimensional'
+	assert type(pan_fname)==type(' ') and len(pan_fname)>0, 'Panorama fname invalid'
+	assert type(model_fname)==type('  ') and len(model_fname)>0, 'Model fname invalid'
 	
 	#load images
 	pan_img = load_array(pan_fname)
+	#grayscale
+	if len(pan_img.shape)==3:
+		pan_img = pan_img[:,:,0]
+	print pan_img.shape
 	#reshape if necessary
-	if len(pan_img).shape !=2:
+	if len(pan_img.shape) !=2:
 		pan_img = attempt_image_reshape_2d(pan_img)
 	#load keras model
 	h,w = pan_img.shape
@@ -67,13 +70,14 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 	#check first centre is okay
 	if first_centre is None:
 		first_centre=(h//2, w//2)
+	assert len(first_centre)==2, 'Image centre must be two dimensional'
 	ch,cw = first_centre
 	#assert first centre is okay
 	assert ch>=0 and ch<= h, 'Initial centre height must be within the panorama image'
 	assert cw>=0 and cw<=w, 'Initial centre width must be within the panorama image'
 	#check viewport widths and heights
-	assert type(viewport_width)=='int', 'Viewport width must be an integer'
-	assert type(viewport_height)=='int', 'Viewport height must be an integer'
+	#assert type(viewport_width)=='int', 'Viewport width must be an integer'
+	#assert type(viewport_height)=='int', 'Viewport height must be an integer'
 	vw = viewport_width//2
 	vh = viewport_height//2
 	assert viewport_width<=w, 'Viewport width cannot be greater than the panorama image'
@@ -89,9 +93,14 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 	#now begin the loop
 	for i in xrange(N):
 		#get the viewport
-		viewport_img = move_viewport(panorama_img, centre, viewport_width, viewport_height)
+		viewport_img = move_viewport(pan_img, centre, viewport_width, viewport_height)
 		#get saliency map predictoins
-		pred = mode.predict(viewport_img)
+		#reshape viewport_img
+		viewport_img_feed = np.reshape(viewport_img, (1,viewport_img.shape[0], viewport_img.shape[1], 1))
+		pred = model.predict(viewport_img_feed)
+		#reshape preds
+		sh = pred.shape
+		pred = np.reshape(pred, (sh[1], sh[2]))
 		salmap = get_salmaps(viewport_img, pred)
 		#assume the pred is the sal map for now. Usually I average but I don't hav to do that here hopefully!
 		#reset centre
@@ -181,8 +190,9 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 
 ## now test
 if __name__ =='__main__':
-	fname="testimages_combined"
-	train_panorama_model_prototype(fname, epochs=1)
+	#fname="testimages_combined"
+	#train_panorama_model_prototype(fname, epochs=1)
+	test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL")
 	
 	
 	
