@@ -11,6 +11,7 @@ import cPickle as pickle
 from panorama import *
 from scanpaths import *
 from utils import *
+from models import *
 
 def plot_panorama_step(pan_img, viewport, sal_map, centre, viewport_width, viewport_height, sigma=None, cmap='gray', border_width=10):
 	if sigma is not None:
@@ -49,7 +50,7 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 
 	#do asserts
 	assert type(pan_fname)=='string' and len(pan_fname)>1, 'Panorama fname invalid'
-	assert type(model_fname)==='string' and len(model_fname)>1, 'Panorama fname invalid'
+	assert type(model_fname)=='string' and len(model_fname)>1, 'Panorama fname invalid'
 	assert len(first_centre)==2, 'Image centre must be two dimensional'
 	
 	#load images
@@ -64,8 +65,8 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 	except:
 		raise TypeError('Keras model could not be loaded with this filename')
 	#check first centre is okay
-	if first_centre=None:
-		first_centre=(h//2, w[1]//2)
+	if first_centre is None:
+		first_centre=(h//2, w//2)
 	ch,cw = first_centre
 	#assert first centre is okay
 	assert ch>=0 and ch<= h, 'Initial centre height must be within the panorama image'
@@ -96,7 +97,7 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 		#reset centre
 		#if show
 		if show_results:
-			plot_panorama_step(pan_img, viewport_img,salmap, centre viewport_width, viewport_height, sigma=sigma)
+			plot_panorama_step(pan_img, viewport_img,salmap, centre, viewport_width, viewport_height, sigma=sigma)
 		
 		centre = get_max_indices(salmap)
 		#now append
@@ -160,6 +161,7 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 	#simply train on the green for ease
 	imgs = imgs[:,:,:,0]
 	shape = imgs.shape
+	print shape
 	train,test= split_into_test_train(imgs)
 
 	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
@@ -175,13 +177,6 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 	#save the model
 	model.save("PANORAMA_PROTOTYPE_MODEL")
 	return res
-
-
-
-
-
-			
-
 
 ## now test
 if __name__ =='__main__':
