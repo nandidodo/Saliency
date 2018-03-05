@@ -38,28 +38,12 @@ def collect_files_and_images(rootdir, crop_size = None, mode='RGB', save = True,
 	filelist = np.array(filelist)
 	if save and save_dir is not None:
 		# we save
-		save_array(filelist, save_dir)
+		np.save(save_dir, filelist)
 	return filelist
 
 def generate_dataset(data_fname, samples_per_image=50, viewport_width=100, viewport_height=100, save_name=None):
-	data = load_array(data_fname)
-	pan_dims = data.shape
-	threeD=False
-	twoD = False
-	if pan_dims.length==3:
-		twoD=True
-	if pan_dims.length==4:
-		threeD=True
-	if pan_dims<3 or pan_dims >4:
-		raise AssertionError('Dimensions of panorama image must be two or three dimensional (plus number of images')
-	
-	if twoD:
-		h,w = pan_dims
-	if threeD:
-		h,w,channels = pan_dims
+	data = np.load(data_fname)
 	assert samples_per_image>0,'Must have 1 or more sample per image'
-	assert viewport_width>0 and viewport_width<=w, 'Viewport must be smaller than whole panorama image'
-	assert viewport_height>0 and viewport_height<=h, 'Viewport must be smaller than whole panorama image'
 
 	if save_name is not None:
 		assert type(save_name)==type(' ') and len(save_name)>0, 'Save name must be a string of length at least 1'
@@ -68,32 +52,44 @@ def generate_dataset(data_fname, samples_per_image=50, viewport_width=100, viewp
 	#just assume 2d for now!
 	generated_data = []
 	for i in xrange(len(data)):
+		#cut down to 2d
 		pan_img = data[i]
+		pan_img = pan_img[:,:,0]
+		h,w = pan_img.shape
+		print pan_img.shape
+		assert viewport_width>0 and viewport_width<=w, 'Viewport must be smaller than whole panorama image'
+		assert viewport_height>0 and viewport_height<=h, 'Viewport must be smaller than whole panorama image'
+		print "Loading image: " + str(i)
+
 		#reshape
 		pan_img = np.reshape(pan_img, (h,w))
 		#now create samples
 		for j in xrange(samples_per_image):
+			print "Sample: " + str(j)
 			#so it can never be needing padding in the first place
 			#probably good for training
 			centre_width = int(np.random.uniform(low=viewport_width, high=w-viewport_width))
 			centre_height = int(np.random.uniform(low=viewport_height, high=h-viewport_height))
 			#get the viewport
-			viewport = move_viewport(pan_img, (centre_width, centre_height), viewport_width, viewport_height)
+			viewport = move_viewport(pan_img, (centre_height, centre_width), viewport_width, viewport_height)
 			#add it to data
 			generated_data.append(viewport)
 	
 	#return the data
 	generated_data = np.array(generated_data)
 	if save_name is not None:
-		save_array(generated_data, save_name)
+		np.save(save_name, generated_data)
 	return generated_data
 
 if __name__ == '__main__':
 	#collect_files_and_images(rootdir='../datasets/Benchmark/BenchmarkIMAGES/', save_dir='benchmarkData')
 	#load image
-	test = load_array('benchmarkData')
-	print test.shape
+	#test = np.load('benchmarkData.npy')
+	#print test.shape
+	generate_dataset('benchmarkData.npy', save_name='panoramaBenchmarkDataset')
+
 	#this is slow but it works. I'm not sure how to stream data in to python
 	#without requiring it all be in memory!
+	#okay, so this can be loaded in instantly. that's amazing yay!
 	
 	
