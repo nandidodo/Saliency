@@ -108,6 +108,7 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 			plot_panorama_step(pan_img, viewport_img,salmap, centre, viewport_width, viewport_height, sigma=sigma)
 		
 		viewport_max = get_max_indices(salmap)
+		centre = get_pan_indices_of_viewport_centre(viewport_max, centre, viewport_width, viewport_height,h,w)
 		#now append
 		viewports.append(viewport_img)
 		sal_maps.append(pred)
@@ -189,8 +190,8 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 
 ## now test
 if __name__ =='__main__':
-	fname="testimages_combined"
-	train_panorama_model_prototype(fname, epochs=100)
+	#fname="testimages_combined"
+	#train_panorama_model_prototype(fname, epochs=100)
 	test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL")
 	
 	
