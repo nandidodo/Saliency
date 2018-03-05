@@ -45,7 +45,6 @@ def plot_panorama_step(pan_img, viewport, sal_map, centre, viewport_width, viewp
 	plt.show()
 
 
-
 def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=None, viewport_width=100, viewport_height=100, N=20, show_results=True, sigma=None):
 
 	#do asserts
@@ -108,7 +107,7 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 		if show_results:
 			plot_panorama_step(pan_img, viewport_img,salmap, centre, viewport_width, viewport_height, sigma=sigma)
 		
-		centre = get_max_indices(salmap)
+		viewport_max = get_max_indices(salmap)
 		#now append
 		viewports.append(viewport_img)
 		sal_maps.append(pred)
@@ -183,15 +182,15 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 	#sal_maps = get_salmaps(test,preds)
 	history = serialize_class_object(his)
 	res = [history, preds, test]
-	save_array(res, "PANORAMA_PROTOTYPE_MODEL_RESULTS")
+	save_array(res, "PANORAMA_PROTOTYPE_MODEL_RESULTS_2")
 	#save the model
-	model.save("PANORAMA_PROTOTYPE_MODEL")
+	model.save("PANORAMA_PROTOTYPE_MODEL_2")
 	return res
 
 ## now test
 if __name__ =='__main__':
-	#fname="testimages_combined"
-	#train_panorama_model_prototype(fname, epochs=1)
+	fname="testimages_combined"
+	train_panorama_model_prototype(fname, epochs=100)
 	test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL")
 	
 	
