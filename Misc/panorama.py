@@ -132,8 +132,8 @@ def get_pan_indices_of_viewport_centre(indices, viewport_centre, viewport_width,
 	ch, cw = indices
 	vch, vcw = viewport_centre
 
-	pan_w = viewport_centre - vw + cw
-	pan_h = viewport_centre - vh +ch
+	pan_w = vcw - vw + cw
+	pan_h = vch - vh +ch
 
 	#stop at edge if overshoots
 	if pan_w <0:
