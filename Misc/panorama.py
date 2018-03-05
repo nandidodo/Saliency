@@ -116,6 +116,41 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 	
 	return highlighted_img
 
+
+def get_pan_indices_of_viewport_centre(indices, viewport_centre, viewport_width, viewport_height, pan_width, pan_height):
+	assert len(indices)==2,'Centre index must be of length 2'
+	assert len(viewport_centre)==2, 'Viewport centre (in pan img coordinates) must be two dimensional'
+	#what if it is outside of the panorama img?
+	assert viewport_width > 0 and viewport_width < pan_width, 'Viewport width must be greater than 0 and less than panorama width'
+	assert viewport_height > 0 and viewport_height < pan_height, 'Viewport height must be greater than 0 and less than panorama width'
+	assert pan_width > 0,'Panorama width must be greater than 0'
+	assert pan_height > 0, 'Panorama height must be greater than 0'
+	#don't let it get so
+	vh = viewport_height//2
+	vw = viewport_width//2
+
+	ch, cw = indices
+	vch, vcw = viewport_centre
+
+	pan_w = viewport_centre - vw + cw
+	pan_h = viewport_centre - vh +ch
+
+	#stop at edge if overshoots
+	if pan_w <0:
+		pan_w = 0
+	if pan_w > pan_width:
+		pan_w = pan_width
+
+	if pan_h<0:
+		pan_h = 0
+	if pan_h>pan_height:
+		pan_h = pan_height
+	#because this is how the viewport is defined, right?
+	#if this works it will be a miracle!
+	return (pan_h, pan_w)
+
+
+
 def move_viewport(panorama_img, new_centre, viewport_width, viewport_height, edge_func=pad_edge, move_outside_img=True,show_viewport=False):
 	assert len(panorama_img.shape)==2, 'Panorama image must be two dimensional'
 	pan_height, pan_width = panorama_img.shape
