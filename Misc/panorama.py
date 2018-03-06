@@ -1,6 +1,7 @@
 import numpy as np
 import scipy 
 import matplotlib.pyplot as plt
+from spatial_frequencies import *
 
 
 def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
@@ -133,9 +134,13 @@ def center_surround_low_spatial_frequency(pan_img, viewport_centre, viewport_wid
 	if not already_lowshifted:
 		#do the low spatial frequency transformation
 		#do it
-		pass
+		new_img = lowpass_filter(new_img)
 
 	#now add in viewport
+	#the only thing I can think of is that one is normalised and the other is not
+	#yeah, that's it!
+	#normalise pan_img
+	pan_img = pan_img.astype('float32')/255.
 	new_img[ch-vh:ch+vh, cw-vw:cw+vw] = pan_img[ch-vh:ch+vh, cw-vw:cw+vw]
 	return new_img
 
