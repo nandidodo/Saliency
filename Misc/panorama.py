@@ -116,6 +116,29 @@ def highlight_viewport(panorama_img, centre, viewport_width, viewport_height, bo
 	
 	return highlighted_img
 
+def center_surround_low_spatial_frequency(pan_img, viewport_centre, viewport_width, viewport_height, already_lowshifted=False):
+	assert len(pan_img.shape)==2, 'Panorama must be two dimensional'
+	assert len(viewport_centre)==2, 'Viewport center point must be two dimensional'
+	h,w = pan_img.shape
+	ch, cw = viewport_centre
+	assert viewport_width > 0 and viewport_width <= w, 'Viewport width must be greater than 0 and less than the covering panoramic image width'
+	assert viewport_height > 0 and viewport_height <= w, 'Viewport height must be greater than 0 and less than the covering panoramic image height'
+	
+	vw = viewport_width//2
+	vh = viewport_width//2
+
+	#copy since I'm doing in place mutations of the image
+	new_img = np.copy(pan_img)
+
+	if not already_lowshifted:
+		#do the low spatial frequency transformation
+		#do it
+		pass
+
+	#now add in viewport
+	new_img[ch-vh:ch+vh, cw-vw:cw+vw] = pan_img[ch-vh:ch+vh, cw-vw:cw+vw]
+	return new_img
+
 
 def get_pan_indices_of_viewport_centre(indices, viewport_centre, viewport_width, viewport_height, pan_width, pan_height):
 	assert len(indices)==2,'Centre index must be of length 2'
