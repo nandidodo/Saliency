@@ -202,7 +202,7 @@ if __name__ =='__main__':
 	#salmaps = get_salmaps(test, preds)
 	#plot_model_results(test, preds, salmaps)
 
-
+	"""
 	#train the experiment on the new data
 	fname="panoramaBenchmarkDataset.npy"
 	train_panorama_model_prototype(fname, epochs=100)
@@ -213,6 +213,14 @@ if __name__ =='__main__':
 	preds = np.reshape(preds, (sh[0], sh[1], sh[2]))
 	salmaps = get_salmaps(test, preds)
 	plot_model_results(test, preds, salmaps)
+	"""
+	#test the low spatial frequency thing
+	pan_img = load_array("pan_img")
+	pan_img = pan_img[:,:,0]
+	new_img = center_surround_low_spatial_frequency(pan_img, (500,500),300,300)
+	plt.imshow(new_img, cmap='gray')
+	plt.show()
+	#it looks really ugly, but it works!
 
 	#I think the problem is that the data the image is learning on is just utterly terrible
 	# I'm going to need to create some of my own data. Oh well, it will be funny, I think
