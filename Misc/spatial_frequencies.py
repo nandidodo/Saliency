@@ -1,3 +1,7 @@
+import numpy as np
+from skimage import exposure
+import matplotlib.pyplot as plt
+
 def get_amplitude_spectrum(img, mult = 255, img_type = 'uint8', show = False, type_convert=True):
 	# first we get the fft of the image
 	img_amp = np.fft.fft2(img)
@@ -160,7 +164,7 @@ def lowpass_filter(img, show = False):
 	# we get the fast fourier transform (shifted) of the original image
 	fft = np.fft.fftshift(np.fft.fft2(img))
 	# weget the low pass filter
-	filt = butter2d_lp(img.shape, 0.2, 2, pxd = 43) # these aprams we need to experiment with
+	filt = butter2d_lp(img.shape, 0.2, 2, pxd = 1) # these aprams we need to experiment with
 	# we get the lowpass by multiplyingfilter with fft image
 	fft_new = fft * filt
 	# we then reconstruct the image
