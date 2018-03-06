@@ -1,5 +1,6 @@
 # okay, so the aim here is to have a bunch of functions which, in the end can try to mimic actual scanpaths, so I can see what's up there to be honest. They should deal with 2d image arrays and produce 
 
+from __future__ import division
 import numpy as np
 import scipy
 
@@ -108,18 +109,45 @@ def euclidean_distance(indices):
 	x,y = indices
 	return np.sqrt(x**2 + y **2)
 
-def apply_gaussian_to_point(val, indices, centre_indices, sigma=2):
+def apply_gaussian_to_point(val, indices, centre_indices, sigma=None):
 	#dagnabbit, undoubtedly there's a numpy function which does this for me in a more efficient manner. But I'm not sure what it is! So I'll implement it like this for now
+
+	assert len(indices)==2, 'Indices must be two dimensional'
+	assert len(centre_indices)==2, 'Centre indices must be two dimensional'
+	#define default sigma
+	if sigma is None:
+		sigma = np.array([[2,0],[0,2]])
+
 	gauss_normalizer = (1/np.sqrt(2*np.pi*sigma))
 
 	#convert indices to numpy arrays
 	indices =np.array(indices)
 	centre_indices = np.array(centre_indices)
 	
-	gauss_exponent = -1 * np.dot((indices-centre_indices).T, np.dot(np.linalg.inv(sigma), (indices-centre_indices)))
-	gauss_diff = gauss_normalizer * np.exp(gauss_exponent)
-	new_val = val - (val*gauss_diff)
+	#gauss_exponent = -1 * np.dot((indices-centre_indices).T, np.dot(np.linalg.inv(sigma), (indices-centre_indices)))
+	#gauss_diff = gauss_normalizer * np.exp(gauss_exponent)
+	#new_val = val - (val*gauss_diff)
+	new_val = val - pdf_2d_gauss(indices, centre_indices, sigma)
+	print new_val
 	return new_val
+
+
+def pdf_2d_gauss(x, mu, cov):
+	#so x is a simple 1d vector o pints,
+	#mu is the same
+	#cov is also the same
+
+	assert mu.shape[0]>mu.shape[1] and x.shape[1]==1, 'mu must be a row vector'
+	assert x.shape[0] > x.shape[1] and x.shape[1]==1, 'X mus be a row vector'
+	assert x.shape[0] ==mu.shape[0], 'x and mu must be of same dimension'
+	assert cov.shape[0]==cov.shape[1], 'Covariance matrix must be square'
+	assert mu.shape[0]==cov.shape[0], 'Covariance matrix and mu must have same dimension'
+
+	#start the math
+	denom = 1 / ((2*np.pi)**(len(mu)/2)) * (np.linalg.det(cov)**(1/2))
+	numer = -0.5 * ((x-mu).T.dot(np.linalg.inv(cov)).dot(x-mu))
+	return float(denom * np.exp(numer))
+	
 
 def gaussian_filter(img, sigma=2):
 	assert len(img.shape==2),'Image must be two dimensional for gaussian filtering'
@@ -131,7 +159,7 @@ def apply_gaussian(img, centre, sigma= 2):
 	width, height = img.shape
 	for i in range(width):
 		for j in range(height):
-			img[i][j] = apply_gaussian_to_point(img[i][j], (i,j), centre, sigma=sigma)
+			img[i][j] = apply_gaussian_to_point(img[i][j], (i,j), centre)
 	return img
 
 def scanpaths_with_gaussian_inhibition(img, N= 10, sigma=2, scanpaths=True):
