@@ -12,6 +12,7 @@ import os
 import scipy
 from scipy.ndimage import imread
 from scipy.misc import imresize
+import matplotlib.pyplot as plt
 
 def collect_files_and_images(rootdir, crop_size = None, mode='RGB', save = True, save_dir = None):
 	filelist = []
@@ -86,7 +87,13 @@ if __name__ == '__main__':
 	#load image
 	#test = np.load('benchmarkData.npy')
 	#print test.shape
-	generate_dataset('benchmarkData.npy', save_name='panoramaBenchmarkDataset')
+	#generate_dataset('benchmarkData.npy', save_name='panoramaBenchmarkDataset')
+	test = np.load('panoramaBenchmarkDataset.npy')
+	print test.shape
+	#perfect!
+	##for i in xrange(10):
+	#	plt.imshow(test[i])
+	#	plt.show()
 
 	#this is slow but it works. I'm not sure how to stream data in to python
 	#without requiring it all be in memory!
