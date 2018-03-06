@@ -203,7 +203,7 @@ if __name__ =='__main__':
 
 
 	#train the experiment on the new data
-	fname="benchmarkData.npy"
+	fname="panoramaBenchmarkDataset.npy"
 	train_panorama_model_prototype(fname, epochs=100)
 	test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL")
 	history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS')
