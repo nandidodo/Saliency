@@ -155,7 +155,73 @@ def scanpaths_with_gaussian_inhibition(img, N= 10, sigma=2, scanpaths=True):
 		scanpaths = np.array(scanpaths)
 		return scanpaths
 		
-		
+def plot_nine_scanpaths(img, sal,scanpath_func = scanpaths_with_gaussian_inhibition, sigma=2, cmap='gray'):
+	assert len(img.shape)==2, 'Image must be two dimensional'
+	assert len(sal.shape)==2,'Sal map must be two dimensional'
+	assert img.shape == sal.shape, 'Image and salience map must have same dimensions'
+	
+	scanpaths = scanpath_func(sal, N=4,sigma)
+	
+	fig = plt.figure()
+	
+	ax1 = fig.add_subplot(331)
+	plt.imshow(img, cmap=cmap)
+	plt.title('Original Image')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax1 = fig.add_subplot(332)
+	plt.imshow(sal, cmap=cmap)
+	plt.title('Salience Map')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax1 = fig.add_subplot(333)
+	plt.imshow(scanpaths[0], cmap=cmap)
+	plt.title('First Fixation')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax1 = fig.add_subplot(334)
+	plt.imshow(scanpaths[1], cmap=cmap)
+	plt.title('Second fixation')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax1 = fig.add_subplot(335)
+	plt.imshow(scanpaths[2], cmap=cmap)
+	plt.title('Third Fixation')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax1 = fig.add_subplot(336)
+	plt.imshow(scanpaths[3], cmap=cmap)
+	plt.title('Fourth Fixation')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax1 = fig.add_subplot(337)
+	plt.imshow(scanpaths[4], cmap=cmap)
+	plt.title('Fifth Fixation')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax1 = fig.add_subplot(338)
+	plt.imshow(scanpaths[5], cmap=cmap)
+	plt.title('Sixth Fixation')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax1 = fig.add_subplot(339)
+	plt.imshow(scanpaths[6], cmap=cmap)
+	plt.title('Seventh Fixation')
+	plt.xticks([])
+	plt.yticks([])
+
+	plt.tight_layout()
+	plt.show()
+	
+	#now get the images
 	
 #I relaly don't know what 
 		
