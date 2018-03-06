@@ -169,7 +169,8 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 	imgs = np.load(fname)
 	imgs = imgs.astype('float32')/255.
 	#simply train on the green for ease
-	imgs = imgs[:,:,:,0]
+	if len(imgs.shape)==4:
+		imgs = imgs[:,:,:,0]
 	imgs = np.reshape(imgs, (imgs.shape[0], imgs.shape[1], imgs.shape[2], 1))
 	shape = imgs.shape
 	print shape
