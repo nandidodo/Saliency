@@ -135,7 +135,7 @@ def plot_model_results(images, preds,salmaps, N=10,cmap='gray', sigma=None):
 	for i in xrange(N):
 		fig = plt.figure()
 	
-		ax1 = plt.subplot(121)
+		ax1 = plt.subplot(131)
 		plt.imshow(images[i], cmap=cmap)
 		plt.title('Original Image')
 		plt.xticks([])
@@ -165,7 +165,8 @@ def plot_model_results(images, preds,salmaps, N=10,cmap='gray', sigma=None):
 
 
 def train_panorama_model_prototype(fname,epochs=100, both=True):
-	imgs = load_array(fname)
+	#imgs = load_array(fname)
+	imgs = np.load(fname)
 	imgs = imgs.astype('float32')/255.
 	#simply train on the green for ease
 	imgs = imgs[:,:,:,0]
@@ -192,7 +193,35 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 if __name__ =='__main__':
 	#fname="testimages_combined"
 	#train_panorama_model_prototype(fname, epochs=100)
+	#test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL")
+	#history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS')
+	#sh= test.shape
+	#test = np.reshape(test, (sh[0], sh[1],sh[2]))
+	#preds = np.reshape(preds, (sh[0], sh[1], sh[2]))
+	#salmaps = get_salmaps(test, preds)
+	#plot_model_results(test, preds, salmaps)
+
+
+	#train the experiment on the new data
+	fname="benchmarkData.npy"
+	train_panorama_model_prototype(fname, epochs=100)
 	test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL")
+	history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS')
+	sh= test.shape
+	test = np.reshape(test, (sh[0], sh[1],sh[2]))
+	preds = np.reshape(preds, (sh[0], sh[1], sh[2]))
+	salmaps = get_salmaps(test, preds)
+	plot_model_results(test, preds, salmaps)
+
+	#I think the problem is that the data the image is learning on is just utterly terrible
+	# I'm going to need to create some of my own data. Oh well, it will be funny, I think
+	#I'm not totally sure how to do it
+	#perhaps cirlce through all the images, and fifty with a number of viewports
+	#that could be easy to write a function to do, I would suspect
+	#and would get me a bit of a dataset at least!
+
+	#notes:
+
 	
 	
 	
