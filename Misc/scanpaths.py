@@ -116,7 +116,7 @@ def apply_gaussian_to_point(val, indices, centre_indices, sigma=2):
 	indices =np.array(indices)
 	centre_indices = np.array(centre_indices)
 	
-	gauss_exponent = -1 * np.dot((indices-centre_indices).T, np.dot(np.inv(sigma), (indices-centre_indices)))
+	gauss_exponent = -1 * np.dot((indices-centre_indices).T, np.dot(np.linalg.inv(sigma), (indices-centre_indices)))
 	gauss_diff = gauss_normalizer * np.exp(gauss_exponent)
 	new_val = val - (val*gauss_diff)
 	return new_val
@@ -160,7 +160,7 @@ def plot_nine_scanpaths(img, sal,scanpath_func = scanpaths_with_gaussian_inhibit
 	assert len(sal.shape)==2,'Sal map must be two dimensional'
 	assert img.shape == sal.shape, 'Image and salience map must have same dimensions'
 	
-	scanpaths = scanpath_func(sal, N=4,sigma)
+	scanpaths = scanpath_func(sal, 7,sigma=sigma)
 	
 	fig = plt.figure()
 	
