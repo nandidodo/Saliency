@@ -26,10 +26,10 @@ def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
 
 
 #get salmap - I'm not sure if this is the way to do it, or just a simple way, but it's what I'm using for now. I can alter it later without changing the other code!
-def get_salmap(imgs, preds):
+def get_salmaps(imgs, preds):
 	assert len(imgs.shape)==2 or len(imgs.shape)==3, 'Images must be two dimensional'
 	assert len(preds.shape)==2 or len(preds.shape)==3, 'Preds must be two dimensional'
-	assert imgs.shape==preds.shape, 'Preds and images must have same shape
+	assert imgs.shape==preds.shape, 'Preds and images must have same shape'
 	if len(imgs.shape)==2:
 		return imgs - preds
 	
@@ -54,7 +54,9 @@ def serialize_class_object(f):
 
 def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0):
 	
-	checkpointer = ModelCheckpoint(filepath=os.path.join(save_path, "_weights"), monitor="val_loss",save_best_only=True, save_weights_only=True)
+	checkpoint_filepath = os.path.join(save_path,'checkpoint_{epoch:02d}-{val_loss:.2f}.hd5')
+	checkpointer = ModelCheckpoint(checkpoint_filepath, monitor="val_loss",save_best_only=True, save_weights_only=True)
+	#so it's only the best weights, but how do I use it!
 	
 	early_stopper = EarlyStopping(monitor='val_loss', min_delta=min_delta, patience=patience*2)
 
@@ -62,10 +64,10 @@ def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0
 	
 	#batch_logger= BatchLossCSVLogger(os.path.join(save_path, "batch_logs.csv"))
 	
-	tensorboard = TensorBoard(log_dir=(os.path.join(save_path, '_tensorboard_logs')), histogram_freq=histogram_freq, write_grads=(histogram_freq>0))
+	#tensorboard = TensorBoard(log_dir=(os.path.join(save_path, '_tensorboard_logs')), histogram_freq=histogram_freq, write_grads=(histogram_freq>0))
 
 	terminator = TerminateOnNaN()
 	
 	reduceLR = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience= patience, verbose=1, mode='auto', min_lr = 1e-8)
 
-	return [checkpointer, early_stopper, epoch_logger, tensorboard, terminator, reduceLR]
+	return [checkpointer, early_stopper, epoch_logger, terminator, reduceLR]
