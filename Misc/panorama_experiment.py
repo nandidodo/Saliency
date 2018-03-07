@@ -13,6 +13,7 @@ from scanpaths import *
 from utils import *
 from models import *
 
+
 def plot_panorama_step(pan_img, viewport, sal_map, centre, viewport_width, viewport_height, sigma=None, cmap='gray', border_width=10):
 	if sigma is not None:
 		assert sigma>0,'Gaussian smooth factor sigma must be greater than 0'
@@ -142,7 +143,7 @@ def plot_model_results(images, preds,salmaps, N=10,cmap='gray', sigma=None):
 		plt.yticks([])
 
 		ax2 = plt.subplot(132)
-		plt.imshow(preds[i])
+		plt.imshow(preds[i], cmap=cmap)
 		plt.title('Predicted Image')
 		plt.xticks([])
 		plt.yticks([])
@@ -151,7 +152,7 @@ def plot_model_results(images, preds,salmaps, N=10,cmap='gray', sigma=None):
 		salmap = salmaps[i]
 		if sigma is not None:
 			salmap = gaussian_flter(salmap, sigma)
-		plt.imshow(salmap)
+		plt.imshow(salmap, cmap=cmap)
 		plt.title('Salience Map')
 		plt.xticks([])
 		plt.yticks([])
@@ -178,7 +179,7 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 
 	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
 	model.compile(optimizer='sgd',loss='mse')
-	callbacks = build_callbacks("./")
+	callbacks = build_callbacks("results/")
 	his=model.fit(train, train, epochs=epochs, batch_size=128, shuffle=True, validation_data=(test,test), callbacks=callbacks)
 
 	preds = model.predict(test)
@@ -189,6 +190,8 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 	#save the model
 	model.save("PANORAMA_PROTOTYPE_MODEL_2")
 	return res
+
+
 
 ## now test
 if __name__ =='__main__':
@@ -202,24 +205,52 @@ if __name__ =='__main__':
 	#salmaps = get_salmaps(test, preds)
 	#plot_model_results(test, preds, salmaps)
 
-	"""
+	
 	#train the experiment on the new data
-	fname="panoramaBenchmarkDataset.npy"
-	train_panorama_model_prototype(fname, epochs=100)
-	test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL")
-	history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS')
-	sh= test.shape
+	#fname="panoramaBenchmarkDataset.npy"
+	#train_panorama_model_prototype(fname, epochs=100)
+	#test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL_2")
+	#history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS_2')
+	#sh= test.shape
+	#test = np.reshape(test, (sh[0], sh[1],sh[2]))
+	#preds = np.reshape(preds, (sh[0], sh[1], sh[2]))
+	#salmaps = get_salmaps(test, preds)
+	#plot_model_results(test, preds, salmaps)
+
+	#test to see if the model checkpointing is even workign
+	#model = load_model('_weights')
+	#print type(model)
+
+	#I'm going to haev to initialise the model else do something idk
+	fname = 'panoramaBenchmarkDataset.npy'
+	imgs = np.load(fname)
+	imgs = imgs.astype('float32')/255.
+	#simply train on the green for ease
+	if len(imgs.shape)==4:
+		imgs = imgs[:,:,:,0]
+	imgs = np.reshape(imgs, (imgs.shape[0], imgs.shape[1], imgs.shape[2], 1))
+	shape = imgs.shape
+	print shape
+	train,test= split_into_test_train(imgs)
+
+	model = SimpleConvDropoutBatchNorm((shape[1], shape[2], shape[3]))
+	model.compile(optimizer='sgd',loss='mse')
+	model.load_weights('_weights')
+	#then predict
+	preds = model.predict(test)
+	sh = test.shape
 	test = np.reshape(test, (sh[0], sh[1],sh[2]))
 	preds = np.reshape(preds, (sh[0], sh[1], sh[2]))
 	salmaps = get_salmaps(test, preds)
 	plot_model_results(test, preds, salmaps)
-	"""
+	#it seems to work okay and do reasonable reconstructions, it's just weird. argh!
+	
 	#test the low spatial frequency thing
-	pan_img = load_array("pan_img")
-	pan_img = pan_img[:,:,0]
-	new_img = center_surround_low_spatial_frequency(pan_img, (500,500),300,300)
-	plt.imshow(new_img, cmap='gray')
-	plt.show()
+	#pan_img = load_array("pan_img")
+	#pan_img = pan_img[:,:,0]
+	#new_img = center_surround_low_spatial_frequency(pan_img, (500,500),300,300)
+	#plt.imshow(new_img, cmap='gray')
+	#plt.show()
 	#it looks really ugly, but it works!
 
 	#I think the problem is that the data the image is learning on is just utterly terrible
