@@ -219,15 +219,15 @@ if __name__ =='__main__':
 
 	
 	#train the experiment on the new data
-	fname="panoramaBenchmarkDataset.npy"
-	train_panorama_model_prototype(fname, epochs=20)
-	test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL_2")
-	history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS_2')
-	sh= test.shape
-	test = np.reshape(test, (sh[0], sh[1],sh[2]))
-	preds = np.reshape(preds, (sh[0], sh[1], sh[2]))
-	salmaps = get_salmaps(test, preds)
-	plot_model_results(test, preds, salmaps)
+	#fname="panoramaBenchmarkDataset.npy"
+	#train_panorama_model_prototype(fname, epochs=20)
+	#test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL_2")
+	#history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS_2')
+	#sh= test.shape
+	#test = np.reshape(test, (sh[0], sh[1],sh[2]))
+	#preds = np.reshape(preds, (sh[0], sh[1], sh[2]))
+	#salmaps = get_salmaps(test, preds)
+	#plot_model_results(test, preds, salmaps)
 
 	#test to see if the model checkpointing is even workign
 	#model = load_model('_weights')
@@ -262,10 +262,30 @@ if __name__ =='__main__':
 	#test the low spatial frequency thing
 	#pan_img = load_array("pan_img")
 	#pan_img = pan_img[:,:,0]
-	#new_img = center_surround_low_spatial_frequency(pan_img, (500,500),300,300)
+	#new_img = center_surround_low_spatial_frequency(pan_img, (500,800),400,400)
 	#plt.imshow(new_img, cmap='gray')
 	#plt.show()
 	#it looks really ugly, but it works!
+
+	#and now for the log polar transform
+	pan_img = load_array("pan_img")
+	pan_img = pan_img[:,:,0]
+	logpolar = move_viewport_log_polar_transform(pan_img, (500,800))
+	fig = plt.figure()
+	ax1 = plt.add_subplot(121)
+	plt.imshow(pan_img, cmap='gray')
+	plt.title('Panorama image')
+	plt.xticks([])
+	plt.yticks([])
+	
+	ax2 = plt.add_subplot(122)
+	plt.imshow(logpolar, cmap='gray')
+	plt.title('Log polar (retinal) transform')
+	plt.xticks([])
+	plt.yticks([])
+	
+	fig.tight_layout()
+	plt.show()
 	
 
 	#viewports, salmaps, centres = test_panorama_scanpaths_single_image('pan_img', model_fname='PANORAMA_PROTOTYPE_MODEL')
