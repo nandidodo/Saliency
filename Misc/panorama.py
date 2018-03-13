@@ -2,6 +2,7 @@ import numpy as np
 import scipy 
 import matplotlib.pyplot as plt
 from spatial_frequencies import *
+from log_polar import *
 
 
 def pad_edge(panorama, centre, viewport_width, viewport_height, left, right, top, bottom):
@@ -143,6 +144,20 @@ def center_surround_low_spatial_frequency(pan_img, viewport_centre, viewport_wid
 	pan_img = pan_img.astype('float32')/255.
 	new_img[ch-vh:ch+vh, cw-vw:cw+vw] = pan_img[ch-vh:ch+vh, cw-vw:cw+vw]
 	return new_img
+
+
+def center_surround_low_spatial_frequency_circular(pan_img, viewport_center, viewport_radius, already_lowshifted=False):
+	pass
+
+
+def move_viewport_log_polar_transform(pan_img, viewport_center):
+	assert len(pan_img.shape)==2, 'Panorama image must be two dimensional'
+	h,w = pan_img.shape
+	assert len(viewport_center)==2, 'Viewport center must be a two dimensional point'
+	ch, cw = viewport_center
+	assert ch>=0 and ch<=w, 'Viewport center height must be within the panorama image boundaries'
+	assert cw>=0 and cw<=w, 'Viewport center width must be within the panorama image boudnaries'
+	return logpolar_fancy(pan_img, ch,cw)
 
 
 def get_pan_indices_of_viewport_centre(indices, viewport_centre, viewport_width, viewport_height, pan_width, pan_height):
