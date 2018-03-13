@@ -50,9 +50,13 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname=None, model_weig
 
 	#do asserts
 	assert type(pan_fname)==type(' ') and len(pan_fname)>0, 'Panorama fname invalid'
-	assert type(model_fname)==type('  ') and len(model_fname)>0, 'Model fname invalid'
-	
-	assert model_fname is None and model_weights is not None or model_fname is not None and model_weighs is None, 'model fname and model weights should be mutually exclusive'
+	if model_fname is not None:
+		assert type(model_fname)==type('  ') and len(model_fname)>0, 'Model fname invalid'
+		assert model is None, 'Cannot have a model when loading from the fname'
+		assert model_weights is None, 'Cannot have model weights when loading from fname'
+	if model_fname is None:
+		assert model is not None, 'If no model filename provided, you must provide a model'
+		assert model_weights is not None, 'If no model filename provided, model must be loaded from weights'
 	#load images
 	if model_weights is not None:
 		assert model is not None, 'If using model weights, the model must also be supplied'
@@ -73,11 +77,11 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname=None, model_weig
 			raise TypeError('Keras model could not be loaded with this filename')
 	#check first centre is okay
 	if model_weights:
-		try:
-			model.compile(optimizer='sgd', loss='mse')
-			model.load_weights(model_weights)
-		except:
-			raise TypeError('Model could not be compiled or weights loaded')
+		model = model((viewport_height, viewport_width, 1))
+		model.compile(optimizer='sgd', loss='mse')
+		model.load_weights(model_weights)
+		#except:
+			#raise TypeError('Model could not be compiled or weights loaded')
 		
 	if first_centre is None:
 		first_centre=(h//2, w//2)
@@ -112,6 +116,8 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname=None, model_weig
 		#reshape preds
 		sh = pred.shape
 		pred = np.reshape(pred, (sh[1], sh[2]))
+		plt.imshow(pred, cmap='gray')
+		plt.show()
 		salmap = get_salmaps(viewport_img, pred)
 		#assume the pred is the sal map for now. Usually I average but I don't hav to do that here hopefully!
 		#reset centre
@@ -202,7 +208,7 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 ## now test
 if __name__ =='__main__':
 	#fname="testimages_combined"
-	#train_panorama_model_prototype(fname, epochs=100)
+	#train_panorama_model_prototype(fname, epochs=20)
 	#test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL")
 	#history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS')
 	#sh= test.shape
@@ -213,15 +219,15 @@ if __name__ =='__main__':
 
 	
 	#train the experiment on the new data
-	#fname="panoramaBenchmarkDataset.npy"
-	#train_panorama_model_prototype(fname, epochs=100)
-	#test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL_2")
-	#history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS_2')
-	#sh= test.shape
-	#test = np.reshape(test, (sh[0], sh[1],sh[2]))
-	#preds = np.reshape(preds, (sh[0], sh[1], sh[2]))
-	#salmaps = get_salmaps(test, preds)
-	#plot_model_results(test, preds, salmaps)
+	fname="panoramaBenchmarkDataset.npy"
+	train_panorama_model_prototype(fname, epochs=20)
+	test_panorama_scanpaths_single_image("pan_img", "PANORAMA_PROTOTYPE_MODEL_2")
+	history, preds, test = load_array('PANORAMA_PROTOTYPE_MODEL_RESULTS_2')
+	sh= test.shape
+	test = np.reshape(test, (sh[0], sh[1],sh[2]))
+	preds = np.reshape(preds, (sh[0], sh[1], sh[2]))
+	salmaps = get_salmaps(test, preds)
+	plot_model_results(test, preds, salmaps)
 
 	#test to see if the model checkpointing is even workign
 	#model = load_model('_weights')
@@ -252,7 +258,7 @@ if __name__ =='__main__':
 	salmaps = get_salmaps(test, preds)
 	plot_model_results(test, preds, salmaps)
 	#it seems to work okay and do reasonable reconstructions, it's just weird. argh!
-	
+	"""
 	#test the low spatial frequency thing
 	#pan_img = load_array("pan_img")
 	#pan_img = pan_img[:,:,0]
@@ -260,9 +266,9 @@ if __name__ =='__main__':
 	#plt.imshow(new_img, cmap='gray')
 	#plt.show()
 	#it looks really ugly, but it works!
-	"""
+	
 
-	viewports, salmaps, centres = test_panorama_scanpaths_single_image('panorama_test_images/016.jpg', model_weights='_weights', model=SimpleConvDropoutBatchNorm)
+	#viewports, salmaps, centres = test_panorama_scanpaths_single_image('pan_img', model_fname='PANORAMA_PROTOTYPE_MODEL')
 	#I think the problem is that the data the image is learning on is just utterly terrible
 	# I'm going to need to create some of my own data. Oh well, it will be funny, I think
 	#I'm not totally sure how to do it
