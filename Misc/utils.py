@@ -60,7 +60,7 @@ def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0
 	
 	early_stopper = EarlyStopping(monitor='val_loss', min_delta=min_delta, patience=patience*2)
 
-	epoch_logger = CSVLogger(os.path.join(save_path, "epoch_logs.csv"))
+	#epoch_logger = CSVLogger(os.path.join(save_path, "epoch_logs.csv"))
 	
 	#batch_logger= BatchLossCSVLogger(os.path.join(save_path, "batch_logs.csv"))
 	
@@ -70,4 +70,12 @@ def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0
 	
 	reduceLR = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience= patience, verbose=1, mode='auto', min_lr = 1e-8)
 
-	return [checkpointer, early_stopper, epoch_logger, terminator, reduceLR]
+	return [checkpointer, early_stopper,  terminator, reduceLR]
+
+
+def euclidean_distance(a_points, b_points):
+	assert len(a_points)==len(b_points), 'Points to be compared must have same dimension
+	total = 0
+	for i in xrange(len(a_points)):
+		total += (a_points[i] - b_points[i])**2
+	return np.sqrt(total)

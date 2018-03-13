@@ -147,7 +147,29 @@ def center_surround_low_spatial_frequency(pan_img, viewport_centre, viewport_wid
 
 
 def center_surround_low_spatial_frequency_circular(pan_img, viewport_center, viewport_radius, already_lowshifted=False):
-	pass
+	assert len(pan_img.shape)==2, 'Panorama image must be two dimensional'
+	h,w = pan_img.shape
+	assert len(viewport_center.shape)==2, 'Viewport center must be two dimensional also'
+	center_height, center_width = viewport_center
+	assert center_height>=0 and center_height<=h, 'Viewport width must be within panorama image'
+	assert center_width>=0 and center_width<=w, 'Viewport width must be within panorama image'
+	assert viewport_radius<=h and viewport_radius<=w, 'Viewport radius must be within image dimensions'
+	#get copy so as not to mutate new img in memory!
+	new_img = np.copy(pan_img)
+
+	if not already_lowshifted:
+		#do the low spatial frequency transformation
+		#do it
+		new_img = lowpass_filter(new_img)
+
+	#go through the image sequentially and check euclid distance
+	for i in xrange(h):
+		for j in xrange(w):
+			dist = euclidean_distance((i,j), viewport_center)
+			if dist<=viewport_radius:
+				new_img[i][j] = pan_img[i][j]
+
+	return new_img
 
 
 def move_viewport_log_polar_transform(pan_img, viewport_center):
