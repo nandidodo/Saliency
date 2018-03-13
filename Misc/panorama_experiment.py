@@ -46,13 +46,16 @@ def plot_panorama_step(pan_img, viewport, sal_map, centre, viewport_width, viewp
 	plt.show()
 
 
-def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=None, viewport_width=100, viewport_height=100, N=20, show_results=True, sigma=None):
+def test_panorama_scanpaths_single_image(pan_fname, model_fname=None, model_weights=None,model=None, first_centre=None, viewport_width=100, viewport_height=100, N=20, show_results=True, sigma=None):
 
 	#do asserts
 	assert type(pan_fname)==type(' ') and len(pan_fname)>0, 'Panorama fname invalid'
 	assert type(model_fname)==type('  ') and len(model_fname)>0, 'Model fname invalid'
 	
+	assert model_fname is None and model_weights is not None or model_fname is not None and model_weighs is None, 'model fname and model weights should be mutually exclusive'
 	#load images
+	if model_weights is not None:
+		assert model is not None, 'If using model weights, the model must also be supplied'
 	pan_img = load_array(pan_fname)
 	#grayscale
 	if len(pan_img.shape)==3:
@@ -63,11 +66,19 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 		pan_img = attempt_image_reshape_2d(pan_img)
 	#load keras model
 	h,w = pan_img.shape
-	try:
-		model = load_model(model_fname)
-	except:
-		raise TypeError('Keras model could not be loaded with this filename')
+	if model_fname:
+		try:
+			model = load_model(model_fname)
+		except:
+			raise TypeError('Keras model could not be loaded with this filename')
 	#check first centre is okay
+	if model_weights:
+		try:
+			model.compile(optimizer='sgd', loss='mse')
+			model.load_weights(model_weights)
+		except:
+			raise TypeError('Model could not be compiled or weights loaded')
+		
 	if first_centre is None:
 		first_centre=(h//2, w//2)
 	assert len(first_centre)==2, 'Image centre must be two dimensional'
@@ -124,7 +135,7 @@ def test_panorama_scanpaths_single_image(pan_fname, model_fname, first_centre=No
 #First I'm going to need to train the model. For simplicity I've copied the function to do this here
 # and it will also adapt it slightly
 
-def plot_model_results(images, preds,salmaps, N=10,cmap='gray', sigma=None):
+def plot_model_results(images, preds,salmaps, N=10,cmap='gray', sigma=None, hightlight_viewport=False):
 	assert len(images.shape)==3, 'Image shape must be two dimensional'
 	assert len(preds.shape)==3,'Preds shape must be two dimensional'
 	assert len(salmaps.shape)==3,'Salmaps shape must be two dimensional'
@@ -159,11 +170,6 @@ def plot_model_results(images, preds,salmaps, N=10,cmap='gray', sigma=None):
 
 		plt.tight_layout()
 		plt.show()
-		
-	
-
-
-
 
 def train_panorama_model_prototype(fname,epochs=100, both=True):
 	#imgs = load_array(fname)
@@ -222,6 +228,8 @@ if __name__ =='__main__':
 	#print type(model)
 
 	#I'm going to haev to initialise the model else do something idk
+
+	"""
 	fname = 'panoramaBenchmarkDataset.npy'
 	imgs = np.load(fname)
 	imgs = imgs.astype('float32')/255.
@@ -252,7 +260,9 @@ if __name__ =='__main__':
 	#plt.imshow(new_img, cmap='gray')
 	#plt.show()
 	#it looks really ugly, but it works!
+	"""
 
+	viewports, salmaps, centres = test_panorama_scanpaths_single_image('panorama_test_images/016.jpg', model_weights='_weights', model=SimpleConvDropoutBatchNorm)
 	#I think the problem is that the data the image is learning on is just utterly terrible
 	# I'm going to need to create some of my own data. Oh well, it will be funny, I think
 	#I'm not totally sure how to do it
