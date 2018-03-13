@@ -272,13 +272,13 @@ if __name__ =='__main__':
 	pan_img = pan_img[:,:,0]
 	logpolar = move_viewport_log_polar_transform(pan_img, (500,800))
 	fig = plt.figure()
-	ax1 = plt.add_subplot(121)
+	ax1 = fig.add_subplot(121)
 	plt.imshow(pan_img, cmap='gray')
 	plt.title('Panorama image')
 	plt.xticks([])
 	plt.yticks([])
 	
-	ax2 = plt.add_subplot(122)
+	ax2 = fig.add_subplot(122)
 	plt.imshow(logpolar, cmap='gray')
 	plt.title('Log polar (retinal) transform')
 	plt.xticks([])

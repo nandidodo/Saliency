@@ -73,7 +73,7 @@ def _get_transform(i_0, j_0, i_n, j_n, p_n, t_n, p_s, t_s):
 					t_k.append(t)
 
 	#creates a fancy set of two indeces
-		transform = ((array(p_k), array(t_k)), (array(i_k), array(j_k)))
+		transform = ((np.array(p_k), np.array(t_k)), (np.array(i_k), np.array(j_k)))
 		_transforms[i_0, j_0, i_n, j_n, p_n, t_n] = transform
 
 	return transform
@@ -120,7 +120,7 @@ def logpolar_fancy(image, i_0, j_0, p_n=None, t_n=None):
         t_n = j_n
     
     # The scale factors determine the size of each "step" along the transform.
-    p_s = log(d_c) / p_n
+    p_s = np.log(d_c) / p_n
     t_s = 2.0 * np.pi / t_n
     
     
@@ -165,4 +165,6 @@ def profile(f):
 if __name__ == '__main__':
     profile(logpolar_naive)
     profile(logpolar_fancy)
+	#image = imread('panorama_test_images/016.jpg')
+	#logpolar = logpolar_fancy(image, 
 
