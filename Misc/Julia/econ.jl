@@ -82,13 +82,48 @@ type Match:
 
 type MatchingEngine:
 	buy_offers: Array{Offer},
-	self_offers: Array{Offer},
+	sell_offers: Array{Offer},
 	matches:: Array{Match}
 end
 
 # okay, that shuold set up the basics here, but I'm not sure what eles I need beyond this
 #type wise, but the main thing is obviously not going to be the types but the actual
 # functions which operate on the types, fairly obviously!
+
+#so what is next. The matching algorithm is going to be kind of funny, I think
+#for each buy offer, it traverses sell offers seeing if one matches
+# and if it does, it creates a match, and removes the sell offers from the array
+#and creates a match
+# what about partial matches
+# ack! that's goind to be horrible
+# since you can construct it in a nasty way
+# I think I'm just going to ignore that for now!
+# who should be favoured in the price, or should it be split down the middle
+#I think splitting down the middle would be reasonable!
+function match!(engine::MatchingEngine):
+	#just try this
+	for buy_offer in engine.buy_offers:
+		const good_id = buy_offer.good_id
+		const quantity = buy_offer.quantity
+		const max_price = buy_offer.max_price
+		const min_price = buy_offer.min_price
+		for sell_offer in engine.sell_offers:
+			if sell_offer.good_id != good_id:
+				break
+			end
+			if quantity !=sell_offer.quantity:
+				break
+			end
+			if sell_offer.max_price < min_price:
+				break
+			end
+			if sell_offer.min_price >max_price:
+				break;
+			end
+			#so here there is a match. calculate the actual price
+			#I can't focus
+
+
 
 
 
