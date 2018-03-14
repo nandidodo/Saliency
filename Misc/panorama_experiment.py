@@ -12,6 +12,7 @@ from panorama import *
 from scanpaths import *
 from utils import *
 from models import *
+from keras.datasets import mnist
 
 
 def plot_panorama_step(pan_img, viewport, sal_map, centre, viewport_width, viewport_height, sigma=None, cmap='gray', border_width=10):
@@ -203,6 +204,19 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 	model.save("PANORAMA_PROTOTYPE_MODEL_2")
 	return res
 
+def sanity_check_mnist():
+	(xtrain, xtest), (ytrain, ytest) = mnist.load_data()
+	xtrain = xtrain.astype('float32')/255.
+	xtest = xtest.astype('float32')/255.
+	sh = xtrain.shape
+	model = SimpleConvDropoutBatchNorm((sh[1], sh[1],1))
+	model.compile(optimizer='sgd', loss='mse')
+	callbacks = build_callbacks('results/')
+	his = model.fit(xtrain, xtrain, epochs=50, batch_size=128, shuffle=True, validation_data=(xtest, xtest))
+	preds= model.predict(test)
+	salmaps = get_salmaps(xtest, preds)
+	plot_model_results(xtest, preds, salmaps)
+
 
 
 ## now test
@@ -270,11 +284,15 @@ if __name__ =='__main__':
 	#and now for the log polar transform
 	pan_img = load_array("pan_img")
 	pan_img = pan_img[:,:,0]
-	logpolar = move_viewport_log_polar_transform(pan_img, (500,800))
+	center = (800,500)
+	h,w = center
+	logpolar = move_viewport_log_polar_transform(pan_img, center)
+	#highlight center in panorama img
+	pan_img[h-10:h+10, w-10:w+10] = np.full((20,20), 255)
 	fig = plt.figure()
 	ax1 = fig.add_subplot(121)
 	plt.imshow(pan_img, cmap='gray')
-	plt.title('Panorama image')
+	plt.title('Panorama image with center highlighted')
 	plt.xticks([])
 	plt.yticks([])
 	
@@ -286,6 +304,14 @@ if __name__ =='__main__':
 	
 	fig.tight_layout()
 	plt.show()
+
+
+`#okay, as before, the model completely and utterly failed to learn anything
+	#I'm fairly confused as to why this is the case?
+	#can it evne learn mnist with any kind of reasonable accuracy?
+	#that is somethign I'm going to have to do a sanity check on, because if it can't learn mnist
+	#where does that put me as to wrt this thing. I don't know why it doesn't work at all
+	#dagnabbit!
 	
 
 	#viewports, salmaps, centres = test_panorama_scanpaths_single_image('pan_img', model_fname='PANORAMA_PROTOTYPE_MODEL')
