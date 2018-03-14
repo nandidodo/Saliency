@@ -208,7 +208,14 @@ def sanity_check_mnist():
 	(xtrain, xtest), (ytrain, ytest) = mnist.load_data()
 	xtrain = xtrain.astype('float32')/255.
 	xtest = xtest.astype('float32')/255.
+	print xtrain.shape
+	print xtest.shape
+	print xtest[0]
+	print ytrain.shape
+	print ytest.shape
 	sh = xtrain.shape
+	xtrain = np.reshape(xtrain, (sh[0], sh[1],sh[2],1))
+	xtest = np.reshape(xtest, (sh[0], sh[1],sh[2],1))
 	model = SimpleConvDropoutBatchNorm((sh[1], sh[1],1))
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks('results/')
