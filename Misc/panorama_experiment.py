@@ -212,7 +212,7 @@ def sanity_check_mnist():
 	model = SimpleConvDropoutBatchNorm((sh[1], sh[1],1))
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks('results/')
-	his = model.fit(xtrain, xtrain, epochs=50, batch_size=128, shuffle=True, validation_data=(xtest, xtest))
+	his = model.fit(xtrain, xtrain, epochs=1, batch_size=128, shuffle=True, validation_data=(xtest, xtest))
 	preds= model.predict(test)
 	salmaps = get_salmaps(xtest, preds)
 	plot_model_results(xtest, preds, salmaps)
@@ -282,6 +282,7 @@ if __name__ =='__main__':
 	#it looks really ugly, but it works!
 
 	#and now for the log polar transform
+	"""
 	pan_img = load_array("pan_img")
 	pan_img = pan_img[:,:,0]
 	center = (800,500)
@@ -304,9 +305,11 @@ if __name__ =='__main__':
 	
 	fig.tight_layout()
 	plt.show()
+	"""
+	#okay, let's set the sanity check mnist running
+	sanity_check_mnist()
 
-
-`#okay, as before, the model completely and utterly failed to learn anything
+	#okay, as before, the model completely and utterly failed to learn anything
 	#I'm fairly confused as to why this is the case?
 	#can it evne learn mnist with any kind of reasonable accuracy?
 	#that is somethign I'm going to have to do a sanity check on, because if it can't learn mnist
