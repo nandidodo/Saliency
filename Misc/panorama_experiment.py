@@ -205,7 +205,9 @@ def train_panorama_model_prototype(fname,epochs=100, both=True):
 	return res
 
 def sanity_check_mnist():
-	(xtrain, xtest), (ytrain, ytest) = mnist.load_data()
+	(xtrain, ytrain), (xtest, ytest) = mnist.load_data()
+	print xtest.shape
+	print xtest[3]
 	xtrain = xtrain.astype('float32')/255.
 	xtest = xtest.astype('float32')/255.
 	print xtrain.shape
@@ -215,12 +217,12 @@ def sanity_check_mnist():
 	print ytest.shape
 	sh = xtrain.shape
 	xtrain = np.reshape(xtrain, (sh[0], sh[1],sh[2],1))
-	xtest = np.reshape(xtest, (sh[0], sh[1],sh[2],1))
+	xtest = np.reshape(xtest, (len(xtest), sh[1],sh[2],1))
 	model = SimpleConvDropoutBatchNorm((sh[1], sh[1],1))
 	model.compile(optimizer='sgd', loss='mse')
 	callbacks = build_callbacks('results/')
 	his = model.fit(xtrain, xtrain, epochs=1, batch_size=128, shuffle=True, validation_data=(xtest, xtest))
-	preds= model.predict(test)
+	preds= model.predict(xtest)
 	salmaps = get_salmaps(xtest, preds)
 	plot_model_results(xtest, preds, salmaps)
 
