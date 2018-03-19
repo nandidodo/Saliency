@@ -172,6 +172,47 @@ def center_surround_low_spatial_frequency_circular(pan_img, viewport_center, vie
 	return new_img
 
 
+def center_surround_low_spatial_frequency_multiple_stripes(pan_img, viewport_center, viewport_radius, blend_region_radius, stripe_radius, peripheral_blur,stripe_decline=None):
+	assert len(pan_img.shape)==2, 'Panorama image must be two dimensional'
+	h,w = pan_img
+	assert len(viewport_center.shape)==2,'Viewport center point must be two dimensional'
+	ch,cw = viewport_center
+	assert viewport_radius>0 and viewport_radius <=h and viewport_radius<=w, 'Viewport must fit inside of panorama image'	
+	assert blend_region_radius>0 and blend_region_radius<=h and blend_region_radius<=w,' Blend region must be reasonably sized'
+	assert stripe_radius>0 and stripe_radius<=blend_region_radius,'Stripe radius cannot be larger than blend region radius'
+	if stripe_decline is not None:
+		assert stripe_decline >0, 'Stripe decline must be a positive number'	
+	
+	#okay, begin algorithm
+	#first copy image
+	new_img = np.copy(pan_img)
+	#lowhisft for periphery
+	new_img = lowpass_filter(new_img)
+	#add in foveated region
+	#do as a horrendously inefficient for loop!
+	for i in xrange(h):
+		for j in xrange(w):
+			dist = euclidean_distance((i,j), viewport_center)
+			if dist<=viewport_radius:
+				new_img[i][j] = pan_img[i][j]
+
+	#now calculate the blend region radius and stripe radius
+	num_stripes = blend_region_radius//stripe_radius
+	#if stripe decline is none calculate it
+	if stripe_decline is None:
+		stripe_decline = (x - peripheral_blur)/num_stripes
+		if stripe_decline ==0:
+			#just in case it rounds too low, there is some stripe decline
+			stripe_decline=1
+
+	#okay, now begin the blend region
+			
+	
+	
+	
+
+
+
 def move_viewport_log_polar_transform(pan_img, viewport_center):
 	assert len(pan_img.shape)==2, 'Panorama image must be two dimensional'
 	h,w = pan_img.shape
@@ -180,6 +221,8 @@ def move_viewport_log_polar_transform(pan_img, viewport_center):
 	assert ch>=0 and ch<=w, 'Viewport center height must be within the panorama image boundaries'
 	assert cw>=0 and cw<=w, 'Viewport center width must be within the panorama image boudnaries'
 	return logpolar_fancy(pan_img, ch,cw)
+
+
 
 
 def get_pan_indices_of_viewport_centre(indices, viewport_centre, viewport_width, viewport_height, pan_width, pan_height):
