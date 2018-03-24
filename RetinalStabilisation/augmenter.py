@@ -2,6 +2,9 @@
 
 import numpy as np
 import scipy
+import keras
+from keras.datasets import mnist
+import matplotlib.pyplot as plt
 
 def translate(img, px, mode='constant'):
 	assert type(px)==float or type(px)==int or len(px)==len(img.shape),'Pixels must either be a value or a tuple containing the number of pixels to move for each axis, and therefore musth ave the same dimension as the input image'
@@ -23,7 +26,7 @@ def augment_with_translations(img, num_augments=10,max_px_translate=4):
 	augments = np.array(augments)
 	return augments
 
-def augment_with_copy(img, num_augments, copy=False):
+def augment_with_copy(img, num_augments=10, copy=False):
 	augments = []
 	augments.append(img)
 	for i in range(num_augments):
@@ -76,4 +79,40 @@ def augment_dataset(dataset, num_augments, base_save_path=None, px_translate=4):
 
 	return augments, copies
 
+
+#first I need to check if this actally works, which I will do here
+if __name__ == '__main__':
+	#import mnist
+	(xtrain, ytrain), (xtest, ytest) = mnist.load_data()
+	print xtrain.shape
+	print ytrain.shape
+	print xtest.shape
+	print ytest.shape
+	#first test augment
+	#augments = augment_with_translations(xtrain[0])
+	#print type(augments)
+	#print augments.shape
+	#for i in xrange(len(augments)):
+	#	plt.imshow(augments[i], cmap='gray')
+	#	plt.show()
+
+	#perfect!
+	#now let's test copies
+	#copies = augment_with_copy(xtrain[0])
+	#print type(copies)
+	#print copies.shape
+	#for i in xrange(len(copies)):
+	#	plt.imshow(copies[i], cmap='gray')
+	#	plt.show()
+	#it works also
+
+	#now let's test entire dataset
+	augments, copies = augment_dataset(xtest, num_augments = 5)
+	print type(augments)
+	print type(copies)
+	print augments.shape
+	print copies.shape
+	for i in xrange(50):
+		plt.imshow(augments[i])
+		plt.show()
 
