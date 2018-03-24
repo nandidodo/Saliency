@@ -1,5 +1,6 @@
 
 #some simple utils for things
+from __future__ import division
 import numpy as np
 import scipy
 import matplotlib.pyplot as plt
@@ -20,6 +21,23 @@ def get_total_error(error_map):
 	return sum(error_map)
 
 
+def get_error_maps(imgs, preds):
+	assert imgs.shape == preds.shape, 'Images and predictions must be the same shape'
+	err_maps = []
+	for i in xrange(len(imgs)):
+		errmap = get_error_maps(imgs[i], preds[i])
+		err_maps.append(errmap)
+
+	err_maps = np.array(err_maps)
+	return err_maps
+
+
+def get_mean_error(errmaps):
+	N = len(errmaps)
+	total = 0
+	for i in xrange(N):
+		total += get_total_error(errmaps[i])
+	return total/N
 
 def save(obj, fname):
 	pickle.dump(obj, open(fname, 'wb'))
