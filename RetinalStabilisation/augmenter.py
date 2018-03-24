@@ -23,6 +23,57 @@ def augment_with_translations(img, num_augments=10,max_px_translate=4):
 	augments = np.array(augments)
 	return augments
 
+def augment_with_copy(img, num_augments, copy=False):
+	augments = []
+	augments.append(img)
+	for i in range(num_augments):
+		#just copy
+		#not sure if entirely new image is needed  i.e. np.copy
+		if copy:
+			augment = np.copy(img)
+			augments.append(augment)
+		if not copy:
+			augments.append(img)
 
+	augments = np.array(augments)
+	return augments
+
+
+def augment_dataset(dataset, num_augments, base_save_path=None, px_translate=4):
+	#try to load dataset if it is a string
+	if type(dataset) is str:
+		dataset = np.load(dataset)
+	#else assume it's okay
+	assert num_augments>=0, 'Augments number cannot be negative. If zero, why are you doing this?'
+	assert px_translate>1, 'Pixels to translate must be greater than zero'
+	assert type(px_translate) is int, 'Pixels to translate must be integer'
+	if base_save_path is not None:
+		assert type(base_save_path) is str, 'Base save path must be a string'
+	
+	assert type(dataset) is np.ndarray, 'Dataset must be in the form of a numpy array, or a string which is the filename of a numpy array'
+
+	#setup our base 
+	augments = []
+	augments = np.array(augments)
+	copies = []
+	copies = np.array(copies)
+
+	#iterate over dataset
+	for i in xrange(len(dataset)):
+		augment = augment_with_translations(dataset[i], num_augments, px_translate)
+		copy = augment_with_copy(dataset[i], num_augments)
+		augments = np.vstack(augments, augment)
+		copies = np.vstack(copies, copy)
+
+	#just to make sure
+	augments = np.array(augments)
+	copies = np.array(copies)
+
+	#if save
+	if base_save_path is not None:
+		np.save(base_save_path + "_augments", augments)
+		np.save(base_save_path + "_copies", copies)
+
+	return augments, copies
 
 
