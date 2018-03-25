@@ -14,6 +14,7 @@ from models import *
 from keras.datasets import mnist
 import keras.backend as K
 from keras import metrics
+import gc
 
 # aim will be to check if it works at all better - hopefully it will
 # with the data augmentation
@@ -65,6 +66,29 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 	return
 
 
+def run_augments():
+	augments_train = np.load(BASE_SAVE_PATH+'_train_augments.npy')
+	#augments results
+	augments_test = np.load(BASE_SAVE_PATH+'_train_augments.npy')
+	run_mnist_model(augments_train, augments_test, save_name="mnist_augments", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_augments")
+
+	#"free" the memory by reassigning once it's no longer needed
+	augments_train = 0
+	augments_test = 0
+	return
+
+def run_copies():
+	
+	copies_train = np.load(BASE_SAVE_PATH + '_train_copies.npy')
+	copies_test = np.load(BASE_SAVE_PATH + '_train_copies.npy')
+	#copy results
+	run_mnist_model(copies_train, copies_test, save_name="mnist_copies", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_copy")
+
+	#"free" memory again
+	copies_train = 0
+	copies_test = 0 
+	return
+
 
 
 
@@ -76,21 +100,17 @@ if __name__ == '__main__':
 	EPOCHS = 1
 	BATCH_SIZE = 64
 	#load the generated dataset
-	augments_train = np.load(BASE_SAVE_PATH+'_train_augments.npy')
-	#augments results
-	augments_test = np.load(BASE_SAVE_PATH+'_train_augments.npy')
-	run_mnist_model(augments_train, augments_test, save_name="mnist_augments", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_augments")
-
-	#"free" the memory by reassigning once it's no longer needed
-	augments_train = 0
-	augments_test = 0
+	
 	# this should stop it blowing up my computer hopefully!
 
-	copies_train = np.load(BASE_SAVE_PATH + '_train_copies.npy')
-	copies_test = np.load(BASE_SAVE_PATH + '_train_copies.npy')
-	#copy results
-	run_mnist_model(copies_train, copies_test, save_name="mnist_copies", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_copy")
+	#okay, this still blows up everything. I'm going to try putting it in separate functions now
+	#hopefully since functions clean up after themselves this will stop the memory
+	#exploding here
 
-	#"free" memory again
-	copies_train = 0
-	copies_test = 0 
+	run_augments()
+	#also force garbage collection after each
+	gc.collect()
+
+	run_copies()
+	gc.collect()
+
