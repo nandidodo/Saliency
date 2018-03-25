@@ -9,13 +9,17 @@ from utils import *
 from plotting import *
 
 
-def calculate_average_error(augments_name, copies_name):
+def calculate_average_error(augments_name, copies_name, save_name=None):
 	augment_test, augment_preds, augment_his = load_array(augments_name)
 	copy_test, copy_preds, copy_his = load_array(copies_name)
 	augment_errmaps = get_error_maps(augment_test, augment_preds)
 	copy_errmaps = get_error_maps(copy_test, copy_preds)
 	augment_error = get_mean_error(augment_errmaps)
 	copy_error =get_mean_error(copy_errmaps)
+
+	if save_name is not None:
+		save_array([augment_error, copy_error], save_name)
+		
 	return augment_error, copy_error
 
 
