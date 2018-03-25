@@ -87,11 +87,11 @@ def augment_dataset(dataset, num_augments, base_save_path=None, px_translate=4):
 if __name__ == '__main__':
 	#import mnist
 	(xtrain, ytrain), (xtest, ytest) = mnist.load_data()
-	print xtrain.shape
-	print ytrain.shape
-	print xtest.shape
-	print ytest.shape
-	#first test augment
+	#print xtrain.shape
+	#print ytrain.shape
+	#print xtest.shape
+	#print ytest.shape
+	##first test augment
 	#augments = augment_with_translations(xtrain[0])
 	#print type(augments)
 	#print augments.shape
@@ -110,12 +110,20 @@ if __name__ == '__main__':
 	#it works also
 
 	#now let's test entire dataset
-	augments, copies = augment_dataset(xtest, num_augments = 5)
-	print type(augments)
-	print type(copies)
-	print augments.shape
-	print copies.shape
-	for i in xrange(50):
-		plt.imshow(augments[i])
-		plt.show()
+	#augments, copies = augment_dataset(xtest, num_augments = 5)
+	#print type(augments)
+	#print type(copies)
+	#print augments.shape
+	#print copies.shape
+	#for i in xrange(50):
+	#	plt.imshow(augments[i])
+	#	plt.show()
+	#okay, augmenter works, that's wonderful
+
+	#now actually create the dataset
+	save_path= "data/mnist_dataset"
+	#create train datasets
+	augment_dataset(xtrain, num_augments=10,base_save_path = save_path+"_train")
+	#create test dataset
+	augment_dataset(xtest, num_augments=10, base_save_path = save_path+"_test")
 
