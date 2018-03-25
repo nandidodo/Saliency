@@ -55,18 +55,21 @@ def augment_dataset(dataset, num_augments, base_save_path=None, px_translate=4):
 	
 	assert type(dataset) is np.ndarray, 'Dataset must be in the form of a numpy array, or a string which is the filename of a numpy array'
 
-	#setup our base 
-	augments = []
-	augments = np.array(augments)
-	copies = []
-	copies = np.array(copies)
+	#setup base case
+	augments = augment_with_translations(dataset[0], num_augments, px_translate)
+	copies = augment_with_copy(dataset[0], num_augments)
 
 	#iterate over dataset
-	for i in xrange(len(dataset)):
-		augment = augment_with_translations(dataset[i], num_augments, px_translate)
-		copy = augment_with_copy(dataset[i], num_augments)
-		augments = np.vstack(augments, augment)
-		copies = np.vstack(copies, copy)
+	for i in xrange(len(dataset)-1):
+		augment = augment_with_translations(dataset[i+1], num_augments, px_translate)
+		copy = augment_with_copy(dataset[i+1], num_augments)
+		#this does not work!
+		#augments.append(augment)
+		#copies.append(copy)
+		#print augment.shape
+		#print augments.shape
+		augments = np.concatenate((augments, augment))
+		copies = np.concatenate((copies, copy))
 
 	#just to make sure
 	augments = np.array(augments)
