@@ -25,9 +25,14 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 	#normalise data
 	train = train.astype('float32')/255.
 	test = test.astype('float32')/255.
+	#reshape for input to conv network
+	shape = train.shape
+	train = np.reshape(train, (len(train), shape[1], shape[2],1))
+	test = np.reshape(test, (len(test), shape[1], shape[2],1))
+	shape = train.shape
 
 	#get the model
-	shape = train.shape
+
 	model = Model(shape[1:])
 	#for now for simplicity
 	model.compile(optimizer='sgd', loss='mse')
@@ -61,10 +66,10 @@ if __name__ == '__main__':
 	EPOCHS = 1
 	BATCH_SIZE = 64
 	#load the generated dataset
-	augments_train = np.load(BASE_SAVE_PATH+'_train_augments')
-	copies_train = np.load(BASE_SAVE_PATH + '_train_copies')
-	augments_test = np.load(BASE_SAVE_PATH+'_train_augments')
-	copies_test = np.load(BASE_SAVE_PATH + '_train_copies')
+	augments_train = np.load(BASE_SAVE_PATH+'_train_augments.npy')
+	copies_train = np.load(BASE_SAVE_PATH + '_train_copies.npy')
+	augments_test = np.load(BASE_SAVE_PATH+'_train_augments.npy')
+	copies_test = np.load(BASE_SAVE_PATH + '_train_copies.npy')
 
 	#augments results
 	run_mnist_model(augments_train, augments_test, save_name="mnist_augments", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_augments")
