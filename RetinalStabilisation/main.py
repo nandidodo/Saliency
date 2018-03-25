@@ -65,3 +65,9 @@ if __name__ == '__main__':
 	copies_train = np.load(BASE_SAVE_PATH + '_train_copies')
 	augments_test = np.load(BASE_SAVE_PATH+'_train_augments')
 	copies_test = np.load(BASE_SAVE_PATH + '_train_copies')
+
+	#augments results
+	run_mnist_model(augments_train, augments_test, save_name="mnist_augments", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_augments")
+
+	#copy results
+	run_mnist_model(copies_train, copies_test, save_name="mnist_copies", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_copy")
