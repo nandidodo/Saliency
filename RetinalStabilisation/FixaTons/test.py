@@ -179,7 +179,10 @@ def get_saccade_distances(scanpath_fname, plot=True, save_name=None, info=True, 
 			path2 = paths[i+1]
 			p2 = path2[0:1]
 			#append the distance
-			distances.append(euclidean_distance(p1,p2))
+			dist = euclidean_distance(p1, p2)
+			if dist <=10000:
+				distances.append(dist)
+			#distances.append(euclidean_distance(p1,p2))
 
 	distances = np.array(distances)
 
@@ -199,7 +202,12 @@ def get_saccade_distances(scanpath_fname, plot=True, save_name=None, info=True, 
 	
 	#plot if necessary
 	if plot:
-		n,bins,patches = plt.hist(distances, bins=15)
+		#n,bins,patches = plt.hist(distances, bins=15)
+
+		#log_bins = np.logspace(np.log(0.01), np.log(2700),20)
+		#print log_bins
+		log_bins=20
+		n, bins, patches = plt.hist(distances, bins=log_bins)
 		plt.title('Distribution of distancs between successive scan paths')
 		plt.show()
 
@@ -323,12 +331,24 @@ def get_middle_of_bins(bins):
 	middles = np.array(middles)
 	return middles
 
+def log(x):
+	#our safer log function
+	for i in xrange(len(x)):
+		if(x[i]==0):
+			x[i]=0
+		else: 
+			x[i] = np.log(x[i])
+	return x
+
+
 def log_log_plot_mine(x,y, xlabel, ylabel, title):
 	print "In log log plot"
 	print x
 	print y
-	x = np.log(x)
-	y = np.log(y)
+	#x = np.log(np.log(x))
+	#y = np.log(np.log(y))
+	x =log(x)
+	y=log(y)
 	print x
 	print y
 	fig = plt.figure()
@@ -338,6 +358,10 @@ def log_log_plot_mine(x,y, xlabel, ylabel, title):
 	plt.title(title)
 	plt.show()
 
+	# yeah, I don't know how to do this effectively
+	# or how even to plot this
+	# I'm still pretty sure it's not log distributed at all
+	#dagnabbit!
 def log_log_plot(x,y, xlabel, ylabel,title):
 	fig = plt.figure()
 	plt.loglog(x,y)
@@ -348,22 +372,38 @@ def log_log_plot(x,y, xlabel, ylabel,title):
 
 
 
+
 if __name__ =='__main__':
 	#investigate_scanpath_lengths('fixaton_scanpaths')
+
 	#distances = get_saccade_distances('fixaton_scanpaths')
 	#durations = get_fixation_durations('fixaton_scanpaths')
 	#durations = get_scanpath_durations('fixaton_scanpaths')
 	distances, n,bins,patches = get_saccade_distances('fixaton_scanpaths',return_hist_data=True)
-	print type(n)
-	print len(n)
-	print type(bins)
-	print len(bins)
-	print type(patches)
-	print len(patches)
-	middles = get_middle_of_bins(bins)
+	#print type(n)
+	#print len(n)
+	#print type(bins)
+	#print len(bins)
+	#print type(patches)
+	#print len(patches)
+	#middles = get_middle_of_bins(bins)
+	print bins
+	print bins[0:len(bins)-2]
+	middles = bins[0:len(bins)-1]
 	print type(middles)
 	print len(middles)
-	log_log_plot(middles, n, 'Log Distance between saccades', 'Log Number of saccades','Log log plot of distance between saccades vs number of saccades')
+	log_log_plot_mine(middles, n, 'Log Distance between saccades', 'Log Number of saccades','Log log plot of distance between saccades vs number of saccades')
+	
+	# yeah, just generally this is very clearly not a log log plot
+	# dagnabbit. It's not power law distribted at all, but how is it distribted?
+	# I'm not sure how I shuold model it - perhaps as a standard brownian motion?
+	# perhaps there just are not long enough scan paths, so I don't nkow?
+	# it could be a fun little shot paper to very easily write up
+	# what if I had more data?
+	# like richard's data or whatever!
+	# like realistically 8 is probably not enough for a levy flight to emerge
+	# to any degree of significance... dagnabbit!
+
 	# yeah, so far as I can tell, at the moment it doesn't at all follow the log log plot
 	# which is quite bad, though I'm almost certainly doing something wrong
 	# it's obviously not at all a striahgt line, in factthe decrease is probably
@@ -399,3 +439,6 @@ if __name__ =='__main__':
 	# perhaps log normal. I guess this is something I'm gong to haev to look up slightly more
 	# but whatever it is, it's quite clearly NOT a power law distribution
 	#dagnabbit!
+	# generally I just don't think that the data is log log distributed at all
+	# except there is a weird intermediate sort of zone that makes no sense where it declines
+	# probably normally and then later in the tails there is heaviness due to a few huge random ones perhas?
