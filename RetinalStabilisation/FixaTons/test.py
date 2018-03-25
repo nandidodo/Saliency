@@ -199,7 +199,7 @@ def get_saccade_distances(scanpath_fname, plot=True, save_name=None, info=True, 
 	
 	#plot if necessary
 	if plot:
-		n,bins,patches = plt.hist(distances)
+		n,bins,patches = plt.hist(distances, bins=15)
 		plt.title('Distribution of distancs between successive scan paths')
 		plt.show()
 
@@ -323,7 +323,7 @@ def get_middle_of_bins(bins):
 	middles = np.array(middles)
 	return middles
 
-def log_log_plot(x,y, xlabel, ylabel, title):
+def log_log_plot_mine(x,y, xlabel, ylabel, title):
 	print "In log log plot"
 	print x
 	print y
@@ -333,6 +333,14 @@ def log_log_plot(x,y, xlabel, ylabel, title):
 	print y
 	fig = plt.figure()
 	plt.plot(x,y)
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.title(title)
+	plt.show()
+
+def log_log_plot(x,y, xlabel, ylabel,title):
+	fig = plt.figure()
+	plt.loglog(x,y)
 	plt.xlabel(xlabel)
 	plt.ylabel(ylabel)
 	plt.title(title)
@@ -370,4 +378,24 @@ if __name__ =='__main__':
 	# and might even get published somewhere
 	# even thoguh it took me just a few days (if that!) to get it sorted
 	# which would not be bad at all!
-
+	# what if I don't do it from the histogram but generate it directly from the data
+	# but what would that even look like in a serious way? I simply do not know... dagnabbit!
+	# I suppose I could see if fiddling with the number of bins would have an actual effect?
+	# nope, it's very clear generally that it's still an exponential curve downward
+	# so it's a hyper exponential display?
+	# basically yeah, this data does quite clearly not follow the log log plot at all!
+	# at all. So then what should my response be?
+	# lie it is not just a standard normal distribution right?
+	# it is just the distribution of distances that I need to look at right?
+	# if it's a downward sloping exponential then what does that mean???
+	#argh! well that's a bit of a dissapointment there to be honest
+	# at least it makesthings slightly more confusing in a lot of ways
+	# in how to write it up and so far, as it's not an actual discovery
+	# but I eally don't know what to do wrt this then actually
+	# guess just put it on the backburner
+	# as it's quite clearly not power law distributed
+	# but rather exponential decreasing-  perhaps whatever, I don't know
+	# could just be a gaussian or whatever. Should talk to richard about it, I don't know
+	# perhaps log normal. I guess this is something I'm gong to haev to look up slightly more
+	# but whatever it is, it's quite clearly NOT a power law distribution
+	#dagnabbit!
