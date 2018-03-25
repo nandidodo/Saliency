@@ -148,5 +148,68 @@ def investigate_scanpath_lengths(scanpath_fname,save_name=None):
 #for me to detect whether it is a levy path or not. Might still be able to do something
 # useful however, I really do not know!
 
+# what sort of things wuold be useful for this
+# presumably  Iwould like the distribution ot distances between scanpaths
+# in euclidean distance, so hopefully that should not be to difficult
+# so let's obtain that
+
+def euclidean_distance(p1, p2):
+	assert len(p1)==len(p2), 'points must be of same dimension'
+	total = 0
+	for i in range(len(p1)):
+		total += np.square(p1[i] - p2[i])
+	return np.sqrt(total)
+
+def euclidean_distance_unsafe(p1, p2):
+	return np.sqrt(np.sum(np.square(p1-p2)))
+
+
+# this ignores the timing info. Not sure how useful that is?
+def get_saccade_distances(scanpath_fname, plot=True, save_name=None, info=True):
+	scanpaths = load(scanpath_fname)
+	distances = []
+	for scanpath in scanpaths:
+		paths = scanpath['scanpath']
+		length = paths.shape[0]
+		for i in xrange(length-1):
+			path1 = paths[i]
+			p1 = path1[0:1]
+			path2 = paths[i+1]
+			p2 = path2[0:1]
+			#append the distance
+			distances.append(euclidean_distance(p1,p2))
+
+	distances = np.array(distances)
+
+	if info:
+		mean = np.mean(distances)
+		print "Mean scanpath distance: " , mean
+		variance = np.var(distances)
+		print "Variance of scanpath distance: " , variance
+		std = np.sqrt(variance)
+		print "Standard deviation of scanpath distance: ", std
+		max_distance = np.max(distances)
+		print "Maximum scanpath distance: ", max_distance
+		min_distance = np.min(distances)
+		print "Minumum scanpath distance: ", min_distance
+	
+	#plot if necessary
+	if plot:
+		plt.hist(distances)
+		plt.title('Distribution of distancs between successive scan paths')
+		plt.show()
+
+	if save_name is not None:
+		np.save(save_name, distances)
+
+	# I'm not sure if it's a log tailed distibution
+	#vast majority are tiny, but seemingly dwarfed by giant one,
+	#I'm really not sure!
+
+	return distances
+
+
+
 if __name__ =='__main__':
-	investigate_scanpath_lengths('fixaton_scanpaths')
+	#investigate_scanpath_lengths('fixaton_scanpaths')
+	distances = get_saccade_distances('fixaton_scanpaths')
