@@ -21,7 +21,7 @@ from keras import metrics
 #with the copied images, so who knows!
 # first I should just check out the overall error there, as far as I know
 
-def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropoutBatchNorm, batch_size = 128, save_model_name=None):
+def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropoutBatchNorm, batch_size = 128, save_model_name=None, ret = False):
 	#normalise data
 	train = train.astype('float32')/255.
 	test = test.astype('float32')/255.
@@ -38,7 +38,10 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 	model.compile(optimizer='sgd', loss='mse')
 	#callbacks = build_callbacks('/callbacks')
 	his = model.fit(train, train, epochs=epochs, batch_size=batch_size, shuffle=True, validation_data=(test, test))
+	#train is no longer needed, so free it
+	train = 0
 	history = serialize_class_object(his)
+	his = 0
 
 	#get predictions
 	preds = model.predict(test)
@@ -48,11 +51,18 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 		model.save(save_model_name)
 
 	#save the preds and test and history
-	res = [test, preds, his]
+	res = [test, preds, history]
 	if save_name is not None:
 		save_array(res,save_name)
 
-	return res
+	if ret:
+		return res
+
+	res=None
+	preds = None
+	history=None
+
+	return
 
 
 
@@ -67,12 +77,20 @@ if __name__ == '__main__':
 	BATCH_SIZE = 64
 	#load the generated dataset
 	augments_train = np.load(BASE_SAVE_PATH+'_train_augments.npy')
-	copies_train = np.load(BASE_SAVE_PATH + '_train_copies.npy')
-	augments_test = np.load(BASE_SAVE_PATH+'_train_augments.npy')
-	copies_test = np.load(BASE_SAVE_PATH + '_train_copies.npy')
-
 	#augments results
+	augments_test = np.load(BASE_SAVE_PATH+'_train_augments.npy')
 	run_mnist_model(augments_train, augments_test, save_name="mnist_augments", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_augments")
 
+	#"free" the memory by reassigning once it's no longer needed
+	augments_train = 0
+	augments_test = 0
+	# this should stop it blowing up my computer hopefully!
+
+	copies_train = np.load(BASE_SAVE_PATH + '_train_copies.npy')
+	copies_test = np.load(BASE_SAVE_PATH + '_train_copies.npy')
 	#copy results
 	run_mnist_model(copies_train, copies_test, save_name="mnist_copies", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_copy")
+
+	#"free" memory again
+	copies_train = 0
+	copies_test = 0 
