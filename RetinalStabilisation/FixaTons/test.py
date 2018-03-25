@@ -1,5 +1,7 @@
 import FixaTons as FT
 import cPickle as pickle
+import numpy as np
+import matplotlib.pyplot as plt
 # I realy hate python's imports. They are totally rubbish
 # in any case let's hope this works
 
@@ -75,6 +77,10 @@ def save(obj, fname):
 	pickle.dump(obj, open(fname, 'wb'))
 
 
+def load(fname):
+	return pickle.load(open(fname, 'rb'))
+
+
 def save_all_scanpaths():
 	datasets = FT.list.datasets()
 	#create a stimuli object for this
@@ -104,5 +110,43 @@ def save_all_scanpaths():
 	print "scanpaths: ", len(scanpaths)
 	save(scanpaths, 'fixaton_scanpaths')
 
-	
 
+
+# okay, now I can load the scanpaths object I created and do a whole bunch oftests on it
+# which is really realy nice
+# for statistical purposes, which is great, and hopefully figure uot how to do a levy test
+# and having all the data here trivially is really quite perfect
+# this data munging was not difficult at all!
+
+# let's look at the scanpath lengths to see if anythin ginteresting is there
+def investigate_scanpath_lengths(scanpath_fname,save_name=None):
+	scanpaths = load(scanpath_fname)
+	lengths = []
+	#do a loop
+	for scanpath in scanpaths:
+		sh = scanpath['scanpath'].shape
+		assert sh[1]==4, 'Scanpath data is incomplete'
+		lengths.append(sh[0]) # as that's the one
+	lengths = np.array(lengths)
+	avg = np.mean(lengths)
+	var = np.var(lengths)
+	print "mean scanpath length: ", avg
+	print "variance of scanpath lengths", var
+	print "standard deviation of scanpath lengths", np.sqrt(var)
+
+	#save
+	if save_name is not None:
+		np.save(save_name, lengths)
+	#plot the histogram
+	plt.hist(lengths)
+	plt.title('Histogram of lengths of the scanpaths')
+	plt.show()
+
+
+# okay, so the length of the averate scanpath in here is quite low
+# and just generally bad. This might cause some statistical problems
+#for me to detect whether it is a levy path or not. Might still be able to do something
+# useful however, I really do not know!
+
+if __name__ =='__main__':
+	investigate_scanpath_lengths('fixaton_scanpaths')
