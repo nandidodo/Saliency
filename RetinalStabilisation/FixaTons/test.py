@@ -182,6 +182,8 @@ def get_saccade_distances(scanpath_fname, plot=True, save_name=None, info=True):
 	distances = np.array(distances)
 
 	if info:
+		length = len(distances)
+		print "Number of scanpath distances calculated: ", length
 		mean = np.mean(distances)
 		print "Mean scanpath distance: " , mean
 		variance = np.var(distances)
@@ -209,7 +211,85 @@ def get_saccade_distances(scanpath_fname, plot=True, save_name=None, info=True):
 	return distances
 
 
+def get_fixation_durations(scanpath_fname, plot=True, save_name=None, info=True):
+	scanpaths = load(scanpath_fname)
+	differences = []
+	for scanpath in scanpaths:
+		paths = scanpath['scanpath']
+		length = paths.shape[0]
+		for i in xrange(length):
+			path = paths[i]
+			differences.append(path[3] - path[2])
+
+	differences = np.array(differences)
+
+	if info:
+		length = len(differences)
+		print "Number of fixation durations calculated: " , length
+		mean = np.mean(differences)
+		print "Mean duration of fixation: " , mean
+		var = np.var(differences)
+		print "Variance of fixation durations: " , var
+		std = np.sqrt(var)
+		print "Standard deviation of fixation durations: " , std
+		max_duration = np.max(differences)
+		print "Maximum fixation duration: " , max_duration
+		min_duration = np.min(differences)
+		print "Minumum fixation duration: " , min_duration
+
+	if plot:
+		plt.hist(differences)
+		plt.title('Distribution of fixation durations')
+		plt.show()
+
+	if save_name is not None:
+		np.save(save_name, differences)
+
+	return differences
+
+
+def get_scanpath_durations(scanpath_fname, plot=True, save_name=None, info=True):
+	scanpaths = load(scanpath_fname)
+	differences = []
+	for scanpath in scanpaths:
+		paths = scanpath['scanpath']
+		length = paths.shape[0]
+		first = paths[0]
+		last = paths[length]
+		differences.append(last[3] - first[2])
+
+	differences = np.array(differences)
+
+	if info:
+		length = len(differences)
+		print "Number of scanpath durations calculated: " , length
+		mean = np.mean(differences)
+		print "Mean duration of scanpaths: " , mean
+		var = np.var(differences)
+		print "Variance of scanpath durations: " , var
+		std = np.sqrt(var)
+		print "Standard deviation of scanpath durations: " , std
+		max_duration = np.max(differences)
+		print "Maximum scanpath duration: " , max_duration
+		min_duration = np.min(differences)
+		print "Minumum scanpath duration: " , min_duration
+
+	if plot:
+		plt.hist(differences)
+		plt.title('Distribution of scanpath durations')
+		plt.show()
+
+	if save_name is not None:
+		np.save(save_name, differences)
+
+	return differences
+
+
+
+
+
 
 if __name__ =='__main__':
 	#investigate_scanpath_lengths('fixaton_scanpaths')
-	distances = get_saccade_distances('fixaton_scanpaths')
+	#distances = get_saccade_distances('fixaton_scanpaths')
+	durations = get_fixation_durations('fixaton_scanpaths')
