@@ -1,5 +1,5 @@
 import FixaTons as FT
-
+import cPickle as pickle
 # I realy hate python's imports. They are totally rubbish
 # in any case let's hope this works
 
@@ -50,19 +50,9 @@ FT.show.scanpath(DATASET_NAME, STIMULUS_NAME, subject=SUBJECT_ID,
 # which would seem reasonable, and Icould even have it as an mmapped file if need be
 # although that is unlikely to actually be required
 
-
-datasets = FT.list.datasets()
-#create a stimuli object for this
-stimuli = []
-for dataset in datasets:
-	stims = FT.list.stimuli(dataset)
-	for stim in stims:
-		stimuli.append((stim, dataset))
-
-print stimuli
-
 # so this is fairly straightforward. Now let's get all scanpaths in a reasonable fashion!
 
+"""
 subjects = FT.list.subjects(DATASET_NAME, STIMULUS_NAME)
 
 # so to get all scanpaths it would then be trivial. let's examine some of them
@@ -78,3 +68,41 @@ for subject in subjects:
 	# I'm not sure how I wuold actually be able to figure out the scanpath statistics 
 	# in a requisite way
 	# although I have a fair amount of data available, which is good!
+	"""
+
+
+def save(obj, fname):
+	pickle.dump(obj, open(fname, 'wb'))
+
+
+def save_all_scanpaths():
+	datasets = FT.list.datasets()
+	#create a stimuli object for this
+	stimuli = []
+	for dataset in datasets:
+		stims = FT.list.stimuli(dataset)
+		for stim in stims:
+			stimuli.append((stim, dataset))
+
+	print stimuli
+
+	#now get it
+	scanpaths = []
+	for stimulus in stimuli:
+		stim, dataset = stimulus
+		subjects = FT.list.subjects(dataset, stim)
+		for subject in subjects:
+			#create  a scanpath object with requisite metadata
+			scanpath = {}
+			scanpath['dataset'] = dataset
+			scanpath['stimulus'] = stimulus
+			scanpath['subject_id'] = subject
+			scanpath['scanpath'] = FT.get.scanpath(dataset, stim, subject = subject)
+			scanpaths.append(scanpath)
+
+	#now I need to save the scanpaths
+	print "scanpaths: ", len(scanpaths)
+	save(scanpaths, 'fixaton_scanpaths')
+
+	
+
