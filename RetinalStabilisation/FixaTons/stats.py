@@ -44,8 +44,16 @@ from test import *
 
 #returns the probabiliy of a point given the power law
 def power_law(x, alpha,xmin):
-	norm = (a-1)/xmin
+	norm = (alpha-1)/xmin
 	power = (x/xmin)**(-1*alpha)
+	if (np.isnan(norm*power)):
+		print "Potential nan encountered in power law"
+		print "x: ", x
+		print "alpha: ", alpha
+		print "xmin: " , xmin
+		print "norm: " , norm
+		print "power: " , power
+		return 0
 	return norm*power
 
 
@@ -58,7 +66,7 @@ def alpha_MLE(data, xmin):
 	MLE_sum = 0
 	for i in xrange(N):
 		MLE_sum += np.log(data[i]/xmin)
-	return 1 + (N * (1/MLE_SUM))
+	return 1 + (N * (1/MLE_sum))
 
 
 def MLE_error(data,xmin):
@@ -91,7 +99,7 @@ def power_law_pdf(data, alpha, xmin):
 	ps = []
 	for i in xrange(len(data)):
 		if(data[i])>=xmin:
-			ps.append(powerlaw(data[i], alpha, xmin))
+			ps.append(power_law(data[i], alpha, xmin))
 	ps = np.array(ps)
 	return ps
 
@@ -165,7 +173,7 @@ def find_xmin(data, min_xmin=0, max_xmin=None):
 def log_likelihood_ratio(dist1, dist2):
 	# here the distributions are assumed to simply be 
 	#approximated by vectors of probabilities
-	assert len(dist1)==len(dist2):
+	assert len(dist1)==len(dist2), 'Distributions must have the same length'
 	ratio = 0
 	for i in range(len(dist1)):
 		ratio += (np.log(dist1[i]) - np.log(dist2[i]))
@@ -191,7 +199,7 @@ def log_likelihood_variance(dist1, dist2):
 
 def normalised_log_likelihood_ratio(ratio,N,std):
 	assert ratio>=0,'Ratio must be positive'
-	if ratio=0:
+	if ratio==0:
 		ratio=-10*100
 	ratio = np.log(ratio)
 	return np.sqrt(N) * ratio * std
@@ -207,6 +215,8 @@ def likelihood_ratio_p_value(ratio, variance, N):
 
 
 def log_likelihood_test(dist1, dist2):
+	print len(dist1)
+	print len(dist2)
 	assert len(dist1)==len(dist2), 'Distributions compared must have same length'
 	N = len(dist1)
 	ratio = log_likelihood_ratio(dist1, dist2)
@@ -214,6 +224,13 @@ def log_likelihood_test(dist1, dist2):
 	return likelihood_ratio_p_value(ratio, variance, N)
 
 
+def sample_power_law(N, alpha):
+	return np.random.power(alpha, size=N)
+
+#something is wrong with the power law atm
+# it's meant to give heavier tails, but it obviously does not
+# however the pretend gaussian with the MLE statistics gives exactly the right pattern
+# but decays too fast. There is a slightly heavier tail then there perhaps hsould be!?
 #I've got power law statistica tests
 # now I just need todothe same to fit to log normal and exponential and others
 # and normal obviosuly and measure degree of fit to be reasnoable!
@@ -224,17 +241,60 @@ def log_likelihood_test(dist1, dist2):
 # and would provide an easy framework for calculating this stuff
 # even if I had to hand roll all my own statistics, which isprobably bad!
 
+
+# the alpha mle calcualted is just aboev 1, meaning a terrifically slow decrease, right?
+# so why is the power law sampler failing so utterly!
+# it should be generating huge outliers, as it's a heavy tails distribution
+# but it is not!
 if __name__=='__main__':
 	data, n,bins,patches = get_saccade_distances('fixaton_scanpaths',return_hist_data=True)
 	N = len(data)
-	xmin = 0
-	alpha = alpha_MLE(data, 0)
+	xmin = 0.0001
+	alpha = alpha_MLE(data,xmin)
+	print "Alpha MLE calculated: " , alpha
 	alpha_error = (alpha-1)/(np.sqrt(N))
+	print "Alpha error" , alpha_error
 	power_law = power_law_pdf(data, alpha, xmin)
-	gaussian = gaussian_probabilities(data)
+	gaussian, mu, variance = gaussian_probabilities(data, xmin=xmin)
 	p, ratio = log_likelihood_test(power_law, gaussian)
 	print "Likelihood ratio: ", ratio
 	print "P-value: " , p
+
+	power_law_samples = sample_power_law(N, alpha)
+	gaussian_samples = sample_gaussian(N, mu, np.sqrt(variance))
+
+	#and plot on log log plot
+	#plt.figure()
+	#n,bins, _ = plt.hist(data)
+	print " data histogram frequencies"
+	print n
+	plt.show()
+	plaw_n, plaw_bins, _ = plt.hist(power_law_samples,bins=bins)
+	print "power law histogram frequencies"
+	print plaw_n
+	plt.show()
+	gauss_n, gauss_bins, _ = plt.hist(gaussian_samples,bins=bins)
+	print "gaussian histogram frquencies"
+	print gauss_n
+	plt.show()
+	bins = bins[0:len(bins)-1]
+	plt.figure()
+	plt.loglog(bins,n)
+	plt.legend('Data frequencies')
+	#plt.loglog(plaw_bins[0:len(plaw_bins)-1],plaw_n)
+	plt.loglog(bins, plaw_n)
+	plt.legend('Power law frequencies')
+	#plt.loglog(gauss_bins[0:len(gauss_bins)-1],gauss_n)
+	plt.loglog(bins, gauss_n)
+	plt.legend('Gaussian frequencies')
+	plt.show()
+
+	# well, that gives an exceptionally strong gaussian result, like absurdly so
+	# probably because hte probability ofthe power law is so shockingly tiny
+	# so that's interesting at least
+	# now I guess I should turn to some other distributions
+	# or at least show the fit distribution of gaussian vs powerlaw
+	# check this by plotting, I think
 
 
 
