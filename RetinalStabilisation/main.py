@@ -38,30 +38,50 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 	#for now for simplicity
 	model.compile(optimizer='sgd', loss='mse')
 	#callbacks = build_callbacks('/callbacks')
+	print "loaded data and compiled model"
 	his = model.fit(train, train, epochs=epochs, batch_size=batch_size, shuffle=True, validation_data=(test, test))
 	#train is no longer needed, so free it
+	print "fitted model"
 	train = 0
+	print "freed train"
 	history = serialize_class_object(his)
 	his = 0
+	print "loaded history and freed his"
 
 	#get predictions
 	preds = model.predict(test)
+	print "made predictions"
 
 	#save the results
 	if save_model_name is not None:
 		model.save(save_model_name)
+		print "saved model"
 
 	#save the preds and test and history
-	res = [test, preds, history]
 	if save_name is not None:
-		save_array(res,save_name)
+		#save_array(res,save_name)
+		#tis is the issue. this takes up too much memory
+		# it's because during te pickle dump, it requires the duplication
+		# of theo bject in memory, which exploded my computer
+		# so you REALLY can't uespickle for large arrays at all!
+		# it was the res which was probably taking up so much space,
+		#being copied twice!
+		# and is otherwise copletely dire
+		# and the pickle results don't work
+		# so instead I'm just going to save stuff separately
+		np.save(save_name+'_preds', preds)
+		save_array(history, save_name+'_history')
+		np.save(save_name+'_test', test)
+		print "save results"
 
 	if ret:
-		return res
+		print "returning"
+		return [test, preds, history]
 
 	res=None
 	preds = None
 	history=None
+	print "freed variables"
 
 	return
 
@@ -70,11 +90,13 @@ def run_augments():
 	augments_train = np.load(BASE_SAVE_PATH+'_train_augments.npy')
 	#augments results
 	augments_test = np.load(BASE_SAVE_PATH+'_train_augments.npy')
+	print "Loaded augments"
 	run_mnist_model(augments_train, augments_test, save_name="mnist_augments", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_augments")
-
+	print "finished running model"
 	#"free" the memory by reassigning once it's no longer needed
 	augments_train = 0
 	augments_test = 0
+	print "Freed data"
 	return
 
 def run_copies():
@@ -111,6 +133,6 @@ if __name__ == '__main__':
 	#also force garbage collection after each
 	gc.collect()
 
-	run_copies()
-	gc.collect()
+	#run_copies()
+	#gc.collect()
 
