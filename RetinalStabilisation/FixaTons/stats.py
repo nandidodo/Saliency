@@ -37,6 +37,9 @@ from __future__ import division
 import numpy as np
 #get gaussian error function erf
 from scipy.special import erf
+from gaussian import *
+from test import *
+#from lognormal import *
 
 
 #returns the probabiliy of a point given the power law
@@ -81,6 +84,14 @@ def power_law_cdf(data, alpha, xmin):
 				ps.append(p)
 				ps_index+=1
 
+	ps = np.array(ps)
+	return ps
+
+def power_law_pdf(data, alpha, xmin):
+	ps = []
+	for i in xrange(len(data)):
+		if(data[i])>=xmin:
+			ps.append(powerlaw(data[i], alpha, xmin))
 	ps = np.array(ps)
 	return ps
 
@@ -132,7 +143,7 @@ def weighted_KS(data, alpha, xmin):
 	return np.max(diffs)
 
 
-def find_xmin(data, min_xmin=0, max_xmin=None)
+def find_xmin(data, min_xmin=0, max_xmin=None):
 # also need a principled way to calculate the xmin so let's figure this out - it uses the minimising
 # the distance between power law model and empirical data, so hopefully not too horendous
 
@@ -188,9 +199,9 @@ def normalised_log_likelihood_ratio(ratio,N,std):
 def likelihood_ratio_p_value(ratio, variance, N):
 	num = np.abs(ratio)
 	denom = np.sqrt(2*np.pi*variance)
-	ratio = num/denom
-	p = 1-erf(ratio)
-	return p
+	normalised_ratio = num/denom
+	p = 1-erf(normalised_ratio)
+	return p, ratio
 
 
 
@@ -206,3 +217,24 @@ def log_likelihood_test(dist1, dist2):
 #I've got power law statistica tests
 # now I just need todothe same to fit to log normal and exponential and others
 # and normal obviosuly and measure degree of fit to be reasnoable!
+
+
+# okay, now test the likelihood of power law vs standard gaussian
+# this is extremely unlikely to work, but if it ooes it would be cool
+# and would provide an easy framework for calculating this stuff
+# even if I had to hand roll all my own statistics, which isprobably bad!
+
+if __name__=='__main__':
+	data, n,bins,patches = get_saccade_distances('fixaton_scanpaths',return_hist_data=True)
+	N = len(data)
+	xmin = 0
+	alpha = alpha_MLE(data, 0)
+	alpha_error = (alpha-1)/(np.sqrt(N))
+	power_law = power_law_pdf(data, alpha, xmin)
+	gaussian = gaussian_probabilities(data)
+	p, ratio = log_likelihood_test(power_law, gaussian)
+	print "Likelihood ratio: ", ratio
+	print "P-value: " , p
+
+
+
