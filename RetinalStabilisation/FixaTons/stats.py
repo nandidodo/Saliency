@@ -35,6 +35,8 @@
 
 from __future__ import division
 import numpy as np
+#get gaussian error function erf
+from scipy.special import erf
 
 
 #returns the probabiliy of a point given the power law
@@ -149,24 +151,29 @@ def find_xmin(data, min_xmin=0, max_xmin=None)
 
 	return xmin
 
-def likelihood_ratio(dist1, dist2):
+def log_likelihood_ratio(dist1, dist2):
 	# here the distributions are assumed to simply be 
 	#approximated by vectors of probabilities
 	assert len(dist1)==len(dist2):
 	ratio = 0
 	for i in range(len(dist1)):
-		ratio += np.log(dist1[i] - dist2[i])
+		ratio += (np.log(dist1[i]) - np.log(dist2[i]))
 	return ratio
 	# in log space it's a simple sun of subtraction isntead of a product of divisions
 
-def likelihood_variance(dist1, dist2):
+def log_likelihood_variance(dist1, dist2):
 	N = len(dist1)
 	assert N ==len(dist2), 'distributions must have same length'
+	#take logs
+	dist1 = np.log(dist1)
+	dist2 = np.log(dist2)
+
+	#procede as normal!
 	mu1 = np.mean(dist1)
 	mu2 = np.mean(dist2)
 	total = 0
 	for i in range(N):
-		total += ((dist1[i]-mu1)-(dist2[i]-mu2)**2)
+		total += ((dist1[i]-dist2[i])-(mu1-mu2))**2
 	return total/N
 
 # I need to begin being able to calculate log likelyhood ratios
@@ -177,6 +184,23 @@ def normalised_log_likelihood_ratio(ratio,N,std):
 		ratio=-10*100
 	ratio = np.log(ratio)
 	return np.sqrt(N) * ratio * std
+
+def likelihood_ratio_p_value(ratio, variance, N):
+	num = np.abs(ratio)
+	denom = np.sqrt(2*np.pi*variance)
+	ratio = num/denom
+	p = 1-erf(ratio)
+	return p
+
+
+
+
+def log_likelihood_test(dist1, dist2):
+	assert len(dist1)==len(dist2), 'Distributions compared must have same length'
+	N = len(dist1)
+	ratio = log_likelihood_ratio(dist1, dist2)
+	variance =log_likelihood_variance(dist1, dist2)
+	return likelihood_ratio_p_value(ratio, variance, N)
 
 
 #I've got power law statistica tests
