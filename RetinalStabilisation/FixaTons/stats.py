@@ -227,6 +227,47 @@ def log_likelihood_test(dist1, dist2):
 def sample_power_law(N, alpha):
 	return np.random.power(alpha, size=N)
 
+
+# lol! my power law version worked and the horrendous numpy implementation
+# did not. That is pretty bad, all things considered
+# although possibly due to the utterly tiny xmin messing everything up in their implementation
+# although I never pass it in as a parameter, so Ireally don't know!
+def sample_power_law_test(N, alpha):
+	samps = np.random.uniform(low=0, high=1, size=N)
+	return np.power((1-samps), (-1/alpha-1))
+
+
+def sample_lognormal(N, mu, variance):
+	return np.random.lognormal(mu, variance, N)
+
+
+def sample_lognormal_mine(N, mu, variance):
+	samps = []
+	length = N//2
+	for i in xrange(length):
+		u1 = np.random.uniform(low=0, high=1)
+		u2 = np.random.uniform(low=0, high=1)
+		p = np.sqrt(-2*variance * np.log(1-u1))
+		theta = 2 * np.pi * u2
+		x1 = np.exp(p*np.sin(theta))
+		x2 = np.exp(p*np.cos(theta))
+		samps.append(x1)
+		samps.append(x2)
+
+	samps = np.array(samps)
+	if len(samps)<N:
+		diff = N-samps
+		for i in xrange(diff):
+			u1 = np.random.uniform(low=0, high=1)
+			u2 = np.random.uniform(low=0, high=1)
+			p = np.sqrt(-2*variance * np.log(1-u1))
+			theta = 2 * np.pi * u2
+			x1 = np.exp(p*np.sin(theta))
+			x2 = np.exp(p*np.cos(theta))
+			samps.append(x1)
+		samps = np.array(samps)
+	return samps
+
 #something is wrong with the power law atm
 # it's meant to give heavier tails, but it obviously does not
 # however the pretend gaussian with the MLE statistics gives exactly the right pattern
@@ -246,6 +287,12 @@ def sample_power_law(N, alpha):
 # so why is the power law sampler failing so utterly!
 # it should be generating huge outliers, as it's a heavy tails distribution
 # but it is not!
+
+# okay, so it's definietly not a power law OR a log normal, which also appears like
+# a standard thing on the log plot
+# also for whatever reason the numpy sampling functoins very rarely actually work
+# which is kind of funny. Oh wel. They don't work for me, which is just hilarious
+# but I don't know. I guess I'm not a numpy implementor, which is wy I don't know this!
 if __name__=='__main__':
 	data, n,bins,patches = get_saccade_distances('fixaton_scanpaths',return_hist_data=True)
 	N = len(data)
@@ -260,8 +307,14 @@ if __name__=='__main__':
 	print "Likelihood ratio: ", ratio
 	print "P-value: " , p
 
-	power_law_samples = sample_power_law(N, alpha)
+	power_law_samples = sample_power_law_test(N, alpha)
 	gaussian_samples = sample_gaussian(N, mu, np.sqrt(variance))
+	lognormal_samples = sample_lognormal_mine(N, mu,np.sqrt(variance))
+	print "lognormal samples tests"
+	print N
+	print mu
+	print variance
+	print lognormal_samples
 
 	#and plot on log log plot
 	#plt.figure()
@@ -277,17 +330,22 @@ if __name__=='__main__':
 	print "gaussian histogram frquencies"
 	print gauss_n
 	plt.show()
+	lognorm_n, lognorm_bins, _ = plt.hist(lognormal_samples, bins=bins)
+	print "log normal histogram frequencies"
+	print lognorm_n
+	plt.show()
 	bins = bins[0:len(bins)-1]
 	plt.figure()
-	plt.loglog(bins,n)
-	plt.legend('Data frequencies')
-	#plt.loglog(plaw_bins[0:len(plaw_bins)-1],plaw_n)
-	plt.loglog(bins, plaw_n)
-	plt.legend('Power law frequencies')
-	#plt.loglog(gauss_bins[0:len(gauss_bins)-1],gauss_n)
-	plt.loglog(bins, gauss_n)
-	plt.legend('Gaussian frequencies')
+	plt.loglog(bins,n, label='Data frequencies')
+	plt.loglog(bins, plaw_n, label='Power law frequencies')
+	plt.loglog(bins, gauss_n,label='Gaussian frequencies')
+	plt.loglog(bins, lognorm_n, label='Log normal frequencies')
+	plt.legend()
 	plt.show()
+
+	# I mean yeah, it quite significantly here heavier tails 
+	# then it should but idk really
+	# right, so that works significantly better. Now perhaps I need to try alternate results
 
 	# well, that gives an exceptionally strong gaussian result, like absurdly so
 	# probably because hte probability ofthe power law is so shockingly tiny
