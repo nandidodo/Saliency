@@ -268,6 +268,16 @@ def sample_lognormal_mine(N, mu, variance):
 		samps = np.array(samps)
 	return samps
 
+
+def sample_exponential_mine(N,l):
+	samps = np.random.uniform(low=0, high=1, size=N)
+	return -1* (1/l) * np.log(1-samps)
+
+
+def MLE_lambda(data):
+	# it's just the reciprocal of the mean!
+	return 1/np.mean(data)
+
 #something is wrong with the power law atm
 # it's meant to give heavier tails, but it obviously does not
 # however the pretend gaussian with the MLE statistics gives exactly the right pattern
@@ -293,6 +303,13 @@ def sample_lognormal_mine(N, mu, variance):
 # also for whatever reason the numpy sampling functoins very rarely actually work
 # which is kind of funny. Oh wel. They don't work for me, which is just hilarious
 # but I don't know. I guess I'm not a numpy implementor, which is wy I don't know this!
+
+# I guess exponential disitribution is the other one to test
+
+
+# crap, it could easily be the exponential distribution!!! dagnabbit
+# that looks more likely, and moer higher tailed than the gaussian. that could cause
+# serious issues of analysis, which is quite annoying...dagnabbit!
 if __name__=='__main__':
 	data, n,bins,patches = get_saccade_distances('fixaton_scanpaths',return_hist_data=True)
 	N = len(data)
@@ -315,6 +332,8 @@ if __name__=='__main__':
 	print mu
 	print variance
 	print lognormal_samples
+	l = MLE_lambda(data)
+	exp_samples = sample_exponential_mine(N, l)
 
 	#and plot on log log plot
 	#plt.figure()
@@ -334,12 +353,17 @@ if __name__=='__main__':
 	print "log normal histogram frequencies"
 	print lognorm_n
 	plt.show()
+	exp_n, exp_bins,_ = plt.hist(exp_samples, bins=bins)
+	print "exponential histogram frequencies"
+	print exp_n
+	plt.show()
 	bins = bins[0:len(bins)-1]
 	plt.figure()
 	plt.loglog(bins,n, label='Data frequencies')
 	plt.loglog(bins, plaw_n, label='Power law frequencies')
 	plt.loglog(bins, gauss_n,label='Gaussian frequencies')
 	plt.loglog(bins, lognorm_n, label='Log normal frequencies')
+	plt.loglog(bins, exp_n, label='Exponential frequencies')
 	plt.legend()
 	plt.show()
 
