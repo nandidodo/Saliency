@@ -101,6 +101,7 @@ def power_law_pdf(data, alpha, xmin):
 		if(data[i])>=xmin:
 			ps.append(power_law(data[i], alpha, xmin))
 	ps = np.array(ps)
+	ps = normalise_distribution(ps)
 	return ps
 
 def data_cdf(data,xmin):
@@ -278,6 +279,22 @@ def MLE_lambda(data):
 	# it's just the reciprocal of the mean!
 	return 1/np.mean(data)
 
+
+def exponential_pdf(data, l):
+	ps = []
+	for i in xrange(len(data)):
+		res = l * np.exp(-1*l*data[i])
+		ps.append(res)
+	ps = np.array(ps)
+	ps = normalise_distribution(ps)
+	return ps
+
+def normalise_distribution(dist):
+	total = np.sum(dist)
+	return dist/total
+
+
+
 #something is wrong with the power law atm
 # it's meant to give heavier tails, but it obviously does not
 # however the pretend gaussian with the MLE statistics gives exactly the right pattern
@@ -334,6 +351,14 @@ if __name__=='__main__':
 	print lognormal_samples
 	l = MLE_lambda(data)
 	exp_samples = sample_exponential_mine(N, l)
+	exps = exponential_pdf(data, l)
+	print "exps"
+	print exps
+	gaussian, mu, variance = gaussian_probabilities(data, xmin=None)
+	p, ratio = log_likelihood_test(gaussian, exps)
+	print "Log likelihood test for gaussian vs exponential"
+	print "Likelihood ratio: ", ratio
+	print "P-value", p
 
 	#and plot on log log plot
 	#plt.figure()

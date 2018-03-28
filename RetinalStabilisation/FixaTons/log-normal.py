@@ -21,6 +21,18 @@ plt.loglog(n, bins[1:])
 plt.show()
 
 
+
+# I suppose I should still do the liklihood ratio test to figure out what distribution
+# best fits the data and do a likelihood ratio test. not totaly sure how I should do that
+# though, as I've already forgotten most of what I read yesterday, whic his truly dire
+# ugh ugh ugh ugh ugh ugh... I really really need to start trying to figure out how to retain this
+# as it is very important generally and it's a marathon not a sprint, so now is always
+# the best possible time to set up good habits for life
+# even if I've wasted the previous 23 (realistically 10!) years of my life.. .dagnabbit!
+
+
+
+
 # crap. in fact it is almost certainly likely to be a standard normal distribution!
 # as defined bythe clt?
 # so that's a great and pretty rubbish thing

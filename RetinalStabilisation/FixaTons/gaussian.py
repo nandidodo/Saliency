@@ -1,6 +1,7 @@
 # just quickly findthe mle's of gaussian data for this
 
 from __future__ import division
+from stats import *
 import numpy as np 
 
 
@@ -25,12 +26,26 @@ def gaussian_probability(x, mu, sigma):
 	num = -1* np.square(x-mu)/(2*sigma)
 	return denom * np.exp(num)
 
-def gaussian_probabilities(data):
+def gaussian_probabilities(data, xmin=None, return_params=True):
 	variance, mu = MLE_sigma_squared(data, return_mean=True)
+	print "Gaussian mean: ", mu
+	print "Gaussian standard deviation: " , np.sqrt(variance)
 	#std = np.sqrt(variance)
 	ps = []
 	for i in xrange(len(data)):
-		ps.append(gaussian_probability(data[i], mu, variance))
+		if xmin is not None:
+			if data[i]>=xmin:
+				ps.append(gaussian_probability(data[i], mu, variance))
+		else:
+			ps.append(gaussian_probability(data[i], mu, variance))
 	ps = np.array(ps)
+	ps = normalise_distribution(ps)
+
+	if return_params:
+		return ps, mu, variance
 	return ps
+
+
+def sample_gaussian(N, mu, sigma):
+	return np.random.normal(loc=mu, scale=sigma, size=N)
 
