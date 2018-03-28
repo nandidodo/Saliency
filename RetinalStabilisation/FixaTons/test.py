@@ -132,6 +132,7 @@ def investigate_scanpath_lengths(scanpath_fname,save_name=None):
 	lengths = np.array(lengths)
 	avg = np.mean(lengths)
 	var = np.var(lengths)
+	print "Number of scanpaths: " , len(lengths)
 	print "mean scanpath length: ", avg
 	print "variance of scanpath lengths", var
 	print "standard deviation of scanpath lengths", np.sqrt(var)
@@ -142,6 +143,8 @@ def investigate_scanpath_lengths(scanpath_fname,save_name=None):
 	#plot the histogram
 	plt.hist(lengths)
 	plt.title('Histogram of lengths of the scanpaths')
+	plt.xlabel('Length of scanpath (in fixations)')
+	plt.ylabel('Number of scanpaths')
 	plt.show()
 
 
@@ -207,8 +210,12 @@ def get_saccade_distances(scanpath_fname, plot=True, save_name=None, info=True, 
 		#log_bins = np.logspace(np.log(0.01), np.log(2700),20)
 		#print log_bins
 		log_bins=20
+		fig = plt.figure()
 		n, bins, patches = plt.hist(distances, bins=log_bins)
-		plt.title('Distribution of distancs between successive scan paths')
+		plt.title('Distribution of distances between successive scan paths')
+		plt.xlabel('Distance in pixels between fixation')
+		plt.ylabel('Frequency of occurence')
+		fig.tight_layout()
 		plt.show()
 
 	if save_name is not None:
@@ -372,14 +379,13 @@ def log_log_plot(x,y, xlabel, ylabel,title):
 
 
 
-
 if __name__ =='__main__':
-	#investigate_scanpath_lengths('fixaton_scanpaths')
+	investigate_scanpath_lengths('fixaton_scanpaths')
 
 	#distances = get_saccade_distances('fixaton_scanpaths')
 	#durations = get_fixation_durations('fixaton_scanpaths')
 	#durations = get_scanpath_durations('fixaton_scanpaths')
-	distances, n,bins,patches = get_saccade_distances('fixaton_scanpaths',return_hist_data=True)
+	#distances, n,bins,patches = get_saccade_distances('fixaton_scanpaths',return_hist_data=True)
 	#print type(n)
 	#print len(n)
 	#print type(bins)
@@ -387,13 +393,14 @@ if __name__ =='__main__':
 	#print type(patches)
 	#print len(patches)
 	#middles = get_middle_of_bins(bins)
-	print bins
-	print bins[0:len(bins)-2]
-	middles = bins[0:len(bins)-1]
-	print type(middles)
-	print len(middles)
-	log_log_plot_mine(middles, n, 'Log Distance between saccades', 'Log Number of saccades','Log log plot of distance between saccades vs number of saccades')
-	
+	#print bins
+	#print bins[0:len(bins)-2]
+	#middles = bins[0:len(bins)-1]
+	#print type(middles)
+	#print len(middles)
+	#log_log_plot_mine(middles, n, 'Log Distance between saccades', 'Log Number of saccades','Log log plot of distance between saccades vs number of saccades')
+	#plt.loglog(bins[0:len(bins)-1], n)
+	#plt.show()
 	# yeah, just generally this is very clearly not a log log plot
 	# dagnabbit. It's not power law distribted at all, but how is it distribted?
 	# I'm not sure how I shuold model it - perhaps as a standard brownian motion?
