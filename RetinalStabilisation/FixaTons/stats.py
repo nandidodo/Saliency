@@ -222,6 +222,7 @@ def log_likelihood_test(dist1, dist2):
 	N = len(dist1)
 	ratio = log_likelihood_ratio(dist1, dist2)
 	variance =log_likelihood_variance(dist1, dist2)
+	print "Log likelihood variance: ", variance
 	return likelihood_ratio_p_value(ratio, variance, N)
 
 
@@ -291,9 +292,31 @@ def exponential_pdf(data, l):
 
 def normalise_distribution(dist):
 	total = np.sum(dist)
-	return dist/total
+	norm_dist = dist/total
+	# it does work, it's just a float 1.0 instead of integer 1
+	#if sum(norm_dist)!=1:
+	#	print "distribution failed to normalise properly"
+	#	print "Sum! " ,sum(norm_dist)
+	return norm_dist
 
 
+# once I've got all the results I needI'm going to need to rationalise this
+# and then split it all up into it's own github project
+# and repository so it makes sense
+# and everything is perfectly in the right place
+# and it all works fine, which is nice
+# but at the moment it does not so I honestly do not know
+# dagnabbit, how it works!
+#let's start writing the very brief outlines ofthe paper, see if I have something!
+
+# yeah, the variances are vastly lower, which is cool, and makes a lot of sense...
+# so it goes. I can right this up very easily and quickly as a quick paper
+# if I try I can probably get it done today,
+# see if richard has any interesting sorts of things to think about it
+# not sure where/when it could be published
+# or if anybody would care. Most likely they do not
+# but it only took a few days of analysis so it's not the end of the world at all!
+#so that is good!
 
 #something is wrong with the power law atm
 # it's meant to give heavier tails, but it obviously does not
@@ -327,8 +350,33 @@ def normalise_distribution(dist):
 # crap, it could easily be the exponential distribution!!! dagnabbit
 # that looks more likely, and moer higher tailed than the gaussian. that could cause
 # serious issues of analysis, which is quite annoying...dagnabbit!
+
+# I mean the stats are probably horrendously dodgy, but I've done a reasonable analysis her
+# I mean I cuold do poisson but it does notreally matter, and basically it seems that the gaussian is the best fir forthe data
+# it is definitely not power law at all
+# distibuted which is the main point, so that is interesting and the stats have been doen
+#at least moderately well so that is encouraging
+# done via a likelihood ratio test
+# and I can explain that. I think I could actually with a little help write up the paper
+# right now, and make it quite quick. 
+# I'll need to rationalise the code and work on the graphs a bit
+# but it certainly will not be the end of the world
+# and could be done quiet quickly
+# and easily today. Then I can work on the other paper which is more important
+# see if it is valuable at all, or anybody would care!
+# so yeah, it would be an incredibly short and simple paper, with a simple literature review
+# and not a whole lot of maths behind it, so that is nice
 if __name__=='__main__':
 	data, n,bins,patches = get_saccade_distances('fixaton_scanpaths',return_hist_data=True)
+	fig = plt.figure()
+	plt.loglog(bins[0:len(bins)-1], n, label='Saccade distance distribution frequency')
+	plt.title('The frequency of saccade distances by distance')
+	plt.xlabel('Log distance between saccades in pixels')
+	plt.ylabel('Log number of saccades observed')
+	plt.legend()
+	fig.tight_layout()
+	plt.show()
+
 	N = len(data)
 	xmin = 0.0001
 	alpha = alpha_MLE(data,xmin)
@@ -383,13 +431,17 @@ if __name__=='__main__':
 	print exp_n
 	plt.show()
 	bins = bins[0:len(bins)-1]
-	plt.figure()
+	fig = plt.figure()
 	plt.loglog(bins,n, label='Data frequencies')
 	plt.loglog(bins, plaw_n, label='Power law frequencies')
 	plt.loglog(bins, gauss_n,label='Gaussian frequencies')
 	plt.loglog(bins, lognorm_n, label='Log normal frequencies')
 	plt.loglog(bins, exp_n, label='Exponential frequencies')
+	plt.title('Log-log plot of the data and various fitted distibutions')
+	plt.xlabel('Log distance (in pixels) between fixations')
+	plt.ylabel('Log number of fixations')
 	plt.legend()
+	fig.tight_layout()
 	plt.show()
 
 	# I mean yeah, it quite significantly here heavier tails 
