@@ -24,6 +24,7 @@ import gc
 
 def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropoutBatchNorm, batch_size = 128, save_model_name=None, ret = False):
 	#normalise data
+	print "starting mnist model"
 	train = train.astype('float32')/255.
 	test = test.astype('float32')/255.
 	#reshape for input to conv network
@@ -31,6 +32,8 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 	train = np.reshape(train, (len(train), shape[1], shape[2],1))
 	test = np.reshape(test, (len(test), shape[1], shape[2],1))
 	shape = train.shape
+	print "train shape: ", train.shape
+	print "test shape: " , test.shape
 
 	#get the model
 
@@ -66,6 +69,7 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 		# so you REALLY can't uespickle for large arrays at all!
 		# it was the res which was probably taking up so much space,
 		#being copied twice!
+
 		# and is otherwise copletely dire
 		# and the pickle results don't work
 		# so instead I'm just going to save stuff separately
@@ -89,7 +93,7 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 def run_augments():
 	augments_train = np.load(BASE_SAVE_PATH+'_train_augments.npy')
 	#augments results
-	augments_test = np.load(BASE_SAVE_PATH+'_train_augments.npy')
+	augments_test = np.load(BASE_SAVE_PATH+'_test_augments.npy')
 	print "Loaded augments"
 	run_mnist_model(augments_train, augments_test, save_name="mnist_augments", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_augments")
 	print "finished running model"
@@ -102,7 +106,7 @@ def run_augments():
 def run_copies():
 	
 	copies_train = np.load(BASE_SAVE_PATH + '_train_copies.npy')
-	copies_test = np.load(BASE_SAVE_PATH + '_train_copies.npy')
+	copies_test = np.load(BASE_SAVE_PATH + '_test_copies.npy')
 	#copy results
 	run_mnist_model(copies_train, copies_test, save_name="mnist_copies", epochs=EPOCHS, batch_size=BATCH_SIZE,save_model_name="model_mnist_copy")
 
@@ -119,7 +123,7 @@ if __name__ == '__main__':
 	NUM_AUGMENTS = 10
 	PIXEL_SHIFT = 4
 	BASE_SAVE_PATH = "data/mnist_dataset"
-	EPOCHS = 1
+	EPOCHS = 10
 	BATCH_SIZE = 64
 	#load the generated dataset
 	
