@@ -16,7 +16,7 @@ print FT.list.stimuli('SIENA12')
 DATASET_NAME = 'SIENA12'
 STIMULUS_NAME = 'land.jpg'
 SUBJECT_ID = 'GT_10022017'
-"""
+
 stimulus_matrix = FT.get.stimulus(DATASET_NAME, STIMULUS_NAME)
 saliency_map_matrix = FT.get.saliency_map(DATASET_NAME, STIMULUS_NAME)
 fixation_map_matrix = FT.get.fixation_map(DATASET_NAME, STIMULUS_NAME)
@@ -25,22 +25,22 @@ print 'Stimulus dims = ', stimulus_matrix.shape
 print "saliency map dims = ", saliency_map_matrix.shape
 print "fixation map matrix = ", fixation_map_matrix.shape
 
-scanpath = FT.get.scanpath(DATASET_NAME, STIMULUS_NAME, subject = SUBJECT_ID)
-print scanpath.shape
-print scanpath
-print "this scanpath has ", len(scanpath), "fixations."
+#scanpath = FT.get.scanpath(DATASET_NAME, STIMULUS_NAME, subject = SUBJECT_ID)
+#print scanpath.shape
+#print scanpath
+#print "this scanpath has ", len(scanpath), "fixations."
 
 #show the map
-FT.show.map(DATASET_NAME, STIMULUS_NAME, showSalMap=True, showFixMap=False, wait_time=5000, plotMaxDim=1024)
+#FT.show.map(DATASET_NAME, STIMULUS_NAME, showSalMap=True, showFixMap=False, wait_time=5000, plotMaxDim=1024)
 
 # that's cool! all of this works even though presumably it requires the cv2 library
 #which I thought Icuoldn't figure out how to install(!)
 
 #show a single scanpath
-FT.show.scanpath(DATASET_NAME, STIMULUS_NAME, subject=SUBJECT_ID,
-	animation=True, wait_time=0, putLines=True, putNumbers = True,
-	plotMaxDim=1024)
-"""
+#FT.show.scanpath(DATASET_NAME, STIMULUS_NAME, subject=SUBJECT_ID,
+#	animation=True, wait_time=0, putLines=True, putNumbers = True,
+#	plotMaxDim=1024)
+
 
 #okay, that is really really REALLY COOL! it works. That's amazing.
 #The fixatons people did a really good job with this!
@@ -81,6 +81,47 @@ def save(obj, fname):
 
 def load(fname):
 	return pickle.load(open(fname, 'rb'))
+
+def get_stimuli_info():
+	datasets = FT.list.datasets()
+	stimuli = []
+	for dataset in datasets:
+		stims = FT.list.stimuli(dataset)
+		print "Num stimuli in dataset " + dataset + "  : " + str(len(stims))
+
+def get_subject_info():
+	scanpaths = load('fixaton_scanpaths')
+	datasets = FT.list.datasets()
+	subjects_per_dataset = {}
+	for dataset in datasets:
+		subjects =[]
+		for scanpath in scanpaths:
+			if scanpath['dataset'] == dataset:
+				subjects.append(scanpath['subject_id'])
+
+		subjects = np.array(subjects)
+		subjects_per_dataset[dataset] = subjects
+
+	print subjects_per_dataset
+	for dataset in datasets:
+		print "dataset: ", dataset
+		print "num subjects: ", str(len(subjects_per_dataset[dataset]))
+	save(subjects_per_dataset, 'subjects_per_dataset')
+
+def get_num_scanpaths_and_fixations():
+	scanpaths = load('fixaton_scanpaths')
+	datasets = FT.list.datasets()
+	for dataset in datasets:
+		fixations = 0
+		paths = 0
+		for scanpath in scanpaths:
+			if scanpath['dataset'] == dataset:
+				fixations += len(scanpath['scanpath'])
+				#print scanpath['scanpath'][0]
+				paths +=1
+		print "dataset: " + dataset
+		print "num scanpaths: " + str(paths)
+		print "num fixations: " + str(fixations)
 
 
 def save_all_scanpaths():
@@ -380,7 +421,11 @@ def log_log_plot(x,y, xlabel, ylabel,title):
 
 
 if __name__ =='__main__':
-	investigate_scanpath_lengths('fixaton_scanpaths')
+	
+	#investigate_scanpath_lengths('fixaton_scanpaths')
+	#get_stimuli_info()
+	#get_subject_info()
+	get_num_scanpaths_and_fixations()
 
 	#distances = get_saccade_distances('fixaton_scanpaths')
 	#durations = get_fixation_durations('fixaton_scanpaths')
