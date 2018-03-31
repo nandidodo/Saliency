@@ -133,10 +133,10 @@ if __name__ == '__main__':
 	#hopefully since functions clean up after themselves this will stop the memory
 	#exploding here
 
-	run_augments()
+	#run_augments()
 	#also force garbage collection after each
-	gc.collect()
-
-	#run_copies()
 	#gc.collect()
+
+	run_copies()
+	gc.collect()
 
