@@ -41,70 +41,6 @@ def calculate_average_error(augments_name, copies_name, save_name=None):
 	# that is good!
 
 
-def plot_errmaps(augments_name, copies_name, N =20):
-	augment_test = np.load(augments_name + '_test.npy')
-	augment_preds = np.load(augments_name+'_preds.npy')
-
-	copy_test = np.load(copies_name + '_test.npy')
-	copy_preds = np.load(copies_name + '_preds.npy')
-
-	augment_errmaps = get_error_maps(augment_test, augment_preds)
-	copy_errmaps = get_error_maps(copy_test, copy_preds)
-	augment_error = get_mean_error(augment_errmaps)
-	copy_error =get_mean_error(copy_errmaps)
-
-	#reshape so work as images
-	sh = augment_test.shape # all shapes should be the same here!
-	augment_test = np.reshape(augment_test, (sh[0], sh[1],sh[2]))
-	augment_preds= np.reshape(augment_preds, (sh[0], sh[1],sh[2]))
-	augment_errmaps = np.reshape(augment_errmaps, (sh[0], sh[1],sh[2]))
-
-	copy_test = np.reshape(copy_test, (sh[0], sh[1],sh[2]))
-	copy_preds = np.reshape(copy_preds, (sh[0], sh[1],sh[2]))
-	copy_errmaps = np.reshape(copy_errmaps, (sh[0], sh[1],sh[2]))
-
-	for i in xrange(N):
-		#begin the plot
-		fig = plt.figure()
-
-		ax1 = fig.add_subplot(131)
-		plt.imshow(augment_test[i], cmap='gray')
-		plt.title('Augmented Test image')
-		plt.xticks([])
-		plt.yticks([])
-
-		ax2 = fig.add_subplot(132)
-		plt.imshow(augment_preds[i], cmap='gray')
-		plt.title('Augmented Image prediction')
-		plt.xticks([])
-		plt.yticks([])
-
-		ax3 = fig.add_subplot(133)
-		plt.imshow(augment_errmaps[i], cmap='gray')
-		plt.title('Augmented error map')
-		plt.xticks([])
-		plt.yticks([])
-
-		ax4 = fig.add_subplot(231)
-		plt.imshow(copy_test[i], cmap='gray')
-		plt.title('Copies Test image')
-		plt.xticks([])
-		plt.yticks([])
-
-		ax5 = fig.add_subplot(232)
-		plt.imshow(copy_preds[i], cmap='gray')
-		plt.title('Copies Image prediction')
-		plt.xticks([])
-		plt.yticks([])
-
-		ax6 = fig.add_subplot(233)
-		plt.imshow(copy_errmaps[i], cmap='gray')
-		plt.title('Copies error map')
-		plt.xticks([])
-		plt.yticks([])
-
-		fig.tight_layout()
-		plt.show()
 #results: 
 #mnist augments error:  0.0458422217494
 #mnist copies error:  1.46164913036
@@ -134,33 +70,60 @@ def plot_errmaps(augments_name, copies_name, N =20):
 #which could be interesting!
 
 # okay, aim to test here how things are
+
+def save_history_losses(his_fname, save_fname):
+	his = load(his_fname)
+	history = his['history']
+	his = None # free history
+	loss = his['loss']
+	val_loss = his['val_loss']
+	print type(loss)
+	print type(val_loss)
+	np.save(save_fname+'_training_loss',loss)
+	np.save(save_fname+'_validation_loss',val_loss)
+	print "saved"
+	return loss, val_loss
+
+
 def test_results():
 	aug_his = load('mnist_augments_history')
 	val_data = aug_his['validation_data']
 	#print len(val_data)
 	#print val_data[0].shape
 	print aug_his.keys()
-	hisory = aug_his['history']
+	history = aug_his['history']
 	print "history"
 	print type(history)
 	print len(history)
 	print history.keys()
+	loss = history['loss']
+	val_loss = history['val_loss']
+	print type(loss)
+	print len(loss)
+	print type(val_loss)
+	print len(val_loss)
 	params = aug_his['params']
 	print "params"
 	print type(params)
 	print len(params)
+	print params.keys()
 	epoch = aug_his['epoch']
 	print "epoch"
 	print type(epoch)
 	print len(epoch)
+	print "validation data"
+	print type(val_data)
+	print len(val_data)
 
 
 #and some quick tests
 if __name__ == '__main__':
 	print "In main!"
-	test_results()
+	#test_results()
 	#calculate_average_error('mnist_augments', 'mnist_copies')
 	#plot_errmaps('mnist_augments', 'mnist_copies')
+	save_history_losses('mnist_augments_history', 'augments')
+	save_history_losses('mnist_copies_history','copies')
 
 
 
