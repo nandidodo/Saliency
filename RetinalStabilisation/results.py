@@ -137,16 +137,30 @@ def plot_errmaps(augments_name, copies_name, N =20):
 def test_results():
 	aug_his = load('mnist_augments_history')
 	val_data = aug_his['validation_data']
-	print len(val_data)
-	print val_data[0].shape
+	#print len(val_data)
+	#print val_data[0].shape
+	print aug_his.keys()
+	hisory = aug_his['history']
+	print "history"
+	print type(history)
+	print len(history)
+	print history.keys()
+	params = aug_his['params']
+	print "params"
+	print type(params)
+	print len(params)
+	epoch = aug_his['epoch']
+	print "epoch"
+	print type(epoch)
+	print len(epoch)
 
 
 #and some quick tests
 if __name__ == '__main__':
 	print "In main!"
-	#test_results()
+	test_results()
 	#calculate_average_error('mnist_augments', 'mnist_copies')
-	plot_errmaps('mnist_augments', 'mnist_copies')
+	#plot_errmaps('mnist_augments', 'mnist_copies')
 
 
 
