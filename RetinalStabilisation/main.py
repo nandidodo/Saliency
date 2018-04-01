@@ -118,13 +118,25 @@ def fixation_simulation(img, num_augments,run_num,epochs, copy_model_save, augme
 
 		#make predictions
 		augment_preds = augment_model.predict(augment_data)
-		copy_preds = augment_model.predict(copy_data)
+		copy_preds = copy_model.predict(copy_data)
+		#augment_preds = np.reshape(augment_preds, (11,28,28))
+		#copy_preds = np.reshape(copy_preds, (11,28,28))
+		#plt.imshow(augment_preds[0])
+		#plt.show()
+		#plt.imshow(copy_preds[0])
+		#plt.show()
+		#augment_preds = np.reshape(augment_preds, (11,28,28,1))
+		#copy_preds = np.reshape(copy_preds, (11,28,28,1))
 		# this should work because the model should be the same each time
 		# the model is preserved hopefully
 		# if not then I can rerun each tiem and it should not matter
 		# and save it each time, so to check if it does not work this time!
 		augment_errmaps = get_error_maps(augment_data, augment_preds)
 		copy_errmaps = get_error_maps(copy_data, copy_preds)
+		#plt.imshow(augment_errmaps)
+		#plt.show()
+		#plt.imshow(copy_errmaps)
+		#plt.show()
 		# I mean I don't need to save the errmaps since htey can always be rederived
 		# but it doesn't hurt and makes analysis easier and I've no shortage of space really!
 		augment_results.append([augment_data, augment_preds, augment_errmaps])
@@ -132,8 +144,8 @@ def fixation_simulation(img, num_augments,run_num,epochs, copy_model_save, augme
 
 
 	#save
-	save(results_save+'_fixation_augments', augment_results)
-	save(results_save+'_fixation_copy', copy_results)
+	save(augment_results,results_save+'_fixation_augments')
+	save(copy_results,results_save+'_fixation_copy')
 	return augment_results, copy_results
 	
 
@@ -201,5 +213,23 @@ if __name__ == '__main__':
 	results_save = 'results/'
 	fixation_simulation(xtest[0], num_augments, run_num, epochs, copy_model_save, augment_model_save, results_save)
 
+	#the fixation results seem promising
+	# so hopefully the results will be what I want
+	# then the only thing to do will perhaps to do the classification
+	# experiments and then write it up, which shall commence next week
+	# and improve plotsandso forth, then have two papers written/done in two weeks
+	# which is not too bad a rate. then I can spend some more time on larger projects
+	# hopefully while still having a good phd showing overall
+	# by figuring out what to do with the previous work on gestalt stuff or whatever
+	# and also working on the predictive processing model of everything. which should be the main goal
+	# for the rest of the month to be honest, and therefore working on the pred net
+	# and the framework forthat, which seems to be rather important overall since it would mark
+	# a real and moderately exciting contribution to thinsg which would be cool
+	# that's april's overall goal then, I think ,and possibly a reasonable achievable one!
+	# yay!
+	# and also probably write up the first year review, which will be annoying and which
+	# I seriously need to talk to richard about... dagnabbit
+	# but first these papers. and then I'll be fine! and also the predictive processing stuff
+	# so I really don't know about that at all, so hey, who knows?
 
 
