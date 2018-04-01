@@ -15,6 +15,9 @@ from keras.datasets import mnist
 import keras.backend as K
 from keras import metrics
 import gc
+from augmenter import *
+from keras.models import load_model
+
 
 # aim will be to check if it works at all better - hopefully it will
 # with the data augmentation
@@ -88,6 +91,47 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 	print "freed variables"
 
 	return
+
+def fixation_simulation(img, num_augments,run_num,epochs, copy_model_save, augment_model_save, results_save):
+
+	# this runs for both the copies and the miages data
+	# to get the results just ine one function
+
+	copy_model = load_model(copy_model_save)
+	augment_model = load_model(augment_model_save)
+	augment_results = []
+	copy_results = []
+
+	for i in xrange(run_num):
+		augment_data = augment_with_translations(img, num_augments)
+		copy_data = augment_with_copy(img, num_augments)
+
+		#fit the models
+		augment_history = augment_model.fit(augment_data, augment_data, epochs=epochs, batch_size=1, shuffle=True)
+		copy_history = copy_model.fit(copy_data, copy_data, epochs=epochs, batch_size=1, shuffle=True)
+
+		#make predictions
+		augment_preds = augment_model.predict(augment_data)
+		copy_preds = augment_model.predict(copy_preds)
+		# this should work because the model should be the same each time
+		# the model is preserved hopefully
+		# if not then I can rerun each tiem and it should not matter
+		# and save it each time, so to check if it does not work this time!
+		augment_errmaps = get_error_maps(augment_data, augment_preds)
+		copy_errmaps = get_error_maps(copy_data, copy_preds)
+		# I mean I don't need to save the errmaps since htey can always be rederived
+		# but it doesn't hurt and makes analysis easier and I've no shortage of space really!
+		augment_results.append([augment_data, augment_preds, augment_errmaps])
+		copy_results.append([copy_data, copy_preds, copy_errmaps])
+
+
+	#save
+	save(results_save+'_fixation_augments', augment_results)
+	save(results_save+'_fixation_copy', copy_results)
+	return augment_results, copy_results
+	
+
+
 
 
 def run_augments():
