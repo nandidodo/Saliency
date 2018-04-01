@@ -75,8 +75,8 @@ def save_history_losses(his_fname, save_fname):
 	his = load(his_fname)
 	history = his['history']
 	his = None # free history
-	loss = his['loss']
-	val_loss = his['val_loss']
+	loss = history['loss']
+	val_loss = history['val_loss']
 	print type(loss)
 	print type(val_loss)
 	np.save(save_fname+'_training_loss',loss)
