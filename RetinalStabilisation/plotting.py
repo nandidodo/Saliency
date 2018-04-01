@@ -8,9 +8,13 @@ def plot_training_loss(aug_losses,copy_losses):
 	aug_losses = np.load(aug_losses)
 	copy_losses = np.load(copy_losses)
 
+	print aug_losses.shape
+	print copy_losses.shape
+
 	fig = plt.figure()
 	assert len(aug_losses) == len(copy_losses), 'Two losses must have gone on for same number of eopchs'
-	N = np.linspace(0, len(aug_losses))
+	N = np.linspace(0, len(aug_losses),num=10)
+	print len(N)
 	plt.plot(N,aug_losses,label='Training loss with augmented data')
 	plt.plot(N,copy_losses, label='Training loss with copied data')
 	plt.xlabel('Epochs')
@@ -28,7 +32,7 @@ def plot_validation_loss(aug_losses,copy_losses):
 
 	fig = plt.figure()
 	assert len(aug_losses) == len(copy_losses), 'Two losses must have gone on for same number of eopchs'
-	N = np.linspace(0, len(aug_losses))
+	N = np.linspace(0, len(aug_losses), num=10)
 	plt.plot(N,aug_losses,label='Validation loss with augmented data')
 	plt.plot(N,copy_losses, label='Validation loss with copied data')
 	plt.xlabel('Epochs')
@@ -122,3 +126,8 @@ def plot_errmaps(augments_name, copies_name, N =20):
 
 		fig.tight_layout()
 		plt.show()
+
+
+if __name__=='__main__':
+	plot_training_loss('augments_training_loss.npy', 'copies_training_loss.npy')
+	plot_validation_loss('augments_validation_loss.npy', 'copies_validation_loss.npy')
