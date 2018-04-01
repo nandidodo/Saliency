@@ -26,6 +26,30 @@ def augment_with_translations(img, num_augments=10,max_px_translate=4):
 	augments = np.array(augments)
 	return augments
 
+def augment_with_translation_deterministic(img, num_augments, px_translate):
+	# it translates by the max amount, but whether x translation, ytranslation or both is random
+	augments = []
+	augments.append(img)
+	for i in range(num_augments):
+		shift_direction = 0
+		rand = np.random.uniform(low=0, high=1)
+		if rand >=0.33 and rand <=0.66:
+			shift_direction=1
+		if rand >0.66 and rand <=1:
+			shift_direction=2
+		if shift_direction==0:
+			augment = translate(img, (px_translate, 0))
+			augments.append(augment)
+		if shift_direction==1:
+			augment = translate(img, (0, px_translate))
+			augments.append(augment)
+		if shift_direction==2:
+			augment = translate(img, (px_translate, px_translate))
+			augments.append(augmment)
+
+		augments = np.array(augments)
+		return augments
+
 def augment_with_copy(img, num_augments=10, copy=False):
 	augments = []
 	augments.append(img)
@@ -41,6 +65,27 @@ def augment_with_copy(img, num_augments=10, copy=False):
 	augments = np.array(augments)
 	return augments
 
+
+def create_translation_invariance_test_datasets(dataset, num_augments, save_base,min_px_translate=0, max_px_translate=10, steps=5):
+	if type(dataset) is str:
+		dataset = np.load(dataset)
+
+	assert num_augments>=0, 'Number of augments acnnot be zero or negative'
+	assert min_px_translate >=0 and min_px_translate <=max_px_translate, 'Min pixels must be positive and less than max pixels (obviously)'
+	assert max_px_translate >0, 'if 0 or less, why are you using this function'
+	assert steps >0, 'steps must be greater than 0'
+	assert type(save_base) is str and len(save_base)>0, 'Save base must be a valid string'
+
+	step_size = (max_px_translate-min_pix_translate)//steps
+	#now begin the loop to create the datasets
+	for i in range(steps):
+		px_translate = min_px_translate + (i * step_size)
+		augments = augment_with_translation_deterministic(dataset, num_augments, px_translate)
+		save_name = save_base + '_' + str(px_translate) + 'pixels_translate'
+		np.save(save_name, augments)
+
+	#and that's it. simple functoin, I think
+	return
 
 def augment_dataset(dataset, num_augments, base_save_path=None, px_translate=4):
 	#try to load dataset if it is a string
@@ -70,6 +115,9 @@ def augment_dataset(dataset, num_augments, base_save_path=None, px_translate=4):
 		#print augments.shape
 		augments = np.concatenate((augments, augment))
 		copies = np.concatenate((copies, copy))
+		print "in augment loop"
+		print augments.shape
+		print copies.shape
 
 	#just to make sure
 	augments = np.array(augments)
