@@ -106,13 +106,19 @@ def fixation_simulation(img, num_augments,run_num,epochs, copy_model_save, augme
 		augment_data = augment_with_translations(img, num_augments)
 		copy_data = augment_with_copy(img, num_augments)
 
+		#reshape data
+		sh = augment_data.shape
+		assert sh == copy_data.shape, 'Augment and copy data should have same shape'
+		augment_data = np.reshape(augment_data, (sh[0], sh[1], sh[2],1))
+		copy_data = np.reshape(copy_data, (sh[0], sh[1], sh[2],1))
+
 		#fit the models
 		augment_history = augment_model.fit(augment_data, augment_data, epochs=epochs, batch_size=1, shuffle=True)
 		copy_history = copy_model.fit(copy_data, copy_data, epochs=epochs, batch_size=1, shuffle=True)
 
 		#make predictions
 		augment_preds = augment_model.predict(augment_data)
-		copy_preds = augment_model.predict(copy_preds)
+		copy_preds = augment_model.predict(copy_data)
 		# this should work because the model should be the same each time
 		# the model is preserved hopefully
 		# if not then I can rerun each tiem and it should not matter
@@ -181,6 +187,19 @@ if __name__ == '__main__':
 	#also force garbage collection after each
 	#gc.collect()
 
-	run_copies()
-	gc.collect()
+	#run_copies()
+	#gc.collect()
+
+
+	#run the fixation experiments now!
+	(xtrain, ytrain), (xtest, ytest) = mnist.load_data()
+	num_augments = 10
+	run_num = 100
+	epochs = 10
+	copy_model_save = 'model_mnist_copy'
+	augment_model_save = 'model_mnist_augments'
+	results_save = 'results/'
+	fixation_simulation(xtest[0], num_augments, run_num, epochs, copy_model_save, augment_model_save, results_save)
+
+
 
