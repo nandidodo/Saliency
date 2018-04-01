@@ -116,14 +116,36 @@ def test_results():
 	print len(val_data)
 
 
+def test_fixations():
+	copy_results = load('results/_fixation_copy')
+	aug_results =load('results/_fixatoin_augments')
+	print type(copy_results)
+	print len(copy_results)
+	plot_fixation_errmaps(aug_results, copy_results)
+
+
 #and some quick tests
 if __name__ == '__main__':
-	print "In main!"
+	
+	#print "In main!"
 	#test_results()
-	#calculate_average_error('mnist_augments', 'mnist_copies')
+	#calculate_average_error('mnist_augments', 'mnist_copies', save_name="errors_1")
 	#plot_errmaps('mnist_augments', 'mnist_copies')
-	save_history_losses('mnist_augments_history', 'augments')
-	save_history_losses('mnist_copies_history','copies')
+	#save_history_losses('mnist_augments_history', 'augments')
+	#save_history_losses('mnist_copies_history','copies')
+
+	test_fixations()
+
+	# so for some reason, even though the validation and test errors are barely different
+	# this is not the case for the error maps where there is a significantand consistent difference
+	# in exactly the directoin I want, whic his good. Now that's the main results I need
+	# all I will need to do then is to show it's superiority on a standard not reconstruction test
+	# but on actual classification tasks, which should be easy, and interesting
+	# as well as greater difference there
+	# and also show the dissapearance of the error map - i.e. retinal stabilisation over time
+	# so hopefully that should be fairly straightforward and with those results, I can begin a proper writeup
+	# and have that to richard by the end of this week, which could be interesting#
+	# so yeah, that would be good, and test classification
 
 
 

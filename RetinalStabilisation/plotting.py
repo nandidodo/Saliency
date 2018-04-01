@@ -51,15 +51,71 @@ def average_error_bar_chart(save_name):
 	width=0.7
 	align='center'
 	tick_labels = ('Mean Error with Augmentation', 'Mean Error with Copying')
-	
+	linewidth = 0.1
 	#start the plot
 	fig = plt.figure()
-	bar(x, height, width, align=align, tick_labels=tick_labels)
+	plt.bar(x, height, width, align=align, tick_label=tick_labels, linewidth=linewidth)
 	#change this depending on how it is written
 	plt.title('Error of the network with data augmentation or data copying')
 	fig.tight_layout()
 	plt.show()
 	return fig
+
+def plot_fixation_errmaps(fixation_results_augments, fixation_results_copy, N = None):
+	if N is None:
+		N = len(fixation_results)
+	for i in xrange(N):
+		aug_tests, aug_preds, aug_errmaps = fixation_results_augments[i]
+		copy_tests, copy_preds, copy_errmaps = fixation_results_copy[i]
+		#just get the first one, because why not here
+		aug_test = aug_tests[0]
+		aug_pred = aug_preds[0]
+		aug_errmap = aug_errmaps[0]
+
+		copy_test = copy_tests[0]
+		copy_pred = copy_preds[0]
+		copy_errmap = copy_errmaps[0]
+
+		fig = plt.figure()
+
+		ax1 = fig.add_subplot(131)
+		plt.imshow(aug_test[i], cmap='gray')
+		plt.title('Augmented Test image')
+		plt.xticks([])
+		plt.yticks([])
+
+		ax2 = fig.add_subplot(132)
+		plt.imshow(aug_pred[i], cmap='gray')
+		plt.title('Augmented Image prediction')
+		plt.xticks([])
+		plt.yticks([])
+
+		ax3 = fig.add_subplot(133)
+		plt.imshow(aug_errmap[i], cmap='gray')
+		plt.title('Augmented error map')
+		plt.xticks([])
+		plt.yticks([])
+
+		ax4 = fig.add_subplot(231)
+		plt.imshow(copy_test, cmap='gray')
+		plt.title('Copies Test image')
+		plt.xticks([])
+		plt.yticks([])
+
+		ax5 = fig.add_subplot(232)
+		plt.imshow(copy_pred, cmap='gray')
+		plt.title('Copies Image prediction')
+		plt.xticks([])
+		plt.yticks([])
+
+		ax6 = fig.add_subplot(233)
+		plt.imshow(copy_errmap, cmap='gray')
+		plt.title('Copies error map')
+		plt.xticks([])
+		plt.yticks([])
+
+		fig.tight_layout()
+		plt.show()
 
 
 def plot_errmaps(augments_name, copies_name, N =20):
@@ -129,5 +185,6 @@ def plot_errmaps(augments_name, copies_name, N =20):
 
 
 if __name__=='__main__':
-	plot_training_loss('augments_training_loss.npy', 'copies_training_loss.npy')
-	plot_validation_loss('augments_validation_loss.npy', 'copies_validation_loss.npy')
+	#plot_training_loss('augments_training_loss.npy', 'copies_training_loss.npy')
+	#plot_validation_loss('augments_validation_loss.npy', 'copies_validation_loss.npy')
+	average_error_bar_chart('errors_1')
