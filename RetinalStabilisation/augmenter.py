@@ -7,7 +7,12 @@ from keras.datasets import mnist
 import matplotlib.pyplot as plt
 
 def translate(img, px, mode='constant'):
-	assert type(px)==float or type(px)==int or len(px)==len(img.shape),'Pixels must either be a value or a tuple containing the number of pixels to move for each axis, and therefore musth ave the same dimension as the input image'
+	#print "in translate"
+	#print px
+	#print len(px)
+	#print len(img.shape)
+	#print img.shape
+	assert type(px) is float or type(px) is int or len(px)==len(img.shape),'Pixels must either be a value or a tuple containing the number of pixels to move for each axis, and therefore musth ave the same dimension as the input image'
 	return scipy.ndimage.interpolation.shift(img, px, mode=mode)
 
 
@@ -30,6 +35,8 @@ def augment_with_translation_deterministic(img, num_augments, px_translate):
 	# it translates by the max amount, but whether x translation, ytranslation or both is random
 	augments = []
 	augments.append(img)
+	#sh = img.shape
+	#img = np.reshape(img, (sh[0], sh[1],sh[2]))
 	for i in range(num_augments):
 		shift_direction = 0
 		rand = np.random.uniform(low=0, high=1)
@@ -38,14 +45,20 @@ def augment_with_translation_deterministic(img, num_augments, px_translate):
 		if rand >0.66 and rand <=1:
 			shift_direction=2
 		if shift_direction==0:
+			#print px_translate
+			#print img.shape
 			augment = translate(img, (px_translate, 0))
 			augments.append(augment)
 		if shift_direction==1:
+			#print px_translate
+			#print img.shape
 			augment = translate(img, (0, px_translate))
 			augments.append(augment)
 		if shift_direction==2:
+			#print px_translate
+			#print img.shape
 			augment = translate(img, (px_translate, px_translate))
-			augments.append(augmment)
+			augments.append(augment)
 
 		augments = np.array(augments)
 		return augments
@@ -76,11 +89,15 @@ def create_translation_invariance_test_datasets(dataset, num_augments, save_base
 	assert steps >0, 'steps must be greater than 0'
 	assert type(save_base) is str and len(save_base)>0, 'Save base must be a valid string'
 
-	step_size = (max_px_translate-min_pix_translate)//steps
+	step_size = (max_px_translate-min_px_translate)//steps
 	#now begin the loop to create the datasets
 	for i in range(steps):
 		px_translate = min_px_translate + (i * step_size)
-		augments = augment_with_translation_deterministic(dataset, num_augments, px_translate)
+		augments = []
+		for j in xrange(len(dataset)):
+			augment = augment_with_translation_deterministic(dataset[j], num_augments, px_translate)
+			augments.append(augment)
+		augments = np.array(augments)
 		save_name = save_base + '_' + str(px_translate) + 'pixels_translate'
 		np.save(save_name, augments)
 
@@ -169,9 +186,11 @@ if __name__ == '__main__':
 	#okay, augmenter works, that's wonderful
 
 	#now actually create the dataset
-	save_path= "data/mnist_dataset"
+	#save_path= "data/mnist_dataset"
 	#create train datasets
-	augment_dataset(xtrain, num_augments=10,base_save_path = save_path+"_train")
+	#augment_dataset(xtrain, num_augments=10,base_save_path = save_path+"_train")
 	#create test dataset
-	augment_dataset(xtest, num_augments=10, base_save_path = save_path+"_test")
+	#augment_dataset(xtest, num_augments=10, base_save_path = save_path+"_test")
 
+	save_path = "data/mnist_invariance"
+	create_translation_invariance_test_datasets(xtest, 10, save_path )
