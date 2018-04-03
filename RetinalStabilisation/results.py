@@ -118,7 +118,7 @@ def test_results():
 
 def test_fixations():
 	copy_results = load('results/_fixation_copy')
-	aug_results =load('results/_fixatoin_augments')
+	aug_results =load('results/_fixation_augments')
 	print type(copy_results)
 	print len(copy_results)
 	plot_fixation_errmaps(aug_results, copy_results)
