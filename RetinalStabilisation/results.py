@@ -144,11 +144,13 @@ def test_generative_invariance(aug_model, copy_model, results_save=None):
 	copy_model = load_model(copy_model)
 
 	#load the invariance files
-	mnist_0px = np.load('mnist_invariance_0pixels_translate.npy')
-	mnist_2px = np.load('mnist_invariance_2pixels_translate.npy')
-	mnist_4px = np.load('mnist_invariance_4pixels_translate.npy')
-	mnist_6px = np.load('mnist_invariance_6pixels_translate.npy')
-	mnist_8px = np.load('mnist_invariance_8pixels_translate.npy')
+	mnist_0px = np.load('data/mnist_invariance_0pixels_translate.npy')
+	mnist_2px = np.load('data/mnist_invariance_2pixels_translate.npy')
+	mnist_4px = np.load('data/mnist_invariance_4pixels_translate.npy')
+	mnist_6px = np.load('data/mnist_invariance_6pixels_translate.npy')
+	mnist_8px = np.load('data/mnist_invariance_8pixels_translate.npy')
+	print mnist_0px.shape
+	print mnist_2px.shape
 
 	pixels = [0,2,4,6,8]
 
@@ -159,6 +161,10 @@ def test_generative_invariance(aug_model, copy_model, results_save=None):
 
 	#test on each and get errors
 	for invariance in invariances:
+		#reshape
+		sh = invariance.shape
+		invariance = np.reshape(invariance, (sh[0], sh[1], sh[2],1))
+		
 		aug_preds = aug_model.predict(invariance)
 		copy_preds = copy_model.predict(invariance)
 		aug_errmaps = get_error_maps(invariance, aug_preds)
@@ -174,7 +180,8 @@ def test_generative_invariance(aug_model, copy_model, results_save=None):
 	if results_save:
 		np.save(results_save+'_aug', aug_errors)
 		np.save(results_save+'_copy', copy_errors)
-	return aug_errors, copy_errors
+		np.save(results_save+'_pixels', pixels)
+	return aug_errors, copy_errors,pixels
 
 
 
@@ -189,7 +196,8 @@ if __name__ == '__main__':
 	#save_history_losses('mnist_augments_history', 'augments')
 	#save_history_losses('mnist_copies_history','copies')
 
-	test_fixations()
+	#test_fixations()
+	test_generative_invariance('model_mnist_augments', 'model_mnist_copy','results/generative_invariance')
 
 	# it sort of shows waht I want to show, but not that well, dagnabbit!
 

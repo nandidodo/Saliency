@@ -157,6 +157,26 @@ def plot_fixation_errmaps(fixation_results_augments, fixation_results_copy, N = 
 		# to see it actually dissapearing out from epochs, so that's the hope!
 		# hopefully it will work that
 
+def plot_generative_invariance_bar_chart(base_fname):
+	aug_errs = np.load(base_fname+'_aug')
+	copy_errs = np.load(base_fname+'_copy')
+	pixels = np.load(base_fname+'_pixels')
+
+	w =0.4
+	align='center'
+
+	#begin plot
+	fig = plt.figure()
+	ax = plt.subplot(111)
+	ax.bar(pixels-w, aug_errs, width=w, align=align, label='Augmented error')
+	ax.bar(pixels+w, copy_errs, width=w, align=align, label='Copy errors')
+	plt.title('Error of copy and augmented against number of pixels translated')
+	plt.xlabel('Pixels translated')
+	plt.ylabel('Mean error')
+	plt.legend()
+	fig.tight_layout()
+	plt.show()
+	return fig
 
 def plot_errmaps(augments_name, copies_name, N =20):
 	augment_test = np.load(augments_name + '_test.npy')
