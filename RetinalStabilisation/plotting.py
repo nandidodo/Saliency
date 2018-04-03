@@ -63,10 +63,18 @@ def average_error_bar_chart(save_name):
 
 def plot_fixation_errmaps(fixation_results_augments, fixation_results_copy, N = None):
 	if N is None:
-		N = len(fixation_results)
+		N = len(fixation_results_augments)
+		assert N == len(fixation_results_copy), 'Fixation results must be same length'
 	for i in xrange(N):
 		aug_tests, aug_preds, aug_errmaps = fixation_results_augments[i]
 		copy_tests, copy_preds, copy_errmaps = fixation_results_copy[i]
+		print np.sum(aug_errmaps)
+		print np.sum(copy_errmaps)
+		# sum is less, s that's good
+		
+
+
+
 		#just get the first one, because why not here
 		aug_test = aug_tests[0]
 		aug_pred = aug_preds[0]
@@ -76,22 +84,44 @@ def plot_fixation_errmaps(fixation_results_augments, fixation_results_copy, N = 
 		copy_pred = copy_preds[0]
 		copy_errmap = copy_errmaps[0]
 
+		concat = np.concatenate((aug_errmap,copy_errmap))
+		print concat.shape
+		sh = concat.shape
+		concat = np.reshape(concat, (sh[0],sh[1]))
+
+		#print aug_errmap[10][10]
+		#print copy_errmap[10][10]
+		# okay, these are the same. all the results are the same... but why?
+
+
+		#reshapes!
+		sh = aug_test.shape
+		print sh
+		#assume all others are of same shape
+		aug_test = np.reshape(aug_test, (sh[0], sh[1]))
+		aug_pred = np.reshape(aug_pred, (sh[0], sh[1]))
+		aug_errmap = np.reshape(aug_errmap, (sh[0], sh[1]))
+
+		copy_test = np.reshape(copy_test, (sh[0], sh[1]))
+		copy_pred = np.reshape(copy_pred, (sh[0], sh[1]))
+		copy_errmap = np.reshape(copy_errmap, (sh[0], sh[1]))
+
 		fig = plt.figure()
 
 		ax1 = fig.add_subplot(131)
-		plt.imshow(aug_test[i], cmap='gray')
+		plt.imshow(aug_test, cmap='gray')
 		plt.title('Augmented Test image')
 		plt.xticks([])
 		plt.yticks([])
 
 		ax2 = fig.add_subplot(132)
-		plt.imshow(aug_pred[i], cmap='gray')
+		plt.imshow(aug_pred, cmap='gray')
 		plt.title('Augmented Image prediction')
 		plt.xticks([])
 		plt.yticks([])
 
 		ax3 = fig.add_subplot(133)
-		plt.imshow(aug_errmap[i], cmap='gray')
+		plt.imshow(aug_errmap, cmap='gray')
 		plt.title('Augmented error map')
 		plt.xticks([])
 		plt.yticks([])
@@ -115,6 +145,11 @@ def plot_fixation_errmaps(fixation_results_augments, fixation_results_copy, N = 
 		plt.yticks([])
 
 		fig.tight_layout()
+		plt.show()
+
+		fig = plt.figure()
+		plt.imshow(concat, cmap='gray')
+		plt.title('Concatenated')
 		plt.show()
 
 
