@@ -117,8 +117,8 @@ def test_results():
 
 
 def test_fixations():
-	copy_results = load('results/_fixation_copy')
-	aug_results =load('results/_fixation_augments')
+	copy_results = load('results/from_scratch_fixation_copy')
+	aug_results =load('results/from_scratch_fixation_augments')
 	print type(copy_results)
 	print len(copy_results)
 	plot_fixation_errmaps(aug_results, copy_results)
@@ -136,6 +136,8 @@ if __name__ == '__main__':
 
 	test_fixations()
 
+	# it sort of shows waht I want to show, but not that well, dagnabbit!
+
 	# so for some reason, even though the validation and test errors are barely different
 	# this is not the case for the error maps where there is a significantand consistent difference
 	# in exactly the directoin I want, whic his good. Now that's the main results I need
@@ -146,6 +148,12 @@ if __name__ == '__main__':
 	# so hopefully that should be fairly straightforward and with those results, I can begin a proper writeup
 	# and have that to richard by the end of this week, which could be interesting#
 	# so yeah, that would be good, and test classification
+
+	# oh yes, with the new thing it actually dissapears over tiem
+	# that's really fantastic, I just need some good way to present them to Richard and for the paper
+	# the other results work out vaguely okay, I think, so that is nice,
+	# I also obviously need the graphs of somethign else, so that is cool also,
+	#yay!
 
 
 

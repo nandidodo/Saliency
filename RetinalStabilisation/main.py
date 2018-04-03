@@ -113,6 +113,8 @@ def fixation_simulation(img, num_augments,run_num,epochs, copy_model_save=None, 
 		copy_model.compile(optimizer='sgd', loss='mse')
 		augment_model = Model(shape[1:])
 		augment_model.compile(optimizer='sgd', loss='mse')
+		augment_results = []
+		copy_results = []
 
 	if copy_model_save is not None and augment_model_save is not None:
 		copy_model = load_model(copy_model_save)
@@ -225,8 +227,8 @@ if __name__ == '__main__':
 	#run the fixation experiments now!
 	(xtrain, ytrain), (xtest, ytest) = mnist.load_data()
 	num_augments = 10
-	run_num = 100
-	epochs = 10
+	run_num = 1000
+	epochs = 1
 	copy_model_save = 'model_mnist_copy'
 	augment_model_save = 'model_mnist_augments'
 	results_save = 'results/from_scratch'

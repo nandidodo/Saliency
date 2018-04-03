@@ -152,6 +152,11 @@ def plot_fixation_errmaps(fixation_results_augments, fixation_results_copy, N = 
 		plt.title('Concatenated')
 		plt.show()
 
+		# the trouble with this is that it decreases too fast
+		# so I'm going to doa single epoch instead this time in the hope of a better success there
+		# to see it actually dissapearing out from epochs, so that's the hope!
+		# hopefully it will work that
+
 
 def plot_errmaps(augments_name, copies_name, N =20):
 	augment_test = np.load(augments_name + '_test.npy')
