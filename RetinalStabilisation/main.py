@@ -92,15 +92,33 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 
 	return
 
-def fixation_simulation(img, num_augments,run_num,epochs, copy_model_save, augment_model_save, results_save):
+def fixation_simulation(img, num_augments,run_num,epochs, copy_model_save=None, augment_model_save=None, results_save=None):
 
 	# this runs for both the copies and the miages data
 	# to get the results just ine one function
 
-	copy_model = load_model(copy_model_save)
-	augment_model = load_model(augment_model_save)
-	augment_results = []
-	copy_results = []
+	#start models from scratch if save is none
+	if copy_model_save is not None:
+		assert augment_model_save is not None, 'Both models must be present or not'
+	if augment_model_save is not None:
+		assert copy_model_save is not None, 'Both models must be present or not'
+
+
+	if copy_model_save is None and augment_model_save is None:
+		Model=SimpleConvDropoutBatchNorm
+		shape = img.shape
+		shape=(1,shape[0], shape[1], 1)
+		print shape
+		copy_model = Model(shape[1:])
+		copy_model.compile(optimizer='sgd', loss='mse')
+		augment_model = Model(shape[1:])
+		augment_model.compile(optimizer='sgd', loss='mse')
+
+	if copy_model_save is not None and augment_model_save is not None:
+		copy_model = load_model(copy_model_save)
+		augment_model = load_model(augment_model_save)
+		augment_results = []
+		copy_results = []
 
 	for i in xrange(run_num):
 		augment_data = augment_with_translations(img, num_augments)
@@ -144,8 +162,9 @@ def fixation_simulation(img, num_augments,run_num,epochs, copy_model_save, augme
 
 
 	#save
-	save(augment_results,results_save+'_fixation_augments')
-	save(copy_results,results_save+'_fixation_copy')
+	if results_save is not None:
+		save(augment_results,results_save+'_fixation_augments')
+		save(copy_results,results_save+'_fixation_copy')
 	return augment_results, copy_results
 	
 
@@ -210,9 +229,9 @@ if __name__ == '__main__':
 	epochs = 10
 	copy_model_save = 'model_mnist_copy'
 	augment_model_save = 'model_mnist_augments'
-	results_save = 'results/'
-	fixation_simulation(xtest[0], num_augments, run_num, epochs, copy_model_save, augment_model_save, results_save)
-
+	results_save = 'results/from_scratch'
+	#fixation_simulation(xtest[0], num_augments, run_num, epochs, copy_model_save, augment_model_save, results_save)
+	fixation_simulation(xtest[0], num_augments, run_num, epochs, results_save=results_save)
 	#the fixation results seem promising
 	# so hopefully the results will be what I want
 	# then the only thing to do will perhaps to do the classification
