@@ -1,6 +1,7 @@
 #this is where the results are calculated before plotting
 #not sure it is totaly needed to be honest, but could be a useful separation of concerns
 
+from __future__ import division
 import numpy as np 
 import scipy
 import keras
@@ -122,6 +123,60 @@ def test_fixations():
 	print type(copy_results)
 	print len(copy_results)
 	plot_fixation_errmaps(aug_results, copy_results)
+
+
+def get_mean_total_error(errmaps):
+	N = len(errmaps)
+	total = 0
+	for errmap in errmaps:
+		total += np.sum(errmap)
+	return total/N
+
+
+def test_generative_invariance(aug_model, copy_model, results_save=None):
+	# this tests the ivnariance of the model - i.e. how good it is at predicting
+	# the whole image it is given for the different invairances tested#
+	# I should also do a classificatory invariance as well, althoguh it would mean
+	# training an entirely separate invariant classification, so that could work well too!
+
+	#load the models
+	aug_model = load_model(aug_model)
+	copy_model = load_model(copy_model)
+
+	#load the invariance files
+	mnist_0px = np.load('mnist_invariance_0pixels_translate.npy')
+	mnist_2px = np.load('mnist_invariance_2pixels_translate.npy')
+	mnist_4px = np.load('mnist_invariance_4pixels_translate.npy')
+	mnist_6px = np.load('mnist_invariance_6pixels_translate.npy')
+	mnist_8px = np.load('mnist_invariance_8pixels_translate.npy')
+
+	pixels = [0,2,4,6,8]
+
+	invariances = [mnist_0px,mnist_2px,mnist_4px,mnist_6px,mnist_8px]
+
+	aug_errors = []
+	copy_errors = []
+
+	#test on each and get errors
+	for invariance in invariances:
+		aug_preds = aug_model.predict(invariance)
+		copy_preds = copy_model.predict(invariance)
+		aug_errmaps = get_error_maps(invariance, aug_preds)
+		copy_errmaps = get_error_maps(invariance, copy_preds)
+		aug_mean_error = get_mean_total_error(aug_errmaps)
+		copy_mean_error = get_mean_total_error(copy_errmaps)
+		aug_errors.append(aug_mean_error)
+		copy_errors.append(copy_mean_error)
+
+	aug_errors = np.array(aug_errors)
+	copy_errors = np.array(copy_errors)
+
+	if results_save:
+		np.save(results_save+'_aug', aug_errors)
+		np.save(results_save+'_copy', copy_errors)
+	return aug_errors, copy_errors
+
+
 
 
 #and some quick tests
