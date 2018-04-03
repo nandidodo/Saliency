@@ -95,9 +95,9 @@ def create_translation_invariance_test_datasets(dataset, num_augments, save_base
 	assert type(save_base) is str and len(save_base)>0, 'Save base must be a valid string'
 
 	step_size = (max_px_translate-min_px_translate)//steps
-	print "step size"
-	print step_size
-	print steps
+	#print "step size"
+	#print step_size
+	#print steps
 	#now begin the loop to create the datasets
 	for i in range(steps):
 		px_translate = min_px_translate + (i * step_size)
@@ -105,12 +105,12 @@ def create_translation_invariance_test_datasets(dataset, num_augments, save_base
 		augments = augment_with_translation_deterministic(dataset[0], num_augments, px_translate)
 		for j in xrange(len(dataset)-1):
 			augment = augment_with_translation_deterministic(dataset[j+1], num_augments, px_translate)
-			print "in loop augment shape"
+			#print "in loop augment shape"
 			#print augment.shape
 			#print step_size
 			#print steps
 			augments = np.concatenate((augments, augment))
-			print augments.shape
+			#print augments.shape
 		#augments = np.array(augments)
 		save_name = save_base + '_' + str(px_translate) + 'pixels_translate'
 		print "final augments shape"
@@ -119,6 +119,54 @@ def create_translation_invariance_test_datasets(dataset, num_augments, save_base
 
 	#and that's it. simple functoin, I think
 	return
+
+def augment_labels_func(label, num_augments):
+	labels = np.full(num_augments+1, label)
+	return labels
+
+
+def augment_dataset_discriminative(dataset, labels, num_augments, base_save_path=None, px_translate=4):
+	
+	assert num_augments>=0,'Number of augments cannot be negative'
+	if base_save_path is not None:
+		assert type(base_save_path) is str and len(base_save_path)>0, 'Save path must be a valid string'
+	assert px_translate>=0, 'Pixels translate cannot be negative'
+
+	if type(dataset) is str:
+		dataset = np.load(dataset)
+	if type(labels) is str:
+		labels = np.load(labels)
+
+	assert len(dataset) == len(labels), 'must have same number of labels as data items'
+
+	#setup base case
+	augments = augment_with_translations(dataset[0], num_augments, px_translate)
+	copies = augment_with_copy(dataset[0], num_augments)
+	aug_labels = augment_labels_func(labels[0], num_augments)
+	copy_labels = augment_labels_func(labels[0], num_augments)
+
+	for i in xrange(len(dataset)-1):
+		augment= augment_with_translations(dataset[i+1], num_augments, px_translate)
+		copy = augment_with_copy(dataset[i+1], num_augments)
+		new_labels = augment_labels_func(labels[i+1], num_augments)
+		augments = np.concatenate((augments, augment))
+		copies = np.concatenate((copies, copy))
+		aug_labels = np.concatenate((aug_labels, new_labels))
+		copy_labels = np.concatenate((copy_labels, new_labels))
+
+	augments = np.array(augments)
+	copies = np.array(copies)
+	augment_labels = np.array(aug_labels)
+	copy_labels = np.array(copy_labels)
+
+	if base_save_path is not None:
+		np.save(base_save_path+'_aug_data', augments)
+		np.save(base_save_path+'_aug_labels', aug_labels)
+		np.save(base_save_path+'_copy_data', copies)
+		np.save(base_save_path+'_copy_labels', copy_labels)
+
+	return augments, copies, aug_labels, copy_labels
+
 
 def augment_dataset(dataset, num_augments, base_save_path=None, px_translate=4):
 	#try to load dataset if it is a string
@@ -208,5 +256,11 @@ if __name__ == '__main__':
 	#create test dataset
 	#augment_dataset(xtest, num_augments=10, base_save_path = save_path+"_test")
 
-	save_path = "data/mnist_invariance"
-	create_translation_invariance_test_datasets(xtest, 10, save_path )
+	#save_path = "data/mnist_invariance"
+	#create_translation_invariance_test_datasets(xtest, 10, save_path )
+
+	save_path = "data/discriminative_train"
+	num_augments = 10
+	augment_dataset_discriminative(xtrain, ytrain,num_augments, save_path)
+	save_path="data/discriminative_test"
+	augment_dataset_discriminative(xtest, ytest, num_augments, save_path)
