@@ -34,12 +34,14 @@ def augment_with_translations(img, num_augments=10,max_px_translate=4):
 def augment_with_translation_deterministic(img, num_augments, px_translate):
 	# it translates by the max amount, but whether x translation, ytranslation or both is random
 	augments = []
-	augments.append(img)
+	#don't have the initial image this time!
+	#augments.append(img)
 	#sh = img.shape
 	#img = np.reshape(img, (sh[0], sh[1],sh[2]))
 	for i in range(num_augments):
 		shift_direction = 0
 		rand = np.random.uniform(low=0, high=1)
+		#print i
 		if rand >=0.33 and rand <=0.66:
 			shift_direction=1
 		if rand >0.66 and rand <=1:
@@ -60,8 +62,10 @@ def augment_with_translation_deterministic(img, num_augments, px_translate):
 			augment = translate(img, (px_translate, px_translate))
 			augments.append(augment)
 
-		augments = np.array(augments)
-		return augments
+	augments = np.array(augments)
+	#print "in augment deterministic"
+	#print augments.shape
+	return augments
 
 def augment_with_copy(img, num_augments=10, copy=False):
 	augments = []
@@ -80,6 +84,7 @@ def augment_with_copy(img, num_augments=10, copy=False):
 
 
 def create_translation_invariance_test_datasets(dataset, num_augments, save_base,min_px_translate=0, max_px_translate=10, steps=5):
+	print "In create invariance test datasets"
 	if type(dataset) is str:
 		dataset = np.load(dataset)
 
@@ -90,15 +95,26 @@ def create_translation_invariance_test_datasets(dataset, num_augments, save_base
 	assert type(save_base) is str and len(save_base)>0, 'Save base must be a valid string'
 
 	step_size = (max_px_translate-min_px_translate)//steps
+	print "step size"
+	print step_size
+	print steps
 	#now begin the loop to create the datasets
 	for i in range(steps):
 		px_translate = min_px_translate + (i * step_size)
-		augments = []
-		for j in xrange(len(dataset)):
-			augment = augment_with_translation_deterministic(dataset[j], num_augments, px_translate)
-			augments.append(augment)
-		augments = np.array(augments)
+		#base case
+		augments = augment_with_translation_deterministic(dataset[0], num_augments, px_translate)
+		for j in xrange(len(dataset)-1):
+			augment = augment_with_translation_deterministic(dataset[j+1], num_augments, px_translate)
+			print "in loop augment shape"
+			#print augment.shape
+			#print step_size
+			#print steps
+			augments = np.concatenate((augments, augment))
+			print augments.shape
+		#augments = np.array(augments)
 		save_name = save_base + '_' + str(px_translate) + 'pixels_translate'
+		print "final augments shape"
+		print augments.shape
 		np.save(save_name, augments)
 
 	#and that's it. simple functoin, I think
