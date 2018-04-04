@@ -15,12 +15,10 @@ import os
 def classification_accuracy(preds, labels):
 
 	N = len(preds)
-	assert type(preds[0]) is int, 'Prediction labels must be integers'
-	assert type(labels[0]) is int, 'Ground truth labels must be integers'
 	assert N==len(labels), 'Predictions and labels should be of same length'
 	total = 0
 	for i in xrange(N):
-		if preds[i] == labels[i]:
+		if np.argmax(preds[i]) == np.argmax(labels[i]):
 			total+=1
 	percent = (total/N)*100
 	return percent
