@@ -12,20 +12,37 @@ import os
 
 
 
+def classification_accuracy(preds, labels):
+
+	N = len(preds)
+	assert type(preds[0]) is int, 'Prediction labels must be integers'
+	assert type(labels[0]) is int, 'Ground truth labels must be integers'
+	assert N==len(labels), 'Predictions and labels should be of same length'
+	total = 0
+	for i in xrange(N):
+		if preds[i] == labels[i]:
+			total+=1
+	percent = (total/N)*100
+	return percent
+
+
 def get_error_map(original_img, pred):
 	assert original_img.shape ==pred.shape, 'Original image and prediction must have same shape'
 	#for the moment just do a subtraction
-	return original_img - pred
+	return np.abs(original_img - pred)
 
 def get_total_error(error_map):
-	return sum(error_map)
+	return np.sum(error_map)
 
 
 def get_error_maps(imgs, preds):
+	print "In get error maps"
+	print imgs.shape
+	print preds.shape
 	assert imgs.shape == preds.shape, 'Images and predictions must be the same shape'
 	err_maps = []
 	for i in xrange(len(imgs)):
-		errmap = get_error_maps(imgs[i], preds[i])
+		errmap = get_error_map(imgs[i], preds[i])
 		err_maps.append(errmap)
 
 	err_maps = np.array(err_maps)
@@ -33,10 +50,15 @@ def get_error_maps(imgs, preds):
 
 
 def get_mean_error(errmaps):
+	print "In get mean error"
+	print errmaps.shape
 	N = len(errmaps)
 	total = 0
 	for i in xrange(N):
 		total += get_total_error(errmaps[i])
+		#print "bib"
+	print "return value"
+	print total/N
 	return total/N
 
 def save(obj, fname):
