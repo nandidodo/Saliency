@@ -92,7 +92,7 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 
 	return
 
-def mnist_discriminative(train, test, train_labels,test_labels save_name=None, epochs=10, Model=SimpleConvDropoutBatchNorm,batch_size = 128, save_model_name=None, ret = False):
+def mnist_discriminative(train, test, train_labels,test_labels save_name=None, epochs=10, Model=SimpleConvolutionalDiscriminative,batch_size = 128, save_model_name=None, ret = False):
 	
 	assert epochs>=1, 'Epochs must be at least one'
 	assert batch_size>=1, 'Batch size must be at least 1'
@@ -153,16 +153,6 @@ def mnist_discriminative(train, test, train_labels,test_labels save_name=None, e
 	#save the preds and test and history
 	if save_name is not None:
 		#save_array(res,save_name)
-		#tis is the issue. this takes up too much memory
-		# it's because during te pickle dump, it requires the duplication
-		# of theo bject in memory, which exploded my computer
-		# so you REALLY can't uespickle for large arrays at all!
-		# it was the res which was probably taking up so much space,
-		#being copied twice!
-
-		# and is otherwise copletely dire
-		# and the pickle results don't work
-		# so instead I'm just going to save stuff separately
 		np.save(save_name+'_preds', preds)
 		save_array(history, save_name+'_history')
 		np.save(save_name+'_test', test)
