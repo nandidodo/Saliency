@@ -12,10 +12,24 @@ import os
 
 
 
+def one_hot(labels,num_classes=None):
+	if num_classes is None:
+		#guess from the labels
+		num_classes = np.max(labels) +1
+	N = len(labels)
+	#create our new array
+	one_hot_array = np.zeros((N, num_classes))
+	print "one hot array shape: " , one_hot_array.shape
+	for i in xrange(N):
+		one_hot_array[i][int(labels[i])] = 1
+	return one_hot_array
+
+
 def classification_accuracy(preds, labels):
 
 	N = len(preds)
 	assert N==len(labels), 'Predictions and labels should be of same length'
+	assert preds.shape == labels.shape, 'Predictions and labels should have same shape'
 	total = 0
 	for i in xrange(N):
 		if np.argmax(preds[i]) == np.argmax(labels[i]):
