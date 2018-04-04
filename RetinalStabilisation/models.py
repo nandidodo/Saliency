@@ -143,9 +143,9 @@ def SimpleAutoencoder(input_shape, weights_path=None):
 	model = Model(input_img, decoded)
 	return model
 
-def SimpleConvolutionalDiscriminative(input_shape,output_shape activation='relu',padding='same'):
+def SimpleConvolutionalDiscriminative(input_shape,output_shape, activation='relu',padding='same'):
 	input_img = Input(input_shape)
-	x = Conv2D(64,2,strides=(1,1), activation=activation, padding=padding)(input_shape)
+	x = Conv2D(64,2,strides=(1,1), activation=activation, padding=padding)(input_img)
 	x = MaxPooling2D((2,2))(x)
 	
 	x = Conv2D(32,2,strides=(1,1), activation=activation, padding=padding)(x)
@@ -153,7 +153,7 @@ def SimpleConvolutionalDiscriminative(input_shape,output_shape activation='relu'
 
 	x = Flatten()(x)
 	x = Dense(1024)(x)
-	x = Dense(output_shape)
+	x = Dense(10)(x)
 
 	model = Model(input_img, x)
 	return model
