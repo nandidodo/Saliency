@@ -17,6 +17,9 @@ def translate(img, px, mode='constant'):
 
 
 def augment_with_translations(img, num_augments=10,max_px_translate=4):
+	assert len(img.shape)==2,'Image must be two dimensional'
+	assert num_augments>=0, 'Number of augments must be positive'
+	assert max_px_translate>=0, 'Pixels to translate must be positive'
 	augments = []
 	#add the initial iamge
 	augments.append(img)
@@ -32,6 +35,11 @@ def augment_with_translations(img, num_augments=10,max_px_translate=4):
 	return augments
 
 def augment_with_translation_deterministic(img, num_augments, px_translate):
+	
+	assert len(img.shape)==2,'Image must be two dimensional'
+	assert num_augments>=0, 'Number of augments must be positive'
+	assert px_translate>=0, 'Pixels to translate must be positive'
+
 	# it translates by the max amount, but whether x translation, ytranslation or both is random
 	augments = []
 	#don't have the initial image this time!
@@ -68,6 +76,9 @@ def augment_with_translation_deterministic(img, num_augments, px_translate):
 	return augments
 
 def augment_with_copy(img, num_augments=10, copy=False):
+	assert len(img.shape)==2, 'Image must be two dimensional'
+	assert num_augments >=0, 'Number of augments must be positive'
+	assert type(copy) is bool, 'Copy is a boolean flag'
 	augments = []
 	augments.append(img)
 	for i in range(num_augments):
@@ -120,6 +131,25 @@ def create_translation_invariance_test_datasets(dataset, num_augments, save_base
 	#and that's it. simple functoin, I think
 	return
 
+def generate_labels(labels, num_augments,save_name=None):
+
+	if save_name is not None:
+		assert type(save_name) is str and len(save_name)>0,'Save name must be a valid string'
+
+		#base case
+	generated_labels = np.full(num_augments+1, labels[0])
+	#loop!
+	for i in xrange(len(labels)-1):
+		aug_labels = np.full(num_augments+1, labels[i+1])
+		generated_labels = np.concatenate((generated_labels, aug_labels))
+	generated_labels = np.array(generated_labels)
+	print "In generated labels: ", generated_labels.shape
+
+	if save_name is not None:
+		np.save(save_name, generated_labels)
+
+	return generated_labels
+
 def augment_labels_func(label, num_augments):
 	labels = np.full(num_augments+1, label)
 	return labels
@@ -150,8 +180,11 @@ def augment_dataset_discriminative(dataset, labels, num_augments, base_save_path
 		copy = augment_with_copy(dataset[i+1], num_augments)
 		new_labels = augment_labels_func(labels[i+1], num_augments)
 		augments = np.concatenate((augments, augment))
+		print augments.shape
 		copies = np.concatenate((copies, copy))
+		print copies.shape
 		aug_labels = np.concatenate((aug_labels, new_labels))
+		print aug_labels.shape
 		copy_labels = np.concatenate((copy_labels, new_labels))
 
 	augments = np.array(augments)
