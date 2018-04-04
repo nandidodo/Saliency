@@ -92,6 +92,93 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 
 	return
 
+def mnist_discriminative(train, test, train_labels,test_labels save_name=None, epochs=10, Model=SimpleConvDropoutBatchNorm,batch_size = 128, save_model_name=None, ret = False):
+	
+	assert epochs>=1, 'Epochs must be at least one'
+	assert batch_size>=1, 'Batch size must be at least 1'
+
+	if type(train) is str:
+		train = np.load(train)
+	if type(test) is str:
+		test = np.load(test)
+	if type(train_labels) is str:
+		train_labels = np.load(train_labels)
+	if type(test_labels) is str:
+		test_labels = np.load(test_labels)
+
+	if save_name is not None:
+		assert type(save_name) is str and len(save_name)>0, 'Save name must be a valid string'
+	if save_model_name is not None:
+		assert type(save_model_name) is str and len(save_model_name)>0, 'Save name must be a valid string'
+
+	N_train = len(train)
+	N_test = len(test)
+	assert N_train == len(train_labels), 'Length of training dataset and labels must be the same'
+	assert N_test == len(test_labels),'Length f test dataset and labels must be the same'
+
+	#asserts complete, begin the actual trining
+	#first begin by reshaping and normalising
+	train = train.astype('float32')/255.
+	test = test.astype('float32')/255.
+	shape = train.shape
+	train = np.reshape(train, (N_train, shape[1], shape[2], 1))
+	test = np.reshape(test, (N_test, shape[1], shape[2], 1))
+	print "train shape: ", train.shape
+	print "test shape: " , test.shape
+
+
+	model = Model(shape[1:])
+	#for now for simplicity
+	model.compile(optimizer='sgd', loss='mse')
+	#callbacks = build_callbacks('/callbacks')
+	print "loaded data and compiled model"
+	his = model.fit(train, train_labels, epochs=epochs, batch_size=batch_size, shuffle=True, validation_data=(test, test_labels))
+	#train is no longer needed, so free it
+	print "fitted model"
+	train = 0
+	print "freed train"
+	history = serialize_class_object(his)
+	his = 0
+	print "loaded history and freed his"
+
+	#get predictions
+	preds = model.predict(test)
+	print "made predictions"
+
+	#save the results
+	if save_model_name is not None:
+		model.save(save_model_name)
+		print "saved model"
+
+	#save the preds and test and history
+	if save_name is not None:
+		#save_array(res,save_name)
+		#tis is the issue. this takes up too much memory
+		# it's because during te pickle dump, it requires the duplication
+		# of theo bject in memory, which exploded my computer
+		# so you REALLY can't uespickle for large arrays at all!
+		# it was the res which was probably taking up so much space,
+		#being copied twice!
+
+		# and is otherwise copletely dire
+		# and the pickle results don't work
+		# so instead I'm just going to save stuff separately
+		np.save(save_name+'_preds', preds)
+		save_array(history, save_name+'_history')
+		np.save(save_name+'_test', test)
+		print "save results"
+
+	if ret:
+		print "returning"
+		return [test, preds, history]
+
+	res=None
+	preds = None
+	history=None
+	print "freed variables"
+
+	return
+
 def fixation_simulation(img, num_augments,run_num,epochs, copy_model_save=None, augment_model_save=None, results_save=None):
 
 	# this runs for both the copies and the miages data
