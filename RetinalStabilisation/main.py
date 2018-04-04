@@ -92,7 +92,7 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 
 	return
 
-def mnist_discriminative(train, test, train_labels,test_labels save_name=None, epochs=10, Model=SimpleConvolutionalDiscriminative,batch_size = 128, save_model_name=None, ret = False):
+def mnist_discriminative(train, test, train_labels,test_labels, save_name=None, epochs=10, Model=SimpleConvolutionalDiscriminative, batch_size = 128, save_model_name=None, ret = False):
 	
 	assert epochs>=1, 'Epochs must be at least one'
 	assert batch_size>=1, 'Batch size must be at least 1'
@@ -123,11 +123,20 @@ def mnist_discriminative(train, test, train_labels,test_labels save_name=None, e
 	shape = train.shape
 	train = np.reshape(train, (N_train, shape[1], shape[2], 1))
 	test = np.reshape(test, (N_test, shape[1], shape[2], 1))
+	shape = train.shape
+	#one hot-ify labels if necessary
+	if len(train_labels.shape)==1:
+		train_labels = one_hot(train_labels)
+	if len(test_labels.shape)==1:
+		test_labels = one_hot(test_labels)
+
 	print "train shape: ", train.shape
 	print "test shape: " , test.shape
+	print "train label shape: ", train_labels.shape
+	print "test label shape: " , test_labels.shape
 
 
-	model = Model(shape[1:])
+	model = Model(shape[1:], train_labels.shape[1])
 	#for now for simplicity
 	model.compile(optimizer='sgd', loss='mse')
 	#callbacks = build_callbacks('/callbacks')
@@ -142,7 +151,7 @@ def mnist_discriminative(train, test, train_labels,test_labels save_name=None, e
 	print "loaded history and freed his"
 
 	#get predictions
-	preds = model.predict(test)
+	preds = model.predict(test_labels)
 	print "made predictions"
 
 	#save the results
@@ -155,7 +164,7 @@ def mnist_discriminative(train, test, train_labels,test_labels save_name=None, e
 		#save_array(res,save_name)
 		np.save(save_name+'_preds', preds)
 		save_array(history, save_name+'_history')
-		np.save(save_name+'_test', test)
+		np.save(save_name+'_test_labels', test_labels)
 		print "save results"
 
 	if ret:
@@ -302,15 +311,23 @@ if __name__ == '__main__':
 
 
 	#run the fixation experiments now!
-	(xtrain, ytrain), (xtest, ytest) = mnist.load_data()
-	num_augments = 10
-	run_num = 1000
-	epochs = 1
-	copy_model_save = 'model_mnist_copy'
-	augment_model_save = 'model_mnist_augments'
-	results_save = 'results/from_scratch'
+	#(xtrain, ytrain), (xtest, ytest) = mnist.load_data()
+	#print xtrain.shape
+	#print ytrain.shape
+	#print xtest.shape
+	#print ytest.shape
+	#print ytest[1]
+	#train_labels = one_hot(ytest)
+	#print train_labels.shape
+	#print train_labels[1]
+	#num_augments = 10
+	#run_num = 1000
+	#epochs = 1
+	#copy_model_save = 'model_mnist_copy'
+	#augment_model_save = 'model_mnist_augments'
+	#results_save = 'results/from_scratch'
 	#fixation_simulation(xtest[0], num_augments, run_num, epochs, copy_model_save, augment_model_save, results_save)
-	fixation_simulation(xtest[0], num_augments, run_num, epochs, results_save=results_save)
+	#fixation_simulation(xtest[0], num_augments, run_num, epochs, results_save=results_save)
 	#the fixation results seem promising
 	# so hopefully the results will be what I want
 	# then the only thing to do will perhaps to do the classification
@@ -329,5 +346,16 @@ if __name__ == '__main__':
 	# I seriously need to talk to richard about... dagnabbit
 	# but first these papers. and then I'll be fine! and also the predictive processing stuff
 	# so I really don't know about that at all, so hey, who knows?
+	train = 'data/discriminative_train_aug_data.npy'
+	train_labels = 'data/discriminative_train_aug_labels.npy'
+	test = 'data/discriminative_test_aug_data.npy'
+	test_labels = 'data/discriminative_test_aug_labels.npy'
+	save_name = 'results/discriminative_aug'
+	save_model_name = 'discriminative_aug_model'
+	epochs=1
+	batch_size=64
+	mnist_discriminative(train, test, train_labels,test_labels,save_name=save_name, save_model_name=save_model_name, epochs=epochs, batch_size=batch_size)
 
+	#yay! this is finally training! all is well, hopefully!
+	#now I can go back to trying to prepare the literature review and so forth!
 
