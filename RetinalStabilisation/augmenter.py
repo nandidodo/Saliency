@@ -244,6 +244,28 @@ def augment_dataset(dataset, num_augments, base_save_path=None, px_translate=4):
 
 	return augments, copies
 
+def test_discriminative_data():
+	test_aug = np.load('data/discriminative_test_aug_data.npy')
+	test_copy = np.load('data/discriminative_test_copy_data.npy')
+	print "test aug data: ", test_aug.shape
+	print "test copy data: " , test_copy.shape
+
+	test_aug_labels = np.load('data/discriminative_test_aug_labels.npy')
+	test_copy_labels = np.load('data/discriminative_test_copy_labels.npy')
+	print "test aug labels: ", test_aug_labels.shape
+	print "test_copy_labels: " , test_copy_labels.shape
+
+	train_aug = np.load('data/discriminative_train_aug_data.npy')
+	train_copy = np.load('data/discriminative_train_copy_data.npy')
+	print "train aug data: " , train_aug.shape
+	print "train copy data: " , train_copy.shape
+
+	train_aug_labels = np.load('data/discriminative_train_aug_labels.npy')
+	train_copy_labels = np.load('data/discriminative_train_copy_labels.npy')
+	print "train aug labels: " , train_aug_labels.shape
+	print "train copy labels: " , train_copy_labels.shape
+
+
 
 #first I need to check if this actally works, which I will do here
 if __name__ == '__main__':
@@ -292,8 +314,10 @@ if __name__ == '__main__':
 	#save_path = "data/mnist_invariance"
 	#create_translation_invariance_test_datasets(xtest, 10, save_path )
 
-	save_path = "data/discriminative_train"
-	num_augments = 10
-	augment_dataset_discriminative(xtrain, ytrain,num_augments, save_path)
-	save_path="data/discriminative_test"
-	augment_dataset_discriminative(xtest, ytest, num_augments, save_path)
+	#save_path = "data/discriminative_train"
+	#num_augments = 10
+	#augment_dataset_discriminative(xtrain, ytrain,num_augments, save_path)
+	#save_path="data/discriminative_test"
+	#augment_dataset_discriminative(xtest, ytest, num_augments, save_path)
+	#test_discriminative_data()
+	#all is looking well here! yay!
