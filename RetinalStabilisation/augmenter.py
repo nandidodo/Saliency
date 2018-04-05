@@ -256,6 +256,9 @@ def create_discriminative_invariance_test_dataset(data,labels, num_augments,save
 	assert steps >0, 'steps must be greater than 0'
 	assert type(save_base) is str and len(save_base)>0, 'Save base must be a valid string'
 
+	if len(data) !=len(labels):
+		raise ValueError('Data and labels must have same length')
+
 	step_size = (max_px_translate-min_px_translate)//steps
 
 	#for each step!
@@ -264,8 +267,8 @@ def create_discriminative_invariance_test_dataset(data,labels, num_augments,save
 		#sort out base cae
 		augments = augment_with_translation_deterministic(data[0], num_augments, px_translate)
 		aug_labels = augment_labels_func(labels[0], num_augments)
-		for j in range(len(dataset)-1):
-			augment = augment_with_translation_deterministic(dataset[j+1], num_augments,px_translate)
+		for j in range(len(data)-1):
+			augment = augment_with_translation_deterministic(data[j+1], num_augments,px_translate)
 			aug_label = augment_labels_func(labels[j+1], num_augments)
 			augments = np.concatenate((augments, augment))
 			aug_labels = np.concatenate((aug_labels, aug_label))
@@ -357,3 +360,4 @@ if __name__ == '__main__':
 	#augment_dataset_discriminative(xtest, ytest, num_augments, save_path)
 	#test_discriminative_data()
 	#all is looking well here! yay!
+	create_discriminative_invariance_test_dataset(xtest, ytest, 10, 'data/discriminative')
