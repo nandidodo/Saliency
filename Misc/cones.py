@@ -40,7 +40,17 @@ def euclidean_distance(point, center):
 def convert_to_grayscale(img):
 	if len(img.shape)!=3:
 		raise ValueError('Input image must be three dimensional')
-	return img[:,:,1:2] = 0
+	img[:,:,1:2] = 0
+	return img
+
+def convert_to_grayscale_mean(img):
+	return np.mean(img, -1)
+
+def convert_to_grayscale_adjust(img):
+	#not sure wherethese magic numbers come from, just some person on stack overflow?
+	r,g,b = img[:,:,0], img[:,:,1], img[:,:,2]
+	gray = 0.2989*r + 0.5870*g + 0.1140*b
+	return gray
 
 def foveal_colour(input_img, foveal_radius):
 	if len(input_img.shape)!=3:
@@ -56,12 +66,14 @@ def foveal_colour(input_img, foveal_radius):
 	center = (height//2, width//2)
 	fovea_radius = 100
 	#add back in the colour section
-	for i in xrange(height):
-		for j in xrange(width):
+	for i in xrange(fovea_radius*2):
+		for j in xrange(fovea_radius*2):
 			#just iterate over the image
-			dist = euclidean_distance((i,j), center)
+			x = (center[0]-fovea_radius)+i
+			y = (center[1] - fovea_radius)+j
+			dist = euclidean_distance((x,y), center)
 			if dist <= fovea_radius:
-				img[i][j][1:2] = input_img[i][j][1:2]
+				img[x][y][1:2] = input_img[x][y][1:2]
 	return img
 
 def foveal_colour_with_random_cones(input_img, foveal_radius, cone_radius, num_cones):
@@ -70,6 +82,14 @@ def foveal_colour_with_random_cones(input_img, foveal_radius, cone_radius, num_c
 	if num_cones<=0:
 		raise ValueError('Number of cones must be a positive number greater than 0')
 	#add colour to the img
+	if len(input_img.shape)!=3:
+		raise ValueError('Input image must be three dimensional')
+	h,w, ch = input_img.shape
+	if fovea_radius>=h or fovea_radius>=w:
+		raise ValueError('Foveal radius cannot be greater than the image size')
+	if cone_radius>=h or cone_radius>=w:
+		raise ValueError('Cone radius cannot be greater than the image size')
+
 
 
 	img = foveal_colour(input_img, foveal_radius)
@@ -78,13 +98,31 @@ def foveal_colour_with_random_cones(input_img, foveal_radius, cone_radius, num_c
 	#distribute the cones randomly through the image
 	cones_added = 0
 	while cones_added<=num_cones:
+		#print "in cone adding loop"
 		#generate random x and y
-		nh = int(np.random.uniform(low=0, high=1)*height)
-		nw = int(np.random.uniform(low=0, high=1)*width)
+		nh = int(np.random.uniform(low=0, high=1)*(height-cone_radius))
+		nw = int(np.random.uniform(low=0, high=1)*(width-cone_radius)) # ensure does not end up outside of the image
 		#check not already part of a cone
-		if img[nh][nw][1]!=0:
+		if img[nh][nw][1]==0:
+			# instead of scanning the whole image, just scan the part around the 
+			#actual cone to check instead, would save a lot!
+			cones_added+=1
+			print "cone added"
+			for i in xrange(cone_radius*2):
+				for j in xrange(cone_radius*2):
+					x = (nh-cone_radius)+i
+					y = (nw-cone_radius)+j
+					#print "Loop location:  "+ str(x)+ " " + str(y)
+					#print "Center: " + str(nh) + " "+ str(nw)
+					dist = euclidean_distance((x,y),(nh,nw))
+					#print dist
+					if dist <=cone_radius:
+						#print "changing image part"
+						img[x][y][1:2] = input_img[x][y][1:2]
 			# i.e. it's not already part of a cone
-			# then add the cone		
+			# then add the cones
+	return img
+
 
 
 
@@ -106,20 +144,24 @@ if __name__ == '__main__':
 	center = (height//2, width//2)
 	fovea_radius = 100
 	#add back in the colour section
-	for i in xrange(height):
-		for j in xrange(width):
-			#just iterate over the image
-			dist = euclidean_distance((i,j), center)
-			if dist <= fovea_radius:
-				img[i][j][1] = img[i][j][0]
-				img[i][j][2] = img[i][j][0]
+	#for i in xrange(height):
+	#	for j in xrange(width):
+	#		#just iterate over the image
+	#		dist = euclidean_distance((i,j), center)
+	#		if dist <= fovea_radius:
+	#			img[i][j][1] = img[i][j][0]
+	#			img[i][j][2] = img[i][j][0]
 				#img[i][j][:] = 0 # blackout the image to test
 				# it works... yay!
-
-
-
-	plt.imshow(img)
+	imf = foveal_colour_with_random_cones(old_img, 100, 10, 40)
+	plt.imshow(imf)
 	plt.show()
+
+
+
+
+	#plt.imshow(img)
+	#plt.show()
 	# so this is actually pretty simple and nice. now let's try a random cone distribution
 
 
