@@ -187,18 +187,18 @@ def test_discriminative_invariance(aug_model, copy_model, results_save=None):
 	aug_model = load_model(aug_model)
 	copy_model = load_model(copy_model)
 
-	mnist_0px_data = np.load('data/discriminative_invariance_0pixels_translate_data.npy')
-	mnist_2px_data = np.load('data/discriminative_invariance_2pixels_translate_data.npy')
-	mnist_4px_data = np.load('data/discriminative_invariance_4pixels_translate_data.npy')
-	mnist_6px_data = np.load('data/discriminative_invariance_6pixels_translate_data.npy')
-	mnist_8px_data = np.load('data/discriminative_invariance_8pixels_translate_data.npy')
+	mnist_0px_data = np.load('data/discriminative_0pixels_translate_data.npy')
+	mnist_2px_data = np.load('data/discriminative_2pixels_translate_data.npy')
+	mnist_4px_data = np.load('data/discriminative_4pixels_translate_data.npy')
+	mnist_6px_data = np.load('data/discriminative_6pixels_translate_data.npy')
+	mnist_8px_data = np.load('data/discriminative_8pixels_translate_data.npy')
 
 	#I'm going to convert these to one-hot - do that here
-	mnist_0px_labels = np.load('data/discriminative_invariance_0pixels_translate_labels.npy')
-	mnist_2px_labels = np.load('data/discriminative_invariance_2pixels_translate_labels.npy')
-	mnist_4px_labels = np.load('data/discriminative_invariance_4pixels_translate_labels.npy')
-	mnist_6px_labels = np.load('data/discriminative_invariance_6pixels_translate_labels.npy')
-	mnist_8px_labels = np.load('data/discriminative_invariance_8pixels_translate_labels.npy')
+	mnist_0px_labels = np.load('data/discriminative_0pixels_translate_labels.npy')
+	mnist_2px_labels = np.load('data/discriminative_2pixels_translate_labels.npy')
+	mnist_4px_labels = np.load('data/discriminative_4pixels_translate_labels.npy')
+	mnist_6px_labels = np.load('data/discriminative_6pixels_translate_labels.npy')
+	mnist_8px_labels = np.load('data/discriminative_8pixels_translate_labels.npy')
 
 	pixels = [0,2,4,6,8]
 
@@ -210,7 +210,13 @@ def test_discriminative_invariance(aug_model, copy_model, results_save=None):
 
 	for i in range(len(invariance_data)):
 		data = invariance_data[i]
+		#reshape
+		sh = data.shape
+		data = np.reshape(data, (sh[0],sh[1],sh[2],1))
+
+		#reshape labels
 		labels = one_hot(invariance_labels[i])
+		#predict
 		aug_pred_labels = one_hot(aug_model.predict(data))
 		copy_pred_labels = one_hot(copy_model.predict(data))
 		#just get teh accuracies and save it
@@ -242,8 +248,8 @@ if __name__ == '__main__':
 	#save_history_losses('mnist_copies_history','copies')
 
 	#test_fixations()
-	test_generative_invariance('model_mnist_augments', 'model_mnist_copy','results/generative_invariance')
-
+	#test_generative_invariance('model_mnist_augments', 'model_mnist_copy','results/generative_invariance')
+	test_discriminative_invariance('discriminative_aug_model','discriminative_copy_model', 'results/discriminative_invariance')
 	# it sort of shows waht I want to show, but not that well, dagnabbit!
 
 	# so for some reason, even though the validation and test errors are barely different
