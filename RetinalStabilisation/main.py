@@ -151,7 +151,7 @@ def mnist_discriminative(train, test, train_labels,test_labels, save_name=None, 
 	print "loaded history and freed his"
 
 	#get predictions
-	preds = model.predict(test_labels)
+	preds = model.predict(test)
 	print "made predictions"
 
 	#save the results
@@ -352,10 +352,20 @@ if __name__ == '__main__':
 	test_labels = 'data/discriminative_test_aug_labels.npy'
 	save_name = 'results/discriminative_aug'
 	save_model_name = 'discriminative_aug_model'
-	epochs=1
+	epochs=10
+	batch_size=64
+	mnist_discriminative(train, test, train_labels,test_labels,save_name=save_name, save_model_name=save_model_name, epochs=epochs, batch_size=batch_size)
+
+	train = 'data/discriminative_train_copy_data.npy'
+	train_labels = 'data/discriminative_train_copy_labels.npy'
+	test = 'data/discriminative_test_copy_data.npy'
+	test_labels = 'data/discriminative_test_copy_labels.npy'
+	save_name = 'results/discriminative_copy'
+	save_model_name = 'discriminative_copy_model'
+	epochs=10
 	batch_size=64
 	mnist_discriminative(train, test, train_labels,test_labels,save_name=save_name, save_model_name=save_model_name, epochs=epochs, batch_size=batch_size)
 
 	#yay! this is finally training! all is well, hopefully!
 	#now I can go back to trying to prepare the literature review and so forth!
-
+	#run this which will last forever and take forever, dagnabbit, hope for the best
