@@ -164,7 +164,7 @@ def test_generative_invariance(aug_model, copy_model, results_save=None):
 		#reshape
 		sh = invariance.shape
 		invariance = np.reshape(invariance, (sh[0], sh[1], sh[2],1))
-		
+
 		aug_preds = aug_model.predict(invariance)
 		copy_preds = copy_model.predict(invariance)
 		aug_errmaps = get_error_maps(invariance, aug_preds)
@@ -183,6 +183,51 @@ def test_generative_invariance(aug_model, copy_model, results_save=None):
 		np.save(results_save+'_pixels', pixels)
 	return aug_errors, copy_errors,pixels
 
+def test_discriminative_invariance(aug_model, copy_model, results_save=None):
+	aug_model = load_model(aug_model)
+	copy_model = load_model(copy_model)
+
+	mnist_0px_data = np.load('data/discriminative_invariance_0pixels_translate_data.npy')
+	mnist_2px_data = np.load('data/discriminative_invariance_2pixels_translate_data.npy')
+	mnist_4px_data = np.load('data/discriminative_invariance_4pixels_translate_data.npy')
+	mnist_6px_data = np.load('data/discriminative_invariance_6pixels_translate_data.npy')
+	mnist_8px_data = np.load('data/discriminative_invariance_8pixels_translate_data.npy')
+
+	#I'm going to convert these to one-hot - do that here
+	mnist_0px_labels = np.load('data/discriminative_invariance_0pixels_translate_labels.npy')
+	mnist_2px_labels = np.load('data/discriminative_invariance_2pixels_translate_labels.npy')
+	mnist_4px_labels = np.load('data/discriminative_invariance_4pixels_translate_labels.npy')
+	mnist_6px_labels = np.load('data/discriminative_invariance_6pixels_translate_labels.npy')
+	mnist_8px_labels = np.load('data/discriminative_invariance_8pixels_translate_labels.npy')
+
+	pixels = [0,2,4,6,8]
+
+	invariance_data = [mnist_0px_data,mnist_2px_data,mnist_4px_data,mnist_6px_data,mnist_8px_data]
+	invariance_labels = [mnist_0px_labels,mnist_2px_labels,mnist_4px_labels,mnist_6px_labels,mnist_8px_labels]
+
+	aug_accuracies = []
+	copy_accuracies = []
+
+	for i in range(len(invariance_data)):
+		data = invariance_data[i]
+		labels = one_hot(invariance_labels[i])
+		aug_pred_labels = one_hot(aug_model.predict(data))
+		copy_pred_labels = one_hot(copy_model.predict(data))
+		#just get teh accuracies and save it
+		aug_acc = get_classification_accuracy(labels, aug_pred_labels)
+		copy_acc = get_classification_accuracy(labels, copy_pred_labels)
+
+		aug_accuracies.append(aug_acc)
+		copy_accuracies.append(copy_acc)
+
+	aug_accuracies = np.array(aug_accuracies)
+	copy_accuracies = np.array(copy_accuracies)
+
+	if results_save is not None:
+		np.save(results_save+'_aug_accuracies', aug_accuracies)
+		np.save(results_save+'_copy_accuracies', copy_accuracies)
+		np.save(results_save+'_pixels', pixels)
+	return aug_accuracies, copy_accuracies, pixels
 
 
 
