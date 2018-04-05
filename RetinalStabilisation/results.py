@@ -217,17 +217,27 @@ def test_discriminative_invariance(aug_model, copy_model, results_save=None):
 		#reshape labels
 		labels = one_hot(invariance_labels[i])
 		#predict
-		aug_pred_labels = one_hot(aug_model.predict(data))
-		copy_pred_labels = one_hot(copy_model.predict(data))
+		aug_pred_labels = aug_model.predict(data)
+		copy_pred_labels = copy_model.predict(data)
+		print "predictions"
+		print aug_pred_labels.shape
 		#just get teh accuracies and save it
-		aug_acc = get_classification_accuracy(labels, aug_pred_labels)
-		copy_acc = get_classification_accuracy(labels, copy_pred_labels)
+		aug_acc = classification_accuracy(labels, aug_pred_labels)
+		copy_acc = classification_accuracy(labels, copy_pred_labels)
+
+		print "pixels: " +str(pixels[i])
+		print "aug acc: " , aug_acc
+		print "copy acc: " , copy_acc
 
 		aug_accuracies.append(aug_acc)
 		copy_accuracies.append(copy_acc)
 
 	aug_accuracies = np.array(aug_accuracies)
 	copy_accuracies = np.array(copy_accuracies)
+	# so this is quite strange, the accuracies here are just terrible
+	# I wonder if the network can actuallylearn anything useful here
+	# at least the pattern works. I think I'll need to learn it with like
+	#50 epochs instead see if it helps hopefully!
 
 	if results_save is not None:
 		np.save(results_save+'_aug_accuracies', aug_accuracies)

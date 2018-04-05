@@ -178,7 +178,7 @@ def plot_generative_invariance_bar_chart(base_fname):
 	plt.show()
 	return fig
 
-def plot_discriminatiev_invariance_bar_chart(base_fname):
+def plot_discriminative_invariance_bar_chart(base_fname):
 	augs = np.load(base_fname+'_aug_accuracies.npy')
 	copies = np.load(base_fname+'_copy_accuracies.npy')
 	pixels = np.load(base_fname+'_pixels.npy')
@@ -268,7 +268,13 @@ if __name__=='__main__':
 	#plot_training_loss('augments_training_loss.npy', 'copies_training_loss.npy')
 	#plot_validation_loss('augments_validation_loss.npy', 'copies_validation_loss.npy')
 	#average_error_bar_chart('errors_1')
-	plot_generative_invariance_bar_chart('results/generative_invariance')
+	#plot_generative_invariance_bar_chart('results/generative_invariance')
+	plot_discriminative_invariance_bar_chart('results/discriminative_invariance')
+
+	# if copy performs better in the copy position, could argue as to why suppressed
+	# but they may not even be suppressed and whether that is the case is doubtful
+	# but it would be a good explanation for why it occurs, why it would be useful
+	# or wahtever, but they don't sem to be random but instead modulated by task demands.
 
 	# so this did not work precisely as hoped, the resulst are strange, error decreases(!)
 	# further from the original image. not sure what is going there

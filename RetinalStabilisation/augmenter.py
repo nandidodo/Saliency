@@ -151,7 +151,7 @@ def generate_labels(labels, num_augments,save_name=None):
 	return generated_labels
 
 def augment_labels_func(label, num_augments):
-	labels = np.full(num_augments+1, label)
+	labels = np.full(num_augments, label)
 	return labels
 
 
@@ -272,12 +272,14 @@ def create_discriminative_invariance_test_dataset(data,labels, num_augments,save
 			aug_label = augment_labels_func(labels[j+1], num_augments)
 			augments = np.concatenate((augments, augment))
 			aug_labels = np.concatenate((aug_labels, aug_label))
+			print augments.shape
 
 		#and save
 		save_name = save_base + '_' + str(px_translate)+'pixels_translate'
 		np.save(save_name+'_data',augments)
 		np.save(save_name+'_labels', aug_labels)
-		return augments, aug_labels
+		print "loop finished: " , i
+	return augments, aug_labels
 
 
 
