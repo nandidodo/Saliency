@@ -158,9 +158,9 @@ def plot_fixation_errmaps(fixation_results_augments, fixation_results_copy, N = 
 		# hopefully it will work that
 
 def plot_generative_invariance_bar_chart(base_fname):
-	aug_errs = np.load(base_fname+'_aug')
-	copy_errs = np.load(base_fname+'_copy')
-	pixels = np.load(base_fname+'_pixels')
+	aug_errs = np.load(base_fname+'_aug.npy')
+	copy_errs = np.load(base_fname+'_copy.npy')
+	pixels = np.load(base_fname+'_pixels.npy')
 
 	w =0.4
 	align='center'
@@ -173,6 +173,26 @@ def plot_generative_invariance_bar_chart(base_fname):
 	plt.title('Error of copy and augmented against number of pixels translated')
 	plt.xlabel('Pixels translated')
 	plt.ylabel('Mean error')
+	plt.legend()
+	fig.tight_layout()
+	plt.show()
+	return fig
+
+def plot_discriminatiev_invariance_bar_chart(base_fname):
+	augs = np.load(base_fname+'_aug_accuracies.npy')
+	copies = np.load(base_fname+'_copy_accuracies.npy')
+	pixels = np.load(base_fname+'_pixels.npy')
+
+	w = 0.4
+	align='center'
+	#begin plot
+	fig = plt.figure()
+	ax = plt.subplot(111)
+	ax.bar(pixels-w, augs, width=w, align=align, label='Augmented accuracy')
+	ax.bar(pixels+w, copies, width=w, align=align, label='Copy accracy')
+	plt.title('Accuracies of copy and augmented against number of pixels translated')
+	plt.xlabel('Pixels translated')
+	plt.ylabel('Mean percentage accuracy')
 	plt.legend()
 	fig.tight_layout()
 	plt.show()
@@ -205,37 +225,37 @@ def plot_errmaps(augments_name, copies_name, N =20):
 		fig = plt.figure()
 
 		ax1 = fig.add_subplot(131)
-		plt.imshow(augment_test[i], cmap='gray')
+		plt.imshow(augment_test[i], cmap='gray', vmin=0, vmax=255)
 		plt.title('Augmented Test image')
 		plt.xticks([])
 		plt.yticks([])
 
 		ax2 = fig.add_subplot(132)
-		plt.imshow(augment_preds[i], cmap='gray')
+		plt.imshow(augment_preds[i], cmap='gray', vmin=0, vmax=255)
 		plt.title('Augmented Image prediction')
 		plt.xticks([])
 		plt.yticks([])
 
 		ax3 = fig.add_subplot(133)
-		plt.imshow(augment_errmaps[i], cmap='gray')
+		plt.imshow(augment_errmaps[i], cmap='gray', vmin=0, vmax=255)
 		plt.title('Augmented error map')
 		plt.xticks([])
 		plt.yticks([])
 
 		ax4 = fig.add_subplot(231)
-		plt.imshow(copy_test[i], cmap='gray')
+		plt.imshow(copy_test[i], cmap='gray', vmin=0, vmax=255)
 		plt.title('Copies Test image')
 		plt.xticks([])
 		plt.yticks([])
 
 		ax5 = fig.add_subplot(232)
-		plt.imshow(copy_preds[i], cmap='gray')
+		plt.imshow(copy_preds[i], cmap='gray', vmin=0, vmax=255)
 		plt.title('Copies Image prediction')
 		plt.xticks([])
 		plt.yticks([])
 
 		ax6 = fig.add_subplot(233)
-		plt.imshow(copy_errmaps[i], cmap='gray')
+		plt.imshow(copy_errmaps[i], cmap='gray', vmin=0, vmax=255)
 		plt.title('Copies error map')
 		plt.xticks([])
 		plt.yticks([])
@@ -247,4 +267,12 @@ def plot_errmaps(augments_name, copies_name, N =20):
 if __name__=='__main__':
 	#plot_training_loss('augments_training_loss.npy', 'copies_training_loss.npy')
 	#plot_validation_loss('augments_validation_loss.npy', 'copies_validation_loss.npy')
-	average_error_bar_chart('errors_1')
+	#average_error_bar_chart('errors_1')
+	plot_generative_invariance_bar_chart('results/generative_invariance')
+
+	# so this did not work precisely as hoped, the resulst are strange, error decreases(!)
+	# further from the original image. not sure what is going there
+	# I think I'm going to have to train the discriminative network instead
+	# and hope that that works better. I should look into doing that now
+	# as it won't be at all difficult most likely, so let's look into doing that
+	# while I read the papers necessary or whatever!
