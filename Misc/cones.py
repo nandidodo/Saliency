@@ -56,6 +56,14 @@ def convert_to_grayscale_adjust(img):
 	gray = 0.2989*r + 0.5870*g + 0.1140*b
 	return gray
 
+def greyscale_expand(img):
+	if len(img.shape!=2):
+		raise ValueError('The initial image for this function must be two dimensional')
+	h,w = img.shape
+	exp = np.zeros((h,w,3))
+	exp[:,:,0] = img
+	return exp
+
 def foveal_colour(input_img, foveal_radius):
 	if len(input_img.shape)!=3:
 		raise ValueError('Input image must be three dimensional - i.e. colour image')
