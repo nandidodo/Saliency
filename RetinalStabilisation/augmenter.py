@@ -244,6 +244,42 @@ def augment_dataset(dataset, num_augments, base_save_path=None, px_translate=4):
 
 	return augments, copies
 
+def create_discriminative_invariance_test_dataset(data,labels, num_augments,save_base, min_px_translate=0, max_px_translate=10, steps=5):
+	if type(data) is str:
+		data = np.load(data)
+	if type(labels) is str:
+		labels = np.load(labels)
+
+	assert num_augments>=0, 'Number of augments acnnot be zero or negative'
+	assert min_px_translate >=0 and min_px_translate <=max_px_translate, 'Min pixels must be positive and less than max pixels (obviously)'
+	assert max_px_translate >0, 'if 0 or less, why are you using this function'
+	assert steps >0, 'steps must be greater than 0'
+	assert type(save_base) is str and len(save_base)>0, 'Save base must be a valid string'
+
+	step_size = (max_px_translate-min_px_translate)//steps
+
+	#for each step!
+	for i in range(steps):
+		px_translate = min_px_translate + (i*step_size)
+		#sort out base cae
+		augments = augment_with_translation_deterministic(data[0], num_augments, px_translate)
+		aug_labels = augment_labels_func(labels[0], num_augments)
+		for j in range(len(dataset)-1):
+			augment = augment_with_translation_deterministic(dataset[j+1], num_augments,px_translate)
+			aug_label = augment_labels_func(labels[j+1], num_augments)
+			augments = np.concatenate((augments, augment))
+			aug_labels = np.concatenate((aug_labels, aug_label))
+
+		#and save
+		save_name = save_base + '_' + str(px_translate)+'pixels_translate'
+		np.save(save_name+'_data',augments)
+		np.save(save_name+'_labels', aug_labels)
+		return augments, aug_labels
+
+
+
+
+
 def test_discriminative_data():
 	test_aug = np.load('data/discriminative_test_aug_data.npy')
 	test_copy = np.load('data/discriminative_test_copy_data.npy')
