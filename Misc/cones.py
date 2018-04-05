@@ -44,9 +44,13 @@ def convert_to_grayscale(img):
 	return img
 
 def convert_to_grayscale_mean(img):
+	if len(img.shape)!=3:
+		raise ValueError('Input image must be three dimensional')
 	return np.mean(img, -1)
 
 def convert_to_grayscale_adjust(img):
+	if len(img.shape)!=3:
+		raise ValueError('Input image must be three dimensional')
 	#not sure wherethese magic numbers come from, just some person on stack overflow?
 	r,g,b = img[:,:,0], img[:,:,1], img[:,:,2]
 	gray = 0.2989*r + 0.5870*g + 0.1140*b
