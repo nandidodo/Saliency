@@ -282,7 +282,7 @@ def create_discriminative_invariance_test_dataset(data,labels, num_augments,save
 	return augments, aug_labels
 
 
-def create_drift_augmented_dataset(data, num_augments, max_px_translate, save_name):
+def create_drift_augmented_dataset(data, num_augments, max_px_translate, save_name=None):
 	if type(data) is str:
 		data = np.load(data)
 
@@ -294,7 +294,39 @@ def create_drift_augmented_dataset(data, num_augments, max_px_translate, save_na
 		dat = data[i]
 		for j in xrange(num_augments):
 			px = (-1*max_px_translate) + (j * step_size)
-			aug = translate(dat, px)
+			aug = translate(dat, (0,px))
+			augments.append(aug)
+	augments = np.array(augments)
+	if save_name is not None:
+		np.save(save_name, augments)
+	return augments
+
+def create_drift_augments_horizontal, vectical(data, num_augments, max_px_translate, horizontal_prob, save_name=None):
+	if type(data) is str:
+		data = np.load(data)
+
+	if horizontal_prob<0 or horizontal_prob>1:
+		raise ValueError('Horizontal prob is a probability and therefore must be between 0 and 1')
+
+	#assume solely horizontal drifts - for now!
+	step_size = int(max_px_translate*2/num_augments)
+
+	#check whether horizontal or vertical
+	horizontal = False
+	rand = np.random.uniform(low=0, high=1)
+	if rand <=horizontal_prob:
+		horizontal = True
+
+	#begin the giant loops
+	augments = []
+	for i in xrange(len(data)):
+		dat = data[i]
+		for j in xrange(num_augments):
+			px = (-1*max_px_translate) + (j * step_size)
+			if horizontal is False:
+				aug = translate(dat, (px,0))
+			if horizontal is True:
+				aug = translate(dat, (0,px))
 			augments.append(aug)
 	augments = np.array(augments)
 	if save_name is not None:
