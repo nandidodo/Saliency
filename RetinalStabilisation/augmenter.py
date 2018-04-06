@@ -282,6 +282,25 @@ def create_discriminative_invariance_test_dataset(data,labels, num_augments,save
 	return augments, aug_labels
 
 
+def create_drift_augmented_dataset(data, num_augments, max_px_translate, save_name):
+	if type(data) is str:
+		data = np.load(data)
+
+	#assume solely horizontal drifts - for now!
+	step_size = int(max_px_translate*2/num_augments)
+	#begin the giant loops
+	augments = []
+	for i in xrange(len(data)):
+		dat = data[i]
+		for j in xrange(num_augments):
+			px = (-1*max_px_translate) + (j * step_size)
+			aug = translate(dat, px)
+			augments.append(aug)
+	augments = np.array(augments)
+	if save_name is not None:
+		np.save(save_name, augments)
+	return augments
+
 
 
 
