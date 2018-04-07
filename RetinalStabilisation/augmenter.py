@@ -301,7 +301,7 @@ def create_drift_augmented_dataset(data, num_augments, max_px_translate, save_na
 		np.save(save_name, augments)
 	return augments
 
-def create_drift_augments_horizontal, vectical(data, num_augments, max_px_translate, horizontal_prob, save_name=None):
+def create_drift_augments_horizontal_vectical(data, num_augments, max_px_translate, horizontal_prob, save_name=None):
 	if type(data) is str:
 		data = np.load(data)
 
@@ -332,6 +332,74 @@ def create_drift_augments_horizontal, vectical(data, num_augments, max_px_transl
 	if save_name is not None:
 		np.save(save_name, augments)
 	return augments
+
+def random_walk_drift(data, num_augments, mean_px_translate, variance_px_translate,save_name=None):
+	# this is where the drift follows a brownian motion random walk pattern with the step size
+	# sampled from a gaussian with variance and mean. the motion is in isotropic random directions
+
+	if type(data) is str:
+		data = np.load(data)
+
+	if num_augments <0:
+		raise ValueError('Number of augments must be a positive number')
+	if mean_px_translate<=0:
+		raise ValueError('mean must be positive (randomly turned negative for random walk)')
+	if variance<=0:
+		raise ValueError('Variance must be positive to be valid')
+
+	augments = []
+
+	for i in xrange(len(data)):
+		item = data[i]
+		augments.append(item)
+		for j in xrange(num_augments):
+			px_translate = int(np.random.normal(mean_px_translate, variance_px_translate))
+			#choose directions
+			direction = 0
+			rand = np.random.uniform(low=0, high=1)
+			aug = item #set this up as a default
+			if rand>=0.33 and rand <0.66:
+				direction=1
+			if rand>=0.66:
+				direction = 2
+			if direction ==0:
+				#negative or not
+				r = np.random.uniform(low=0, high=1)
+				if r<=0.5:
+					aug = translate(item, (-1*px_translate,0))
+				if r>0.5:
+					aug = translate(item, (px_translate,0))
+
+			if direction==1:
+				r = np.random.uniform(low=0, high=1)
+				if r<=0.5:
+					aug = translate(item, (0, -1*px_translate))
+				if r>=0.5:
+					aug = translate(item,(0, px_translate))
+
+			if direction==2:
+				r1 = np.random.uniform(low=0, high=1)
+				r2 = np.random.uniform(low=0, high=1)
+				d1 = 1
+				d2=1
+				if r1<=0.5:
+					d1 = -1
+				if r2<=0.5:
+					d2 = -1
+				aug = translate(item, (d1*px_translate, d2*px_translate))
+
+			#now append and update
+			augments.append(aug)
+			#make item aug for random walk
+			item = aug
+
+	augments = np.array(augments)
+	if save_name is not None:
+		np.save(save_name, augments)
+	return augments
+
+
+
 
 
 
