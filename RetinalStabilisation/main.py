@@ -350,9 +350,9 @@ if __name__ == '__main__':
 	train_labels = 'data/discriminative_train_aug_labels.npy'
 	test = 'data/discriminative_test_aug_data.npy'
 	test_labels = 'data/discriminative_test_aug_labels.npy'
-	save_name = 'results/discriminative_aug'
-	save_model_name = 'discriminative_aug_model'
-	epochs=10
+	save_name = 'results/discriminative_aug_2'
+	save_model_name = 'discriminative_aug_model_2'
+	epochs=50
 	batch_size=64
 	mnist_discriminative(train, test, train_labels,test_labels,save_name=save_name, save_model_name=save_model_name, epochs=epochs, batch_size=batch_size)
 
@@ -360,9 +360,9 @@ if __name__ == '__main__':
 	train_labels = 'data/discriminative_train_copy_labels.npy'
 	test = 'data/discriminative_test_copy_data.npy'
 	test_labels = 'data/discriminative_test_copy_labels.npy'
-	save_name = 'results/discriminative_copy'
-	save_model_name = 'discriminative_copy_model'
-	epochs=10
+	save_name = 'results/discriminative_copy_2'
+	save_model_name = 'discriminative_copy_model_2'
+	epochs=50
 	batch_size=64
 	mnist_discriminative(train, test, train_labels,test_labels,save_name=save_name, save_model_name=save_model_name, epochs=epochs, batch_size=batch_size)
 
