@@ -259,7 +259,7 @@ if __name__ == '__main__':
 
 	#test_fixations()
 	#test_generative_invariance('model_mnist_augments', 'model_mnist_copy','results/generative_invariance')
-	test_discriminative_invariance('discriminative_aug_model','discriminative_copy_model', 'results/discriminative_invariance')
+	test_discriminative_invariance('discriminative_aug_model_2','discriminative_copy_model_2', 'results/discriminative_invariance_2')
 	# it sort of shows waht I want to show, but not that well, dagnabbit!
 
 	# so for some reason, even though the validation and test errors are barely different

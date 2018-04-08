@@ -269,7 +269,7 @@ if __name__=='__main__':
 	#plot_validation_loss('augments_validation_loss.npy', 'copies_validation_loss.npy')
 	#average_error_bar_chart('errors_1')
 	#plot_generative_invariance_bar_chart('results/generative_invariance')
-	plot_discriminative_invariance_bar_chart('results/discriminative_invariance')
+	plot_discriminative_invariance_bar_chart('results/discriminative_invariance_2')
 
 	# if copy performs better in the copy position, could argue as to why suppressed
 	# but they may not even be suppressed and whether that is the case is doubtful
