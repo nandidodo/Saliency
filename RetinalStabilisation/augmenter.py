@@ -344,14 +344,16 @@ def random_walk_drift(data, num_augments, mean_px_translate, variance_px_transla
 		raise ValueError('Number of augments must be a positive number')
 	if mean_px_translate<=0:
 		raise ValueError('mean must be positive (randomly turned negative for random walk)')
-	if variance<=0:
+	if variance_px_translate<=0:
 		raise ValueError('Variance must be positive to be valid')
 
 	augments = []
+	N = len(data)
 
-	for i in xrange(len(data)):
+	for i in xrange(N):
 		item = data[i]
 		augments.append(item)
+		print "item: " + str(i) + " completed of " + str(N)
 		for j in xrange(num_augments):
 			px_translate = int(np.random.normal(mean_px_translate, variance_px_translate))
 			#choose directions
@@ -464,8 +466,10 @@ def drift_and_microsaccades(dataset, num_augments, microsaccade_prob,microsaccad
 		dataset = np.load(dataset)
 
 	augments = []
+	N =len(dataset)
 
-	for i in xrange(len(dataset)):
+	for i in xrange(N):
+		print "item: " + str(i) + " completed of: " + str(N)
 		aug = dataset[i]
 		augments.append(aug)
 		for j in xrange(num_augments):
@@ -566,4 +570,17 @@ if __name__ == '__main__':
 	#augment_dataset_discriminative(xtest, ytest, num_augments, save_path)
 	#test_discriminative_data()
 	#all is looking well here! yay!
-	create_discriminative_invariance_test_dataset(xtest, ytest, 10, 'data/discriminative')
+	#create_discriminative_invariance_test_dataset(xtest, ytest, 10, 'data/discriminative')
+
+
+	# I need to create the drift datasets, and the drift with random walk and hope it works!
+	#create train
+	#random_walk_drift(xtrain, num_augments=10, mean_px_translate=2, variance_px_translate=1, save_name='data/random_walk_drift_train', show=False)
+	#test
+	#random_walk_drift(xtest, num_augments=10, mean_px_translate=2, variance_px_translate=1, save_name='data/random_walk_drift_test', show=False)
+
+	#now that the drifts have been created, it'stime to create the melange
+	#train
+	drift_and_microsaccades(xtrain, num_augments=10, microsaccade_prob=0.1, microsaccade_translate=8, mean_drift_translate=2, variance_drift_translate=1, microsaccade_vertical_prob=0.5, show=False, save_name='data/drift_and_microsaccades_train')
+	#test
+	drift_and_microsaccades(xtest, num_augments=10, microsaccade_prob=0.1, microsaccade_translate=8, mean_drift_translate=2, variance_drift_translate=1, microsaccade_vertical_prob=0.5, show=False, save_name='data/drift_and_microsaccades_test')
