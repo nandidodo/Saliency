@@ -333,7 +333,7 @@ def create_drift_augments_horizontal_vectical(data, num_augments, max_px_transla
 		np.save(save_name, augments)
 	return augments
 
-def random_walk_drift(data, num_augments, mean_px_translate, variance_px_translate,save_name=None):
+def random_walk_drift(data, num_augments, mean_px_translate, variance_px_translate,save_name=None,show=False):
 	# this is where the drift follows a brownian motion random walk pattern with the step size
 	# sampled from a gaussian with variance and mean. the motion is in isotropic random directions
 
@@ -392,13 +392,98 @@ def random_walk_drift(data, num_augments, mean_px_translate, variance_px_transla
 			augments.append(aug)
 			#make item aug for random walk
 			item = aug
+			if show:
+				plt.imshow(aug)
+				plt.show()
 
 	augments = np.array(augments)
 	if save_name is not None:
 		np.save(save_name, augments)
 	return augments
 
+def random_walk_step(item, mean_px_translate, variance_px_translate):
+	px_translate = int(np.random.normal(mean_px_translate, variance_px_translate))
+	#choose directions
+	direction = 0
+	rand = np.random.uniform(low=0, high=1)
+	if rand>=0.33 and rand <0.66:
+		direction=1
+	if rand>=0.66:
+		direction = 2
+	if direction ==0:
+		#negative or not
+		r = np.random.uniform(low=0, high=1)
+		if r<=0.5:
+			aug = translate(item, (-1*px_translate,0))
+		if r>0.5:
+			aug = translate(item, (px_translate,0))
 
+	if direction==1:
+		r = np.random.uniform(low=0, high=1)
+		if r<=0.5:
+			aug = translate(item, (0, -1*px_translate))
+		if r>=0.5:
+			aug = translate(item,(0, px_translate))
+
+	if direction==2:
+		r1 = np.random.uniform(low=0, high=1)
+		r2 = np.random.uniform(low=0, high=1)
+		d1 = 1
+		d2=1
+		if r1<=0.5:
+			d1 = -1
+		if r2<=0.5:
+			d2 = -1
+		aug = translate(item, (d1*px_translate, d2*px_translate))
+	return aug
+
+def microsaccade_step(item, microsaccade_translate, microsaccade_vertical_prob):
+	r1 = np.random.uniform(low=0, high=1)
+	r2 = np.random.uniform(low=0, high=1)
+	if r1<=microsaccade_vertical_prob:
+		if r2<=microsaccade_vertical_prob:
+			#do both
+			aug = translate(item, (microsaccade_translate, microsaccade_translate))
+		if r2>microsaccade_vertical_prob:
+			aug = translate(item, (0, microsaccade_translate))
+	if r1>microsaccade_vertical_prob:
+		if r2>=microsaccade_vertical_prob:
+			aug=translate(item, (microsaccade_translate, microsaccade_translate))
+		if r2<microsaccade_vertical_prob:
+			aug = translate(item, (microsaccade_translate, 0))
+	return aug
+
+def drift_and_microsaccades(dataset, num_augments, microsaccade_prob,microsaccade_translate, mean_drift_translate, variance_drift_translate,microsaccade_vertical_prob=0.5, show=False, save_name = None):
+
+	# this should be interesting to test in a bit, see if it helps or hinders
+	# the whole drift questions would be good and add another dimension to the paper
+	# and its results. would be cool,I think!
+
+	#now go forward
+	if type(dataset) is str:
+		dataset = np.load(dataset)
+
+	augments = []
+
+	for i in xrange(len(dataset)):
+		aug = dataset[i]
+		augments.append(aug)
+		for j in xrange(num_augments):
+			rand = np.random.uniform(low=0, high=1)
+			if rand <=microsaccade_prob:
+				aug = microsaccade_step(aug, microsaccade_translate,microsaccade_vertical_prob)
+				augments.append(aug)
+			if rand > microsaccade_prob:
+				aug = random_walk_step(aug, mean_drift_translate, variance_drift_translate)
+			if show:
+				plt.imshow(aug)
+				plt.show()
+			augments.append(aug)
+
+	augments = np.array(augments)
+	if save_name is not None:
+		np.save(save_name, augments)
+	return augments
 
 
 
