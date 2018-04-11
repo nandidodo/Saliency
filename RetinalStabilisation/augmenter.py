@@ -490,6 +490,60 @@ def drift_and_microsaccades(dataset, num_augments, microsaccade_prob,microsaccad
 	return augments
 
 
+#is there anything else I need to code up here, I'm really not sure. I mean I need to continue
+# training the networks the drift and then the microsaccade swith driftn etworks and then what do I do with that
+# I mean I almost certainly dno't have any significant permanent or even temporary (today!)
+#impairment from the possible (and in fact unlikely, and not from CO or the windowcleaner) impairment 
+# that happened yesterdya, if I'm going crazy, it's just that to be honest
+#I just don't know what I need to program to be honest
+def levyFlightDriftStep(item, alpha, vertical_prob=0.5):
+	#sample from power law to get stpe size
+	sample = np.random.uniform(low=0, high=1)
+	#then turn to the power
+	sample = np.power((1-sample), (-1/(alpha-1)))
+	#for vertical prob
+	rand = np.random.uniform(low=0, high=1)
+	r2 = np.random.uniform(low=0, high=1)
+
+	#init this here
+	aug = item
+	if rand <=vertical_prob:
+		if r2<=vertical_prob:
+			aug = translate(item, (sample, sample))
+		if r2>vertical_prob:
+			aug = translate(item, (0, sample))
+	if rand> vertical_prob:
+		if r2>vertical_prob:
+			aug = translate(item, (sample, sample))
+		if r2<=vertical_prob:
+			aug = translate(item, (sample, 0))
+
+	return aug
+
+def levyFlightDrift(dataset, num_augments, alpha, vertical_prob, save_name=None, show=False):
+	if type(dataset) is str:
+		dataset = np.load(dataset)
+
+	augments = []
+
+	for i in xrange(len(dataset)):
+		item = data[i]
+		augments.append(item)
+		for j in xrange(num_augments):
+			aug = levyFlightDriftStep(item, alpha, vertical_prob)
+			augments.append(aug)
+			item = aug # so random walk is actually a walk
+			if show:
+				plt.imshow(aug)
+				plt.show()
+
+	augments = np.array(augments)
+	if save_name is not None:
+		np.save(save_name, augments)
+
+	return augments
+
+
 
 
 
