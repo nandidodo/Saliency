@@ -1,7 +1,3 @@
-# okay, this is the one where I finally define my model for cifar and also try to figure out the cross channel encoding with the split brain autoencoder model. If I can get this done, then that will be sufficient for tonight, I think. There is currently going to be large amounts of code duplicatoin, and this likely cannot be helped atm. I'll definitely have to refactor this all later, but for the moment we're just doing prototyping, so it's okay
-
-
-
 from keras.datasets import cifar10, mnist
 from matplotlib import pyplot as plt
 from scipy.misc import toimage
@@ -69,6 +65,14 @@ def plot_mean_error_maps(mean_maps, N = 10):
 		plt.imshow(mean_maps[i])
 		plt.show()
 
+def compare_error_maps(mean_maps, imgs, N = 10):
+	for i in xrange(N):
+		print mean_maps[i].shape
+		print imgs[i].shape
+		mmap = np.reshape(mean_maps[i], (shape, shape))
+		img = np.reshape(imgs[i], (shape, shape))
+		compare_two_images(mmap, img, 'Error Map', 'Original Image')
+
 def generate_salience_trace(error_map, N = 15):
 	salience_arr = np.zeros(error_map.shape)
 	# we loop backwards because we want the first values to be the highest
@@ -102,8 +106,6 @@ def salience_trace_with_gaussians(error_map, N = 5, std=4):
 			for c in xrange(len(gauss_means)):
 				sal_map[a][b] += (1.0/index_distance([a,b], gauss_means[c]))* np.abs(np.random.normal(0, std))
 
-
-	#this i sa realy hacky and horrible way of doing it, but it might work! to produce something vaguelly gaussianly smoothed!
 	print type(sal_map)
 	print sal_map.shape
 	return sal_map
@@ -244,20 +246,19 @@ autoencoder.compile(optimizer=optimizer, loss='binary_crossentropy')
 # we train
 autoencoder.fit(redtrain, greentrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(redtest, greentest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
 
-# let's try a second autoencoder here, see if it works... if it does, it would be really awesome, as it would be super easy
-#autoencoder2 = Model(input_img, decoded)
-#optimizer = optimizers.SGD(lr = lrate, decay=1e-6, momentum=0.9, nesterov=True)
-#autoencoder2.compile(optimizer=optimizer, loss='binary_crossentropy')
+autoencoder2 = Model(input_img, decoded)
+optimizer = optimizers.SGD(lr = lrate, decay=1e-6, momentum=0.9, nesterov=True)
+autoencoder2.compile(optimizer=optimizer, loss='binary_crossentropy')
 # we train
-#autoencoder2.fit(greentrain, redtrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(greentest, redtest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
+autoencoder2.fit(greentrain, redtrain, epochs=epochs, batch_size=batch_size, shuffle=shuffle, validation_data=(greentest, redtest), callbacks =[TensorBoard(log_dir='tmp/autoencoder')])
 
 
 # once trained we then move onto getting our predictions
 preds = autoencoder.predict(greentest)
-#preds2 = autoencoder.predict(redtest)
+preds2 = autoencoder.predict(redtest)
 
-#mean_preds = mean_map(preds, preds2)
-#plot_sample_results(greentest, mean_preds)
+mean_preds = mean_map(preds, preds2)
+plot_sample_results(greentest, mean_preds)
 
 # we see our sample results
 print "  "
@@ -268,22 +269,21 @@ plot_sample_results(greentest, preds)
 
 # we generate the error maps here
 error_maps = generate_error_maps(redtest, preds)
-#error_maps2 = generate_error_maps(greentest, preds2)
+error_maps2 = generate_error_maps(greentest, preds2)
 print error_maps.shape
 
 gauss_maps = gaussian_filter(error_maps)
 print "error_maps"
 print "  "
-plot_error_maps(error_maps)
+#plot_error_maps(error_maps)
 print "gauss smoothed error maps"
 print gauss_maps.shape
 print "  "
-plot_error_maps(gauss_maps)
+#plot_error_maps(gauss_maps)
 
-#mean_maps = generate_mean_maps(error_maps, error_maps2)
+mean_maps = generate_mean_maps(error_maps, error_maps2)
 #plot_mean_error_maps(mean_maps)
-
-# okay great. that worked. I mean at least the code worked. the aactual idea didn't but that's the way of the things. I suppose I'll need to at least get the spatial frequency thing working if I can, well, I have the downloaded code which can do that, and then I'll be just wonderfully fine. And then I an tell richard that I've got that working as well, which would be cool. if only I could get the gaussian smotthing thing working, and we'd be much beter off tbh, I'll ahve to look into that. applying a gaussian filter to an image. I'm sure there's a way to do that!
+compare_error_maps(mean_maps, redtest)
 
 # a quick save here
 #fname = "cifar_error_map_preliminary_split_test"
@@ -299,7 +299,6 @@ plot_error_maps(gauss_maps)
 # we lpot some error maps
 #plot_error_maps(error_maps)
 
-# we then generate some saliency maps off them and have a look
 #show_salience_traces(error_maps)
 
 # and with the gaussians
