@@ -1,4 +1,3 @@
-# okay, this script is just meant to help us read in the files to the requisite numpy arrays which we can then pickle and save. it seems fairly reasonable, but I realy don't know how to do it. If I was sensible I would use classes, but I'm not, so I'm going to fail terrible instead!
 
 import numpy as np
 import scipy
@@ -11,17 +10,17 @@ import cPickle as pickle
 from utils import *
 import os
 
-#I think the max size is 1024x784
 
 dirname = 'BenchmarkIMAGES/'
 crop_size = (1024,1024)
 mode = 'RGB'
-num_images = 300
+num_images = 300 
 
 save_dir=''
 save_name = 'MIT300_pickle'
 default_size = (1024, 1024)
 N_splits = num_images
+	
 
 def collect_images(dirname,num_images,crop_size=None, mode='RGB'):
 	imglist = []
@@ -47,7 +46,7 @@ def collect_files_and_images(rootdir, crop_size = default_size, mode='RGB', save
 	filelist = []
 	print "IN FUCNTION"
 	for subdir, dirs, files in os.walk(rootdir):
-		# this will save them all in one enormous file, which makes sense, but is dire
+		
 		print subdir
 		print dirs
 		for file in files:
@@ -228,6 +227,24 @@ def split_img_on_colour(img, mode='RGB'):
 		blue = img[1,:,:]
 		green = img[2,:,:]
 		return [red, blue, green]
+
+
+
+if __name__ == '__main__':
+	#set up our default variables
+	print "File Reader Activated"
+	
+	#I think the max size is 1024x784
+
+	dirname = 'BenchmarkIMAGES/'
+	crop_size = (1024,1024)
+	mode = 'RGB'
+	num_images = 300 
+
+	save_dir=''
+	save_name = 'MIT300_pickle'
+	default_size = (1024, 1024)
+	N_splits = num_images
 	
 
 			
@@ -242,7 +259,6 @@ def split_img_on_colour(img, mode='RGB'):
 #plt.imshow(img)
 #plt.show()
 
-# let's try a really hacky resize method to see if it works - I mean it kind of does. it looks kind of ugly, but oh well, and these images are going to be big. we might need to tone this down in production to get it to a reasonable size, nevertheless, we can do this realtively simply. we just have one more thing to test before we have this script being workable (well, two, including the pickling!)
 #imgarray = []
  
 #resized = imresize(img, (1024,1024))
@@ -260,10 +276,5 @@ def split_img_on_colour(img, mode='RGB'):
 #print imgarray.shape
 #arr = np.array(imgarray)
 #print arr.shape
-# okay, yes! that wokrs. now let's make a proper script to do this
-
-
-#print resized.shape
-
 
 
