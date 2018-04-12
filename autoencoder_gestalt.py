@@ -1,22 +1,3 @@
-
-# okay, so the previou sautoencoder model wasn't really working (at all!) so my lpan, I think,  is to try to make a gestalt autoencoder model which hopefully will work significantly better than before, and see if it does. let's hope it does. we can copy some of the VGG conv layers and stuff if it seems to be doing oay, and isn't too horrendously slow!
-
-# so, what is the plan for tomorrow re this (5/1/18 (!!!)) argh it's 2018!!! anyhoow I think what I've got to do is basically just play around with the models and get a good one working and try using the inspiration of the vgg net orany other good cnn keras implementations that i can find on the web and get the gestalts working, and then possibly back apply them to the thing that we actually want for the main model. that would be very useful to have done tomorrow, and then in the afternoon of course it's the yelp clone and then eventually, hopefully enyo!!!
-
-# okay, so how do we define models for things in keras and get them working? 
-# this should be a fairly straightfoward thing to do to be honest?
-# let's see if we can get it working in cifar and see if it works... could be nice?
-
-# s yeah, I guess this isn't original at all but the point of the autoencoder is to find some function on the input which can be easily defined and larned in an unsupervised manner which requires using full informatino about the stucture of the iamge to represent, so things like denoising and so forth add useful little things there as do the cross prediction channel thing. it's basically the same as a denoising autoencoder but without any serious problems at all, and it's not that fun really, but could be seriosuly useful. the zhang paper is really cool and useful, and Ishould look up where they do that to see if I can get it to work atall, and it is interesting. let's see if it can kind of manage to learn gestalt kind of continuations as that should be really interesting from a psychological perspective which is really the point
-
-# first we've got to run the test gestalt single model experiment and find those resulst. that's important. We'll run them over night, then tomorrow the autoencoder vae on mnist to check it works, and then if it does, run that too and hope for the best there, see if we get anything. also focus on GANs. That info MCMC thing looks vital! also info VAE study that.
-
-# yeah, we need tocheck results of this, see if it works better. and then run the autoencoder on mnist, and then what? I really don't nkow how it works. I put too much code up online, and everything is just going wrong today and I'm donig everything wrong and I hate it and ugh.
-
-# what are the steps we need to udnerstand for this to function correctly? Because we are far far behind literally everyone in the world and we need to be decent. We need to train this, to train the rejection sampler, and do some tests and experiments on the vaes. all of that is important. now let's run the autoencoder train
-
-# okay, we do need to think substantially about efficiency and testing and stuff that is really useful, and how to produce efficient code rather than most github commits as that stuff doesn't really matter although it feels good. what really matters in the long term for me is progress, and we need to figureo ut how to do it explicitly, so let's try!
-
 import keras
 import numpy as np
 from gestalt_models import *
@@ -221,7 +202,7 @@ def test_gestalt_single_model(epochs=500, fname="gestalt/single_model_test_32px"
 	print half1test.shape
 	shape = half1train.shape
 
-	model = Model((shape[1], shape[2], shape[3])) # is this a cause of bugs here... there shuoldn't be a shape[3], right
+	model = Model((shape[1], shape[2], shape[3]))
 	model.compile(optimizer='sgd', loss=loss_func)
 	callbacks = build_callbacks("gestalt/")
 	his = model.fit(x=half1train, y=half2train, epochs=epochs, batch_size=128, shuffle=True, validation_data=(half1val, half2val), callbacks=callbacks)
@@ -269,8 +250,6 @@ def test_loss_func(x,y):
 	#print y
 
 	#compare_two_images(x,y)
-	#the above are sanity checks seeing if the correct images are actually fed into the loss functoin
-	#and now I'll just return an utterly standard binary cross-entropy loss functio
 	return metrics.binary_crossentropy(K.flatten(x), K.flatten(y))
 
 def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Model=SimpleConvDropoutBatchNorm, save_model=True, save_model_fname="gestalt/default_gestalt_model", loss_func = 'mse'):
@@ -360,15 +339,6 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 		model.save(save_model_fname + "_1")
 		model2.save(save_model_fname + "_2")
 
-
-	#this will test our model with completely unseen data, which is very important
-	#and larger data than it expects!?!?!? which might mess it up actually
-	#I guess we'll find out!
-	#but this is to tell if it's actually any good at what it does at all, or if it isn't
-	#and it's somehow cheating by training on the validatoin set or whatever
-	#I guess we'll have to see
-	#if this works it's prtty hard proof since it's most definitely never seen any of these images
-	 # before... so I guess we'll just have to look and see!
 	imgs = load_array("datasets/Benchmark/BenchmarkDATA/BenchmarkIMAGES_images_resized_100x100")
 	imgs = imgs.astype('float32')/255.
 	print imgs.shape
@@ -382,15 +352,6 @@ def test_gestalt(both=False,epochs=500, fname="gestalt/default_gestalt_test", Mo
 
 		#plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
 	
-
-	#okay, that's weird. it seems to learn to predict the right slice, even though it's not supposed to, and I have no idea whyy it's trying to do that, so I really don't know...
-# ah, les, I have an idea actually. let's flip_this aroud and see if we get anything on the other side
-
-# what's crazy is that this actually seems to work!?!??! that's totally insane and I've no idea how it does it. It'll definitely be something to show richard. We should also experiment with seeing how good the autoencoder is on the standard colour transfer task to see if we get any interesting errmaps. That's what I'll do tonight, I think
-
-# okay, this is really really weird.  have no idea how it actually manages to do it.. .argh!?
-#like how can it know??? those are test images it's showing... wtf?? how does it manage to know that... argh?
-
 
 def invert_preds_image(pred):
 	sh = pred.shape
@@ -412,7 +373,7 @@ def invert_preds(preds, gaussian=False):
 	for i in xrange(len(preds)):
 		new_pred = invert_preds_image(preds[i])
 		if gaussian:
-			new_pred = gaussian_filter(new_pred, sigma=0.5)
+			new_pred = gaussian_filter(new_pred, sigma=1)
 		new_preds.append(new_pred)
 	new_preds = np.array(new_preds)
 	return new_preds
@@ -451,12 +412,7 @@ def test_cifar():
 	#new_preds = invert_preds(preds, gaussian=True)
 	
 	plot_four_image_comparison(preds, slicerighttest, slicelefttest, 20)
-	#okay, let's see if this simple cifar test works at all!
-	#okay, our experiments are running.  Let's get some of this sorted!
-
-
-
-# okay, lets do the simplest thing possible = go back to mnist!!
+	
 def test_mnist():
 	(x_train, _), (x_test, y_test) = mnist.load_data()
 	x_train = x_train.astype('float32') / 255.
@@ -478,21 +434,7 @@ def test_mnist():
 
 	model.compile(optimizer=adam, loss=test_loss_func)
 
-	#okay, so it sort of works on mnist!!! that's really exciting. Now I've got to scale it up
-	#to cifar, like before, because that is where the main improvements will lie, I feel
-	#and if I can get that sorted, then that would be really really good
-	#hopefully!
-	#I'm not sure what to do to make that better off however, I really don't know... dagnabbit
 
-	#So this gives reasonable-ish results, although they need some preprocessing, on mnist. So that's good. expanding to cifar tends to be more difficult though, and that isannoying. Maybe later when plugged in I should try rerunning the cifar experiments but with the preprocessing steps. I really don't know if that would help. Not sure what else to be honest...
-# so, additionally, I've got to figure out how the rejection sampler is not working. At the moment ironically it's working too well in that the sample acceptance rate tends towards 100% too rapidly, and I think I'm missing a key piece of logic as the whole point is that otherwise normal ARS wouldn't work either with the current logic since the better it is, the higher the acceptance rate, and then from there, the closer the sample ditribution wouldapproximate the normal initial sampling pre-rejection distribution. I need to look this up how it works. maybe it's something to do with the ars being solely a hull above the actual distribution, and having it below distorts the sampling, and I wonder if neural networks can be applied with that constraint, but that still does not help that much as the pint is it "learns" a piecewise linear function to approximate to an ultimate arbitrary closeness the real distribution, presuming it's convex and log bounded and so forth, and so they should run into the same problem as I have. I need to fogire out what is wrong, and most likely it is just a simple and fixable issue which is quite easily done, and hoefully this method could be serious useful now I've got the tensorflow network actually working which is good! maybe I'm just not understanding hwo the ars samples in a ifferent way to the standard rejecion sampler, since if it's uniform, the rejections are a huge part of the method t obe honest! i.e. rally what it plots at each point is not the actul samples but the empirical ratio between acceptances and rejects, and that approximates the distribution if the conditoins hold for obvious reasons, but the point of ars is to distort that ratio, so I'm not sure how it can possibly work? or in fact any kind of rejection sampling other than that bounded by a q of a standard uniform above the support, and really, it needs to be above to some special degree also, since that will change the scale?
-
-
-# okay, so what do I need to do with regard to this? that is the questoin??? 
-# I guess I could expand the model but to work on this productively, I guess I kind of need to actually run the models to test on cifar and so forth. and then ultiamtely the actual image data. More importantly, hwoever, is how to expand on the models, but I'm not sure I actually have a way to expand on the models either, except to twak learning rates and stuff when it diverges, which, again, I need to run it for!
-
-#okay, so the vae doesn't work still on cifar, and this one gives well, not especially great results, although I think I can discern some kind of working in there. I'm not sure how to progress with this really, which is very unfortunte, and I'm generally not making good progress in life. Not sure how to progress with this at all really. dagnabbit! I'm really inefficient at this stuff. dagnabbit. I just can't focus today, it seems. I need to get some results here. dagnabbit! I need to figure out how to prioritize and work efficiently as there's so much I need to do and relatively little time to do it, at least if I want to be decent. So, what steps do I need with the phd? first, check out the SOM, then try to figure out what's wrong with the other networks. let' sdo that. then perhaps spend some time again (although really I should spend a whole day on this!) with the predictive processing model, or reading about ARS. I think the rejection sampling is the better approach, as I can then figure out the actual model, hoepfully!
-	#so this actually worked the autoencoder gestalt kind of did. I'm going to try with adam optimizer now, I think!
 
 	#his = model.fit(righttrain, lefttrain, epochs=20, batch_size=128, shuffle=True, validation_data=(righttest, lefttest), verbose=1, callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 	#history = serialize_class_object(his)
@@ -504,11 +446,11 @@ def test_mnist():
 	new_preds = invert_preds(preds, gaussian=True)
 	print "NEW PREDS"
 	#print new_preds[0]
-	plot_four_image_comparison(new_preds, righttest, lefttest, N=20)
+	plot_four_image_comparison(new_preds, righttest, lefttest, N=100)
 
 if __name__ =='__main__':
-	test_cifar()
-	#test_mnist()
+	#test_cifar()
+	test_mnist()
 
 	#preds = load_array('gestalt/TEST_MNIST_PREDS_3')
 	#print preds.shape
@@ -568,15 +510,6 @@ if __name__ =='__main__':
 		compare_two_images(pred, display_img)
 	#preds1, preds2, history, half1test, half2test = load_array("gestalt/single_model_test")
 	#plot_three_image_comparison(half1test, preds2, half2test)
-	# okay, yeah, so as I suspect all it tries to do is just straight up predict the image it's given
-	#as it can't realistically display the thing. and with the 32 it's not necessarily any better tbh - 
-	# so yeah, this straight up doesn't work? because it just learns to predict it's own image
-	# I'm kind of confused about what it's learning to do as it never learns totaly successfully
-	#and usually the learning just straight up doesn't work. Let's try it with the vae's instead, as could be interesting! let's try to figure out the vae and get that working?
-	"""
-
-
-
 
 
 
