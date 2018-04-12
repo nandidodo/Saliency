@@ -1,5 +1,3 @@
-# this is where I just put really random things which are easy to find here. so we can inspect data and so forth. this isgoig to be a very freeform file. for scripting, as that's what python is meant to do.
-
 import numpy as np
 import scipy
 from file_reader import *
@@ -92,7 +90,6 @@ rootdir = './BenchmarkIMAGES/SM'
 cropsize = (200,200)
 save_images_per_directory(rootdir, cropsize)"""
 
-# now let's check this actuallt works, we can load them and get images, and so forth, that seems rather important to me
 def load_file_test(fname):
 	imgs = load(fname)
 	print type(imgs)
@@ -488,7 +485,7 @@ def show_all_error_maps_with_original_imgs_3(fname="testimages_combined_imgs_pre
 	#151, 123
 	arr = load_array(fname)
 	imgs, preds, errmaps = arr
-	new_size=200
+	new_size=(400,400)
 	sh = imgs.shape
 	imgs = np.reshape(imgs, (sh[0], sh[1],sh[2]))
 	imgs = imgs[:,:,15:85]
@@ -774,18 +771,6 @@ if __name__ =='__main__':
 
 
 
-
-
-
-
-
-
-
-
-
-# okay, yay, if we crop it sufficiently, we can get an okay looking centre bias heatmap, but it seems like a bit of a scam that w need to crop it sufficiently, but nevertheless, it kind of works. i don't know what other solutions i'm meant to get. so that's good. at least we are sorted now, which is great. but anyhow, how are we actually going to get this sorted? let's go and look up and catalogue a whole bunch of centre bias papers, and also figure out just what we're doing here, let's do that until mycah finishes work. from there, the next step is to have lunch and finish this stuff off. hopefully we can present richard, perhaps even with a draft paper next thursday on the centre bias, of a thousand words or so, plus our stuff and an exlpanation of the results. thiscould be very reasonable indeed. and we'll take the best things and compare them, although we have no actual accuracy/ROC calculation metrics here, which is unfortuante, but that's still quitemiportant, so we should seriously look at that and see what's up, and we also need to perform hyperparameter optimisation and stuff on our models, to get it significantly better, and like use the ADAM optimiser and so forth, so we shuold look at that and also at other people's approaches. so let's get on with that then right now!
-
-		
 
 
 #plt.imshow(img_amp_display)
