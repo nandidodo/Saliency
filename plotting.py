@@ -1,9 +1,3 @@
-# okay, this is just meant to be a very simple file for plotting and stuff which is easy to use
-# and let's us get our datasets fairly standardly
-# for the plots used in the paper, so not difficult.
-# we'll obviously comment each method with how it is used when we push this to github properly
-# orwhatever to sort it out
-
 import matplotlib.pyplot as plt
 from utils import *
 from experiments import *
@@ -23,8 +17,7 @@ def show_img_red_green(img_fname, indices):
 		img = imgs_to_show[i]
 		reds.append(img[:,:,0])
 		greens.append(img[:,:,1])
-	#now we begin plotting
-	#not sure how to do this. it would be annoying. what even is the name of the dataset. I should at least get this to work... dagnabbit. not enough time at all. I just have had no focus the past few days and it really shows. nothing is done... argh!
+	
 	for k in xrange(N):
 		#full img
 		plt.subplot(k+1, 3,1)
@@ -46,12 +39,7 @@ def show_img_red_green(img_fname, indices):
 		plt.yticks([])
 
 	print "finished function!?"
-	plt.show()
-	# I don't know how this works, and it kind of doesn't atm, but we can't really fix it.
-	#dagnabbit we don't really have anything to show for anything. we need to do more work, but we have no time a swe've frittered it away stressing... dagnabbt!
-		
-
-	
+	plt.show()	
 if __name__ == '__main__':
 	img_fname='testimages_combined'
 	indices = (40,45,56)
