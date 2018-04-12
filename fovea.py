@@ -1,15 +1,3 @@
-# okay, let's try a log polar sampling. This should be really fun. I'm really not sure how to recreate the image in a way we can display it though. that's realy bad... ugh!
-# this does seem to be extremely important as it's how the brain actually perceives these thigns
-# and writing it up seems like a very valuable thing to be doing,so we can understnad just how it works
-# and also understand just how julia works also, as a language, as writing the algorithm in that first, although in python also seems to be very important
-
-
-## let's try this as a very very simple loop. it'll be death slow in python, but that won'tbe too horrendous
-
-# I wonder actually let's define a really simple and hacky transform which just blitzes the resolutoin of the thing out so it makes sense, with the resolution falling off at each time. I honestly don't know. also, we need to know what to do if we reach edges and so forth, but I don't know... argh. dagnabbit edge effects. let's try out a cool image transform and see what happens this is just artificially decreasing the resolution to test and see if anything interesting is happening
-
-# ythis is just a file where I try to figure out some simple python foveal image transforms to see what's up here, because this will undoubtedly be very useful and cool. ew can do this... let's go!
-
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import *
@@ -24,16 +12,6 @@ img = imgs[40]
 #img = np.reshape(img, (img.shape[0], img.shape[1]))
 plt.imshow(img)
 plt.show()
-
-# okay great. I forgot they were only doing stuff on the 100/100 iamges. oh well. we'll have to fix that later, but for now it doesn't matter. let's first just figure out a simple manual for loop thing that decreases the resolution at each tick of the image from the centre
-
-#not sure to the extent to which the resolution should decrease. I really have no clue. guess I should find out, but let's test it for a bit
-
-# this is going to be horrendously inefficient, as it is python, and not vectorised code
-
-#okay, our very simple and currently primitive distance function
-
-# okay, well, thisdoesn' really work, but nevertheless it's cool. I should also go and have a shower now, I think
 def resolution_by_distance(dist):
 	if dist<=20:
 		return 0
@@ -94,8 +72,6 @@ def manual_resolution_decrease(img, centre):
 #plt.imshow(fovimg,cmap='gray')
 #plt.show()
 
-
-# okaty, I copied this code from stackoverflow. let's see if it works at all
 
 def polar2cart(r, theta, center):
 
@@ -241,7 +217,6 @@ def logpolar(image, angles=None, Rs=None, mode='M', cval=0, output=None,
 #plt.imshow(fovimg, cmap='gray')
 #plt.show()
 
-# okay, we're going to try another different polar conversion t see if this works
 import numpy as np
 from scipy.ndimage.interpolation import geometric_transform
 
