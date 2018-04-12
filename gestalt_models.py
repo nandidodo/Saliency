@@ -1,5 +1,3 @@
-# okay, this is where we write fairly simple gestalt models, with the aim of hopefully being simple
-# so let's test a few
 
 import keras
 import numpy as np
@@ -187,11 +185,6 @@ def VGGnet(input_shape, desired_output_shape, activation='relu'):
 
 
 def SimpleContinuingConvModel(input_shape):
-	#this is a bunch of convolutional models which try to keep the miage of the same shape
-	# in the line of the 1x1 convolutions all convolutional networks
-	#I'm seeing how powerful the convolutional image transformers are
-	#I was thinking this could map from our error maps to their given sal maps
-	#for actual apples to apples comparison of ROC curves and so forth of our method to theirs
 	input_img = Input(input_shape)
 	x = Conv2D(32,2,strides=(1,1), activation='relu',padding='same')(input_img)
 	x = BatchNormalization(momentum=0.9)(x)
