@@ -1,12 +1,3 @@
-#This is a simple keras implementation of the VGG19 model I got from here: https://gist.github.com/baraldilorenzo/8d096f48a1be4a2d660d
-
-# the aim is that if we can try to decompose the network into well tested pieces
-# we won't necessarily have to worry about how bad our convolutional network is in the first place
-# which we currently do atm and be guaranteed of an okay thing. the only trouble is that I desperately need CUDA as this is currently REALLY slow on my computer for any reasonably sized images
-# which is really unfortunate tbh
-
-
-
 from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
@@ -73,7 +64,6 @@ def VGG_19(weights_path=None):
 
 def predict_cat():
 	im = cv2.resize(cv2.imread('cat.jpg'), (224,224)).astype(np.float32)
-	#this bit is pretty cryptic, I must admit!
 	im[:,:,0] -= 103.939
 	im[:,:,1] -= 116.779
 	im[:,:,2] -= 123.68
