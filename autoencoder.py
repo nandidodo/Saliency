@@ -1,5 +1,3 @@
-# okay, the aim of this is to refactor our autoencoder code into a class based model where it can be much more easily utilised and understood. that shouldn't be too difficult,, although I'm not quite sure the best practice to do this a.) in python, and b.) within the keras api, which is going to be unfortuante, of course, but also kind of fun and interesting!, so let's get to it
-
 from keras.datasets import cifar10, mnist
 from matplotlib import pyplot as plt
 from scipy.misc import toimage
@@ -35,12 +33,6 @@ nesterov = True
 shuffle = True
 loss = 'binary_crossentropy'
 
-#this is a horrendously ugly hack. I'm not sure how to get this working properly
-# so the conv net can create any dimension it wants given input and output
-# I'm not sure how to get that working at all, but perhaps I should be if I were decent... dagnabbit!
-
-# okay, well, the thing straight up doesn't work, somehow gets negative loss(!!!!) and diverges... I'm not totally sure what's going on there, but IDK honestly!
-
 gestalt = False
 
 optimizer = optimizers.SGD(lr =lrate, decay=decay, momentum = momentum, nesterov = nesterov)
@@ -71,9 +63,7 @@ class Hemisphere(object):
 		self.shape = input_data.shape
 		#assert self.shape == output_data.shape, 'input and output data do not have the same shape'
 
-		#next we define our model, we will normally do something with architecture here, but we're not going o do that yet, so we'll have a placeholder
 		if architecture is not None:
-			# initialies and set it up, but we've not impleneted it yet
 			raise NotImplementedError
 			pass
 		if architecture is None:
@@ -127,12 +117,8 @@ class Hemisphere(object):
 			if gestalt:
 				#sh = self.output_data.shape
 				#final = Dense(20, activation='sigmoid')(decoded)
-				#let's try with a reshape layer althoguh this is a direly ugly hack
+		
 				#final = Reshape((sh[1], sh[2], sh[3]))(decoded)
-					# thi sis such a horrendously hacky solution there's no way it can work
-
-				#the trouble is that it's so hacky that if it doesn't work, I don't even know that it's because of the method being inherently unstable, or the crazy permnutations I'vedone here
-	# so it's a terrible test. I guess I need to reimplement everything in tensorflow anyway, where I have more control!?
 				print decoded.shape
 				dec = decoded.shape
 				print dec
@@ -208,10 +194,6 @@ class Hemisphere(object):
 		
 	
 	def get_error_maps(self, input_data = None, predictions= None, return_preds = False):
-		# we get all combinations of things here for behaviour
-		# we also reshape them here, for the rest of all time, so my functoins are easy
-
-	#okay, this function at the moment is just totally wrong. let's rewrite
 		if input_data is None:
 			input_data = self.test_input
 		if predictions is None:
@@ -274,7 +256,6 @@ class Hemisphere(object):
 		n = len(error_maps1)
 		assert len(error_maps2) != n, 'different numbers of maps in each'
 		if N == -1:
-			#so nothing specified we do the full lunch
 			N = n
 		mean_maps = []
 		for i in xrange(N):
