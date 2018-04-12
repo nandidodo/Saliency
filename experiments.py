@@ -1,5 +1,3 @@
-# okay, this is where I actually run my experiments, as another kind of master file/script
-
 from keras.datasets import cifar10, mnist
 from matplotlib import pyplot as plt
 from scipy.misc import toimage
@@ -121,11 +119,6 @@ def load_spatial_frequency_split_cifar(test_up_to=None):
 	return lptrain, lptest, hptrain, hptest
 		
 	
-	
-
-
-# okay, that sorts out our data, now let's get the model working
-
 def run_colour_experiments(epochs = 1, save=True, test_up_to=None):
 
 	redtrain, greentrain, bluetrain, redtest, greentest, bluetest = load_colour_split_cifar(test_up_to=test_up_to)
@@ -608,8 +601,6 @@ def multi_hyperparam_grid_search(param_names, param_lists, input_fname, save_bas
 		hyperparam_grid_search(param_names[i], param_lists[i], input_fname, save_bases[i], epochs=epochs, error=error, error_list=error_list, sal_map_fname = sal_map_fname, fn=fn)
 
 
-#we need a way to get the error and accuracies or whatever, but we'll have to add that in a bit, so I don't know!
-
 def try_gestalt_model_spatial_frequency(fname, epochs=100):
 	imgs = load_array(fname)
 	imgs = imgs.astype('float32')/255.
@@ -675,9 +666,6 @@ def plot_error_maps_saliences_from_preds(preds_fname, sal_fname, N = 20, save=Tr
 	print preds2.shape
 	assert sal_maps.shape == preds1.shape == preds2.shape, 'all potential images must be same shape!'
 
-	#it seemsthe trouble is that the network is actually getting way too good at predicting thecolour change differences, and so we don't really get a salience map at all, except one dominated by the artefacts at the edge of the image or wahtever, which is really unfortunate. Not really sure what to do about that to be honest. let's do a bit of latex cleaning up and see what we want to go with?
- 	#and rewrite discussion/introduction and also write up the thing algorithm. we've somehow already wasted hours. not sure how, so let's try and get this sorted fairly rapidly
-
 	if save:
 		save_array(errmaps, save_name)
 
@@ -742,14 +730,6 @@ if __name__ == '__main__':
 	#print his1
 	#save_array((his1, his2), "history_experiment")
 
-	# okay, this works. what shuold be my next steps in modelling this?
-	# so we can try to get the gestalts working and play aroudn with those numbers
-	#that seems like the most reasonable solution to be honest, so let's try to get that working
-	#and then see what we can obtain from that. if wecan do thattonight, and get a reasonable looking model, then I wuold be very happy indeed. so let's try that!
-
-
-	#okay, here's me trying my probably better and more successful gestalt models
-	#for the standard autoencoding task
 	#try_gestalt_model_for_normal("testsaliences_combined", epochs=500, both=True)
 	#plot_error_maps_saliences_from_preds("gestalt/STANDARD_WITH_GESTALT_AUTOENCODER_MODEL", "testsaliences_combined")
 	fname= "all_errmaps_all_colour_combinations_imgs_preds_errmaps"
@@ -790,9 +770,6 @@ if __name__ == '__main__':
 		#print errmap
 		#plt.imshow(errmaps[120 + i], cmap='gray')
 		#plt.show()
-		#sort out image cropping!!! now! this should only take like half an hour!
-	#write in PUMA model!?
-	#focus on abstract and conclusion as that's where triage happens!
 		img = imgs[120+i]
 		img = np.reshape(img, (100,100))
 		img = img[:,15:85]
@@ -816,53 +793,3 @@ if __name__ == '__main__':
 		compare_images(images,titles)
 	
 	
-	
-	
-		
-
-
-
-
-
-
-#ideas: predictive processing neglect- very low precision means that side completely fades from view? except subconsciously???
-
-
-
-
-
-
-
-
-
-
-
-
-
-# the next step, depending on what we say to richard, is the hyperparam search. that isn't that difficult, but that's the default step. we can write something to dothat, and to be hoenst I should probably just do it now, as I'm not realistically going to be able to do any significantly useful other stuff in like the half an hour I've got now. I'll upload my react/vue stuff to github, and then see where i stand, I think. Getting hyperparam search working andthe save files set up, so Ican just run it tonight while doing stuff with mycah would be the ideal, so I shuold look at it and see how it's going and where we get up to... so let's do that!
-
-# one very simpel thing we we don't actually compare the mean maps to the saliecne traces. maybe if we did that would help. that's pretty trivial to do all things considered, so we should look at making that work!
-
-# first we're going to run this and then test it by hand. we're going to have to have some eval scripts to evaluate differences for us, and then test different smoothing methods, such as gaussian smoothing or whatever to see if there's anything useful there. furthermore, and we are kind of doomed here, we'll need to figure out just hwt exactly we're doing re hyperparameters and stuff,  but a lot of that is incremental and boring. We could also start writign stuff up, but basiclaly just talk to richard. that seems to be the way. okay, now I'ev got stuff going I think I'm going to go to my desk and start working through the react-yelp tutorial to see if there's anything cool or useful there... should be fun!
-
-
-# okay, so what are our plans for today wrt the phd stuff? This is actually going okay, because the saliences do often seem to track the error differences, which is cool
-# so, what are we going to do? well, there are two stories we can tell, one is just about the hemispheres generating edge detection kind of automatically, whic his really awesome, we should definitely show richard thatand tie that into predictive processing and biological models, as it's really cool. could be a minimum publishable unit (as well as the autism!?). second we would try to recreate the salienec patterns by testing them with our thing. that's really what we needto get done now, I feel so let's get on that
-# the other trouble is that the current collect dirs doesn't actually do stuff in order either, which is unfortuante, I think so we'll need to rewrite that one to do so also, and then we just need to train the model and compare which is fair enoguh. at some later point we'll need to start wriging plotting functions so we can compare training performance over time, and start seriosuly consdiering optimisations and scripts for hyperparameter search. moreoever, we'll need to start trying the different ones. that's where I'll just need to go into the office and get some serious computatoinal power
-# but yeah, I think today the aim is just to find this and get it running while we actually work on the other important stuff, which is greater importance re Enyo, such as figuring out how to do a react application. that seems very important, and must be done
-
-# right, that means I actually need to start working at stuff. so let's do that?
-# okay, we emailed richard, next step is generating the function that combines the data into a big array, andthen training with it, so let's do that
-
-
-# so basically we have found that the things it has trouble predicting, and thus the most "informative" parts of the picture are basically the edges, nwo this is actually quite interesting, and if I'mfeeling pretty dodgy, I could write a paper on this lol, as it would be quite interesting, and could see why we do edges, and then we would do a fucking thing where we see edges and perhaps try to integrate it with gestalts, and so forth, and that could be really really interesting, but Ithink it's quite unlikely to be honest but at least that's something cool we've found. one thing we need to do is to improve the plot error map functoin to show all three, so let's do that, and then lets work on other stuff - i.e. we'll perhaps, I do't know what the next step is - doing gaussian smoothing seems to be important, also training on the huge image corpus and then cross validating, with the actual responses. so let's work on that and get that done today, then we can do some smiple html and css which could be fun. tomorrow we'll prepare what we're actually going to say to richard!
-
-
-# we should actually talk to richard about that... what are our next steps, however? I'm not actually sure of any of this, so I should have a look to see what we've got
-# we could perhaps try to write a paper about it - could be interesting. next steps are trying it out, trying to actually properly cmopare the images to the things. let's have a look at that now
-
-# I think I know what the issue is, actually, which is interesting. I'm pretty sure it relates to the fact that python dictionaries aren't ordered, and when we do our file system, it parses a dictoinary, which is going to be really really irritating. We're going to have to have a better unciton
-# OTOH the salience maps often actually look kind of like the outlines which we see with the reconstructions, so that's really promising. we should try to solev these issues, I feel
-
-# yeah, there aretwo problems. firstly, it apparently completely ignores each file, secodnly it actually doesn't read them in in the right order AT ALL, so I'm really not sure how I should do this to be perfectly honest. I really don't know. the trouble is they come in directories, so I'm not sure how to maintain the order. let's go on stackoverflow to have a look!
-# okay, there are only 100, it just orders them in even numbers for whatever dumb reason. okay, we can solve this, let's get to it!
