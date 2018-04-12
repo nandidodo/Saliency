@@ -1,5 +1,3 @@
-# okay, this is just for generic utils. such as saving functionality
-
 #from __future__ import division
 import numpy as np
 import scipy
@@ -11,13 +9,9 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, TensorBoa
 import os
 
 
-#simple thing here really, depending on whether this actually works, idk, but may as well have it as a util function
 def get_run_num():
 	if len(sys.argv)>1:
 		return sys.argv[1]
-
-
-#pickle loading and saving functoinality
 
 def save(obj, fname):
 	pickle.dump(obj, open(fname, 'wb'))
@@ -61,7 +55,6 @@ def build_callbacks(save_path, min_delta = 1e-4, patience = 10, histogram_freq=0
 
 
 def calculate_variance_of_errmap(errmaps):
-	#so, I'm a bit confused here; should we calculate the variance of the error map or of the actual image for the predictive processing thing. I think we could just do both to be honest? but it would be kind of funny. I honestly do not know? I think the variance of te predictoin error would make the most sense. See if it makesthe images any more useful. if it does it would be hilarious to be honest?
 	shape = errmaps.shape
 	assert len(shape)==3, 'error map must be two dimensinoal (+ number of error maps)'
 	variance_map = np.zeros((shape[1], shape[2]))
@@ -75,8 +68,6 @@ def calculate_variance_of_errmap(errmaps):
 	#hopefully this will work
 
 def apply_var_map_to_sal_map(salmap, varmap):
-	#this just does the division. See if it gives any better results
-	#this is aactually more in line with the predictive processing framework, so that's good!
 	shape = salmap.shape
 	assert len(shape)==2, 'salience map must be two dimensional'
 	assert shape == varmap.shape,'maps must both be the same shape'
@@ -340,7 +331,7 @@ def get_mean_maps(err_maps):
 	return avg_map
 
 def mean_maps(all_err_maps):
-	#all err maps is a tuple of error maps, I think, where each error maps contains multiple of the whole test set
+
 	assert len(all_err_maps)>0 and type(all_err_maps) == tuple, "all error maps must be a tuple of error maps containing at least one!"
 	num_maps = len(all_err_maps)
 	shape = all_err_maps[0].shape
@@ -362,12 +353,6 @@ def mean_maps(all_err_maps):
 	avg_maps = np.array(avg_maps)
 	return avg_maps	
 		
-
-#the trouble here is that we generate a mean map for each test image, and we don't want to average them all until we do that, thus, we need to figure out a loop over all of them also, as well as reshaping, so let's look at this!
-	#this algorithm is horrendously inefficient. hopefully it doesn't really matter that much!
-
-
-
 def reshape_into_image(img):
 	shape = img.shape
 	print shape
@@ -376,7 +361,6 @@ def reshape_into_image(img):
 		return np.reshape(img, (len(img), shape[1], shape[2]))
 	if len(shape)==3:
 		if shape[2] > 3:
-			# we assume that it's that we've got too many channels or something so we just return the img
 			return img
 		if shape[2] >1 and shape[2] <=3:
 			return img
@@ -442,7 +426,6 @@ def split_into_test_train(data, frac_train = 0.9, frac_test = 0.1):
 	return train, test
 
 def get_error(err_map, sal_map, accuracy = True, verbose = True):
-	# so thi is just a simple way of getting the accuracy, as we simply sum the abs of it and divide by the shape of them both, so it's pretty simple tbh
 	salience_error_map = np.abs(err_map - sal_map)
 	error = np.sum(salience_error_map)
 	print "ERROR: " + str(error)
@@ -558,15 +541,13 @@ def get_min_loss(res_dict, name=True):
 	return min_loss
 
 
-def gaussian_filter(img, sigma = 2):
+def gaussian_filter(img, sigma = 4):
 	# just to be safe
 	img = reshape_into_image(img)
 	return scipy.ndimage.filters.gaussian_filter(img, sigma)
 
 
 def compare_saliences(smaps1, smaps2, maps=True, verbose = True, save=False,save_name=None, show=False, N = 10, start =0):
-	#this will generate both accuracies and a list of images
-	#they must be parrallel arrays
 	shape = smaps1.shape
 	if verbose:
 		print "Shape smap1: " + str(shape)
@@ -577,8 +558,7 @@ def compare_saliences(smaps1, smaps2, maps=True, verbose = True, save=False,save
 	if maps:
 		maplist = []
 	for i in xrange(len(smaps1)):
-		errmap = np.absolute(smaps1[i] -smaps2[i])
-		#the error here is just the sum over the array. this will be large and ugly, but hopefully it will give us some idea of the kind of things we are doing wrong. also won't really scale with the image. we could probably rescale it by image size, 
+		errmap = np.absolute(smaps1[i] -smaps2[i]) 
 		err = np.sum(errmap) / (shape[1] * shape[2])
 		if maps:
 			maplist.append(errmap)
@@ -859,7 +839,6 @@ def bandpass_filter(img, show = False):
 
 	
 def filter_dataset(dataset, f, N = -1):
-	#we're going to do this in a horrendously inefficient for loop. I don't see how we can necessarily do this in a vectorisedfashion
 	if N == -1:
 		N = len(dataset)
 
@@ -881,7 +860,3 @@ def split_dataset_spatial_frequency(dataset, save=True, save_name=None):
 		save_array(res, save_name)
 	return res
 
-
-
-	
-	
