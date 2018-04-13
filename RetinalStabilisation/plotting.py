@@ -61,6 +61,83 @@ def average_error_bar_chart(save_name):
 	plt.show()
 	return fig
 
+#okay, I need to plot all the fixations on oen graph to see what's up, hopefully it will work
+#plot 12 for the fading and 12 for the non fading?
+
+def plot_graph_loop(imgs, num_rows, imgs_per_row, item_label, cmap='gray'):
+	if len(imgs)< num_rows*imgs_per_row:
+		raise ValueError('Not enough images supplied for graphing')
+	fig = plt.figure()
+	for i in xrange(num_rows):
+		for j in range(imgs_per_row):
+
+			#hope this is right but probably not as I have brain damage
+			epoch = (i*imgs_per_row)+(j+1)
+			print epoch
+			img = imgs[epoch][2] # since you're getting the errmaps
+			print img.shape
+			ax = fig.add_subplot(num_rows, imgs_per_row, epoch)
+			plt.imshow(imgs[epoch])
+			plt.title(item_label + ' Epoch: ' + str(epoch))
+			plt.xticks([])
+			plt.yticks([])
+
+	#I just can't think properly, dagnabbit, and I feel sick. ugh, I'm really struggling with this
+	# and I'm just fighting against carbon monoxide poisoning /brian damage... argh!
+	plt.suptitle('Prediction errors of ' + item_label +' Condition being fixated over time', fontsize=14)
+	fig.tight_layout()
+	fig.subplots_adjust(wspace=0.6)
+	plt.show()
+	return fig
+
+	#who knew this was so horrendously difficlt just to get the requisite plots. 
+	# I also need to do the data analysis of the drift results
+	# and then write the whole discussion and conclusion, why isthi so difficult
+	 #
+
+
+def plot_12_fixation_errmaps_one_graph_both(fixation_results_augments, fixation_results_copy,N=None, save_name =None):
+	#not totally sure what the point of N is, but hey, I think it's so we can see them all, let's try it out
+
+	if N is None:
+		N = len(fixation_results_augments)
+
+	#just test this is the start
+	if type(fixation_results_augments) is str:
+		fixation_results_augments = load(fixation_results_augments)
+	if type(fixation_results_copy) is str:
+		fixation_results_copy = load(fixation_results_copy)
+
+	#this is the sort of careless stupidity which could be caused by brain damage argh!
+	if len(fixation_results_copy)!=len(fixation_results_augments):
+		raise ValueError('Copies and augments should have same length: Augments Length:' + str(len(fixation_results_augments)) + ' Copies length: ' +str(len(fixation_results_copy)))
+
+
+		#this is the sort of other stupid mistakes caused by my weird feelin headache and brain damage... dagnabbit
+		# I would never have made that mistake before. I don't know what is wrong with me
+	print type(fixation_results_copy)
+	print len(fixation_results_copy)
+	print type(fixation_results_augments)
+	print len(fixation_results_augments)
+	bib = fixation_results_augments[0]
+	tib = fixation_results_copy[2]
+	print type(bib)
+	print len(bib)
+	print type(tib)
+	print len(tib)
+	b = bib[0]
+	print type(b)
+	print len(b)
+
+	run_num = 12 # assume 12
+	aug_fig = plot_graph_loop(fixation_results_augments, 4,3,'Augments')
+	copy_fig = plot_graph_loop(fixation_results_copy, 4,3,'Copies')
+
+
+
+
+
+
 def plot_fixation_errmaps(fixation_results_augments, fixation_results_copy, N = None):
 	if N is None:
 		N = len(fixation_results_augments)
@@ -269,8 +346,8 @@ if __name__=='__main__':
 	#plot_validation_loss('augments_validation_loss.npy', 'copies_validation_loss.npy')
 	#average_error_bar_chart('errors_1')
 	#plot_generative_invariance_bar_chart('results/generative_invariance')
-	plot_discriminative_invariance_bar_chart('results/discriminative_invariance_2')
-
+	#plot_discriminative_invariance_bar_chart('results/discriminative_invariance_2')
+	plot_12_fixation_errmaps_one_graph_both('results/from_scratch_fixation_augments', 'results/from_scratch_fixation_copy')
 	# if copy performs better in the copy position, could argue as to why suppressed
 	# but they may not even be suppressed and whether that is the case is doubtful
 	# but it would be a good explanation for why it occurs, why it would be useful
