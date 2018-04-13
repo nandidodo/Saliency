@@ -74,19 +74,26 @@ def plot_graph_loop(imgs, num_rows, imgs_per_row, item_label, cmap='gray'):
 			#hope this is right but probably not as I have brain damage
 			epoch = (i*imgs_per_row)+(j+1)
 			print epoch
-			img = imgs[epoch][2] # since you're getting the errmaps
+			img = imgs[epoch][2][0] # since you're getting the errmaps
+			img = np.reshape(img, (img.shape[0], img.shape[1]))
 			print img.shape
 			ax = fig.add_subplot(num_rows, imgs_per_row, epoch)
-			plt.imshow(imgs[epoch])
-			plt.title(item_label + ' Epoch: ' + str(epoch))
+			plt.imshow(img, vmin=0, vmax=255., cmap=cmap)
+			plt.title('Epoch: ' + str(epoch), fontsize=7)
 			plt.xticks([])
 			plt.yticks([])
+			#first time my graphing plotting logic worked! that's awesome!!
+			# even though I'm clumsy and forgetful in some things
+			# that's objectively quite difficult logic and i did okay,
+			# so hopefully my brain damage isn't quite that severe
+			# even though I'm having werid amounts of problems typgin
+			# which is fair enough I don't even know... the results seem to work okay which is great
 
 	#I just can't think properly, dagnabbit, and I feel sick. ugh, I'm really struggling with this
 	# and I'm just fighting against carbon monoxide poisoning /brian damage... argh!
-	plt.suptitle('Prediction errors of ' + item_label +' Condition being fixated over time', fontsize=14)
+	plt.suptitle('Prediction errors of ' + item_label +' condition being fixated over time', fontsize=11)
+	fig.subplots_adjust(top=0.2,wspace=0.1, left=0.1)
 	fig.tight_layout()
-	fig.subplots_adjust(wspace=0.6)
 	plt.show()
 	return fig
 
@@ -353,6 +360,7 @@ if __name__=='__main__':
 	# but it would be a good explanation for why it occurs, why it would be useful
 	# or wahtever, but they don't sem to be random but instead modulated by task demands.
 
+	#average_error_bar_chart('drift_errors_1')
 	# so this did not work precisely as hoped, the resulst are strange, error decreases(!)
 	# further from the original image. not sure what is going there
 	# I think I'm going to have to train the discriminative network instead
