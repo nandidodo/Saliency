@@ -455,6 +455,26 @@ def microsaccade_step(item, microsaccade_translate, microsaccade_vertical_prob):
 			aug = translate(item, (microsaccade_translate, 0))
 	return aug
 
+def augment_dataset_large_microsaccade(dataset, num_augments, microsaccade_min=4, microsaccade_max=8, mirosaccade_vertical_prob=0.5, save_name=None):
+	if type(dataset) is str:
+		dataset = np.load(dataset)
+
+	augments = []
+	for i in xrange(len(dataset)):
+		item = dataset[i]
+		for j in xrange(num_augments):
+			translate = int(np.random.uniform(low=microsaccade_min, high=microsaccade_max))
+			aug = microsaccade_step(item, translate, microsaccade_vertical_prob)
+			augments.append(aug)
+	augments = np.array(augments)
+
+	if save_name is not None:
+		np.save(save_name, augments)
+	return augments
+
+
+
+
 def drift_and_microsaccades(dataset, num_augments, microsaccade_prob,microsaccade_translate, mean_drift_translate, variance_drift_translate,microsaccade_vertical_prob=0.5, show=False, save_name = None):
 
 	# this should be interesting to test in a bit, see if it helps or hinders
@@ -496,6 +516,12 @@ def drift_and_microsaccades(dataset, num_augments, microsaccade_prob,microsaccad
 #impairment from the possible (and in fact unlikely, and not from CO or the windowcleaner) impairment 
 # that happened yesterdya, if I'm going crazy, it's just that to be honest
 #I just don't know what I need to program to be honest
+
+# so I think I can still program(!yay!) at least a simple function like this, which is goo
+# so then that's not a serious proble, even if this is fairly trivial and largely like
+# what has gone before. I think I'm feeling a little weird. hopefully my memory or IQ haven't been harmed
+# but really, I need to improev my sleep drastically as that almost certainly does equal harm
+#than a  bit of weirdnes which may just have been extreme tiredness, so what do I know!
 def levyFlightDriftStep(item, alpha, vertical_prob=0.5):
 	#sample from power law to get stpe size
 	sample = np.random.uniform(low=0, high=1)
