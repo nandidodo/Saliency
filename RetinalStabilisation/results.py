@@ -259,8 +259,15 @@ if __name__ == '__main__':
 
 	#test_fixations()
 	#test_generative_invariance('model_mnist_augments', 'model_mnist_copy','results/generative_invariance')
-	test_discriminative_invariance('discriminative_aug_model_2','discriminative_copy_model_2', 'results/discriminative_invariance_2')
+	#test_discriminative_invariance('discriminative_aug_model_2','discriminative_copy_model_2', 'results/discriminative_invariance_2')
 	# it sort of shows waht I want to show, but not that well, dagnabbit!
+
+	#begin with the drift!
+	#calculate_average_error('results/drift_aug', 'results/drift_copy', save_name='drift_errors_1')
+	#calculate the drift invariances
+	# this network hasn't been trained for as long, so I'll need to rewrite the discussion to accoutn for that
+	# and figure uot how to get good graphs from matplotlib, so I honestly do not know... argh!
+	test_generative_invariance('drift_model', 'drift_copy_model','results/drift_invariance')
 
 	# so for some reason, even though the validation and test errors are barely different
 	# this is not the case for the error maps where there is a significantand consistent difference
