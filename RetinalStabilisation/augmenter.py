@@ -661,6 +661,11 @@ if __name__ == '__main__':
 
 	#now that the drifts have been created, it'stime to create the melange
 	#train
-	drift_and_microsaccades(xtrain, num_augments=10, microsaccade_prob=0.1, microsaccade_translate=8, mean_drift_translate=2, variance_drift_translate=1, microsaccade_vertical_prob=0.5, show=False, save_name='data/drift_and_microsaccades_train')
+	#drift_and_microsaccades(xtrain, num_augments=10, microsaccade_prob=0.1, microsaccade_translate=8, mean_drift_translate=2, variance_drift_translate=1, microsaccade_vertical_prob=0.5, show=False, save_name='data/drift_and_microsaccades_train')
 	#test
-	drift_and_microsaccades(xtest, num_augments=10, microsaccade_prob=0.1, microsaccade_translate=8, mean_drift_translate=2, variance_drift_translate=1, microsaccade_vertical_prob=0.5, show=False, save_name='data/drift_and_microsaccades_test')
+	#drift_and_microsaccades(xtest, num_augments=10, microsaccade_prob=0.1, microsaccade_translate=8, mean_drift_translate=2, variance_drift_translate=1, microsaccade_vertical_prob=0.5, show=False, save_name='data/drift_and_microsaccades_test')
+
+	#augment with proper microsaccades
+	augment_dataset_large_microsaccade(xtrain, 10, save_name='data/proper_microsaccades_train')
+	#test
+	augment_dataset_large_microsaccade(xtest, 10, save_name='data/proper_microsaccades_test')
