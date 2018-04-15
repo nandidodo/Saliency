@@ -455,13 +455,15 @@ def microsaccade_step(item, microsaccade_translate, microsaccade_vertical_prob):
 			aug = translate(item, (microsaccade_translate, 0))
 	return aug
 
-def augment_dataset_large_microsaccade(dataset, num_augments, microsaccade_min=4, microsaccade_max=8, mirosaccade_vertical_prob=0.5, save_name=None):
+def augment_dataset_large_microsaccade(dataset, num_augments, microsaccade_min=4, microsaccade_max=8, microsaccade_vertical_prob=0.5, save_name=None):
 	if type(dataset) is str:
 		dataset = np.load(dataset)
 
 	augments = []
-	for i in xrange(len(dataset)):
+	N = len(dataset)
+	for i in xrange(N):
 		item = dataset[i]
+		print "Item: " + str(i) + " of: " + str(N) + " complete"
 		for j in xrange(num_augments):
 			translate = int(np.random.uniform(low=microsaccade_min, high=microsaccade_max))
 			aug = microsaccade_step(item, translate, microsaccade_vertical_prob)
