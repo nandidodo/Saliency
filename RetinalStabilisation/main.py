@@ -28,6 +28,13 @@ from keras.models import load_model
 def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropoutBatchNorm, batch_size = 128, save_model_name=None, ret = False):
 	#normalise data
 	print "starting mnist model"
+	if type(train) is str:
+		train = np.load(train)
+
+	if type(test) is str:
+		test = np.load(test)
+
+
 	train = train.astype('float32')/255.
 	test = test.astype('float32')/255.
 	#reshape for input to conv network
@@ -45,7 +52,7 @@ def run_mnist_model(train, test,save_name=None,epochs=100, Model=SimpleConvDropo
 	model.compile(optimizer='sgd', loss='mse')
 	#callbacks = build_callbacks('/callbacks')
 	print "loaded data and compiled model"
-	his = model.fit(train, train, epochs=epochs, batch_size=batch_size, shuffle=True, validation_data=(test, test))
+	his = model.fit(train, train, epochs=epochs, batch_size=batch_size, shuffle=False, validation_data=(test, test))
 	#train is no longer needed, so free it
 	print "fitted model"
 	train = 0
@@ -346,26 +353,41 @@ if __name__ == '__main__':
 	# I seriously need to talk to richard about... dagnabbit
 	# but first these papers. and then I'll be fine! and also the predictive processing stuff
 	# so I really don't know about that at all, so hey, who knows?
-	train = 'data/discriminative_train_aug_data.npy'
-	train_labels = 'data/discriminative_train_aug_labels.npy'
-	test = 'data/discriminative_test_aug_data.npy'
-	test_labels = 'data/discriminative_test_aug_labels.npy'
-	save_name = 'results/discriminative_aug_2'
-	save_model_name = 'discriminative_aug_model_2'
-	epochs=50
-	batch_size=64
-	mnist_discriminative(train, test, train_labels,test_labels,save_name=save_name, save_model_name=save_model_name, epochs=epochs, batch_size=batch_size)
+	#train = 'data/discriminative_train_aug_data.npy'
+	#train_labels = 'data/discriminative_train_aug_labels.npy'
+	#test = 'data/discriminative_test_aug_data.npy'
+	#test_labels = 'data/discriminative_test_aug_labels.npy'
+	#save_name = 'results/discriminative_aug_2'
+	#save_model_name = 'discriminative_aug_model_2'
+	#epochs=50
+	#batch_size=64
+	#mnist_discriminative(train, test, train_labels,test_labels,save_name=save_name, save_model_name=save_model_name, epochs=epochs, batch_size=batch_size)
 
-	train = 'data/discriminative_train_copy_data.npy'
-	train_labels = 'data/discriminative_train_copy_labels.npy'
-	test = 'data/discriminative_test_copy_data.npy'
-	test_labels = 'data/discriminative_test_copy_labels.npy'
-	save_name = 'results/discriminative_copy_2'
-	save_model_name = 'discriminative_copy_model_2'
-	epochs=50
-	batch_size=64
-	mnist_discriminative(train, test, train_labels,test_labels,save_name=save_name, save_model_name=save_model_name, epochs=epochs, batch_size=batch_size)
+	#train = 'data/discriminative_train_copy_data.npy'
+	#train_labels = 'data/discriminative_train_copy_labels.npy'
+	#test = 'data/discriminative_test_copy_data.npy'
+	#test_labels = 'data/discriminative_test_copy_labels.npy'
+	#save_name = 'results/discriminative_copy_2'
+	#save_model_name = 'discriminative_copy_model_2'
+	#epochs=50
+	#batch_size=64
+	#mnist_discriminative(train, test, train_labels,test_labels,save_name=save_name, save_model_name=save_model_name, epochs=epochs, batch_size=batch_size)
 
 	#yay! this is finally training! all is well, hopefully!
 	#now I can go back to trying to prepare the literature review and so forth!
 	#run this which will last forever and take forever, dagnabbit, hope for the best
+
+
+	#run the drift and copy models
+	#drift model
+	#run_mnist_model('data/random_walk_drift_train.npy', 'data/random_walk_drift_test.npy', save_name='results/drift_aug',epochs=10, batch_size=64, save_model_name='drift_model')
+	#copy model
+	#run_mnist_model('data/mnist_dataset_train_copies.npy', 'data/mnist_dataset_test_copies.npy',save_name='results/drift_copy', epochs=10, batch_size=64, save_model_name='drift_copy_model')
+
+	#drift and microsaccades model
+	run_mnist_model('data/drift_and_microsaccades_train.npy', 'data/drift_and_microsacces_test.npy', save_name='results/drift_and_microsaccades_aug',epochs=20, batch_size=64, save_model_name='drift_and_microsaccades_model')
+	#copy model
+	run_mnist_model('data/mnist_dataset_train_copies.npy', 'data/mnist_dataset_test_copies.npy',save_name='results/drift_and_microsaccades_copy', epochs=20, batch_size=64, save_model_name='drift_and_microsaccades_copy_model')
+
+
+	#normalise data
