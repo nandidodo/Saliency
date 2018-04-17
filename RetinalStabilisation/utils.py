@@ -11,6 +11,30 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, TensorBoa
 import os
 
 
+#okay, I need to do simple things to get medians and t-tests as that is fairly straightforward hopefully
+#for exlporatory data analysis, and to have some statistical backing
+def median(data):
+	N = len(data)
+	if N %2 ==0:
+		#so even
+		half = N//2
+		d1 = data[half]
+		d2 = data[half+1]
+		return (d1 + d2)/2
+	if N % 2 !==0:
+		return data[(N//2)+1]
+
+def t_test(d1, d2):
+	N1 = len(d1)
+	N2 = len(d2)
+	mu1 = np.mean(d1)
+	mu2 = np.mean(d2)
+	var1 = np.var(d1)
+	var2 = np.var(d2)
+	numerator = np.abs(mu1-mu2)
+	denom = np.sqrt((((N1+1)* var1 + (N2+1)*var2)/(N1+N2+2))*(1/N1+1) * (1/N2+1))
+	t = numerator/denom
+	return t
 
 def one_hot(labels,num_classes=None):
 	if num_classes is None:
