@@ -9,6 +9,7 @@ from skimage import exposure
 import sys
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, TensorBoard, TerminateOnNaN, ReduceLROnPlateau
 import os
+from math import gamma
 
 
 #okay, I need to do simple things to get medians and t-tests as that is fairly straightforward hopefully
@@ -34,7 +35,25 @@ def t_test(d1, d2):
 	numerator = np.abs(mu1-mu2)
 	denom = np.sqrt((((N1+1)* var1 + (N2+1)*var2)/(N1+N2+2))*(1/N1+1) * (1/N2+1))
 	t = numerator/denom
+	#not sure precisely how to get degrees of freedom here!
+	p = t_distribution_mine(t, N1-1)
 	return t
+
+def t_distribution_mine(t, df):
+	const = gamma((df+1)/2) / (np.sqrt(df * np.pi) * gamma(df/2))
+	exp = (1 + np.square(t)/df)**(-1*(df+1)/2)
+	return const*exp
+
+def KL_divergence(p,q):
+	#assumes p and q are lists of probability values which have been normalised
+	# so it's the discrete kl, so not difficult to calculate
+	if len(p) !=len(q):
+		raise ValueError('The distributions must have matching lengths')
+
+	total = 0
+	for i in xrange(len(p)):
+		total += p[i] + np.log(p[i]/q[i])
+	return total
 
 def one_hot(labels,num_classes=None):
 	if num_classes is None:
