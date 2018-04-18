@@ -25,6 +25,9 @@ def median(data):
 	if N % 2 !==0:
 		return data[(N//2)+1]
 
+def variance(data):
+	return np.var(data)
+
 def t_test(d1, d2):
 	N1 = len(d1)
 	N2 = len(d2)
@@ -38,6 +41,9 @@ def t_test(d1, d2):
 	#not sure precisely how to get degrees of freedom here!
 	p = t_distribution_mine(t, N1-1)
 	return t
+
+	#I guess now I'm working on this... so, what is the ultimate plan here?
+	# presumably to actually run a t-test on things, or at least determine variance
 
 def t_distribution_mine(t, df):
 	const = gamma((df+1)/2) / (np.sqrt(df * np.pi) * gamma(df/2))
@@ -54,6 +60,13 @@ def KL_divergence(p,q):
 	for i in xrange(len(p)):
 		total += p[i] + np.log(p[i]/q[i])
 	return total
+
+#stirlings approximation for calculating the gamma factor - i.e. factorial - an old method
+# lanczos' method is better! but seems more complicated
+def stirling_gamma_approximation(n):
+	#define e.
+	e = np.exp(-1)
+	return np.sqrt(2*np.pi*n) * np.power((n/e), n)
 
 def one_hot(labels,num_classes=None):
 	if num_classes is None:
