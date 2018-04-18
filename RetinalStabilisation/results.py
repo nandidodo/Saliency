@@ -183,7 +183,7 @@ def test_generative_invariance(aug_model, copy_model, results_save=None):
 		np.save(results_save+'_pixels', pixels)
 	return aug_errors, copy_errors,pixels
 
-def test_discriminative_invariance(aug_model, copy_model, results_save=None):
+def test_discriminative_invariance(aug_model, copy_model, results_save=None, info=False):
 	aug_model = load_model(aug_model)
 	copy_model = load_model(copy_model)
 
@@ -246,6 +246,90 @@ def test_discriminative_invariance(aug_model, copy_model, results_save=None):
 	return aug_accuracies, copy_accuracies, pixels
 
 
+def split_cross_validate_invariance_accuracies(aug_model, copy_model, num_splits=10, results_save=None, plot=False):
+	if type(aug_model) is str:
+		aug_model = load_model(aug_model)
+	if type(copy_model) is str:
+		copy_model = load_model(copy_model)
+
+	mnist_0px_data = np.load('data/discriminative_0pixels_translate_data.npy')
+	mnist_2px_data = np.load('data/discriminative_2pixels_translate_data.npy')
+	mnist_4px_data = np.load('data/discriminative_4pixels_translate_data.npy')
+	mnist_6px_data = np.load('data/discriminative_6pixels_translate_data.npy')
+	mnist_8px_data = np.load('data/discriminative_8pixels_translate_data.npy')
+
+	#I'm going to convert these to one-hot - do that here
+	mnist_0px_labels = np.load('data/discriminative_0pixels_translate_labels.npy')
+	mnist_2px_labels = np.load('data/discriminative_2pixels_translate_labels.npy')
+	mnist_4px_labels = np.load('data/discriminative_4pixels_translate_labels.npy')
+	mnist_6px_labels = np.load('data/discriminative_6pixels_translate_labels.npy')
+	mnist_8px_labels = np.load('data/discriminative_8pixels_translate_labels.npy')
+
+	pixels = [0,2,4,6,8]
+
+	invariance_data = [mnist_0px_data,mnist_2px_data,mnist_4px_data,mnist_6px_data,mnist_8px_data]
+	invariance_labels = [mnist_0px_labels,mnist_2px_labels,mnist_4px_labels,mnist_6px_labels,mnist_8px_labels]
+
+	all_aug_accs = []
+	all_copy_accs =[]
+	assert len(invariance_data) == len(invariance_labels),'Serious problem. invariance labels and data different shape'
+	for i in xrange(len(invariance_data)):
+		data = invariance_data[i]
+		labels = invariance_labels[i]
+		#these are parralel arrays so this should work
+		aug_accs = []
+		copy_accs = []
+		split_length = len(data)//num_splits
+		for j in xrange(num_splits):
+			d = data[i*split_length:(j+1)*split_length]
+			l = labels[i*split_length:(j+1)*split_length]
+			sh = d.shape
+			d = np.reshape(data, (sh[0],sh[1],sh[2],1))
+
+			#reshape labels
+			l = one_hot(l)
+			#predict
+			aug_pred_labels = aug_model.predict(d)
+			copy_pred_labels = copy_model.predict(d)
+			print "predictions"
+			print aug_pred_labels.shape
+			#just get teh accuracies and save it
+			aug_acc = classification_accuracy(l, aug_pred_labels)
+			copy_acc = classification_accuracy(l, copy_pred_labels)
+
+			print "split number: " + str(j) + "pixels: " +str(pixels[i])
+			print "aug acc: " , aug_acc
+			print "copy acc: " , copy_acc
+
+			aug_accs.append(aug_acc)
+			copy_accs.append(copy_acc)
+		aug_accs = np.array(aug_accs)
+		copy_accs = np.array(copy_accs)
+		#now analysis and printing
+		print "pixels: " + str(pixels[i]) + " analysis:"
+		print "aug mean: " + str(np.mean(aug_accs))
+		print "copy mean: ", np.mean(copy_accs)
+		print "aug median: ", median(aug_accs)
+		print "copy median: ", median(copy_accs)
+		print "aug variance: ", np.var(aug_accs)
+		print "copy variance: ", np.var(copy_accs)
+		if plot:
+			fig = plt.figure()
+			plt.bar(aug_accs, label='Augmentation accuracies')
+			plt.bar(copy_accs, label='Copy accuracies')
+			plt.legend()
+			plt.show()
+		all_aug_accs.append(aug_accs)
+		all_copy_accs.append(copy_accs)
+
+	#now save
+	if save_name is not None:
+		save_array(all_aug_accs, save_name+'_all_aug_accs')
+		save_array(all_copy_accs, save_name+'_all_copy_accs')
+
+	return all_aug_accs, all_copy_accs
+
+
 
 #and some quick tests
 if __name__ == '__main__':
@@ -267,7 +351,7 @@ if __name__ == '__main__':
 	#calculate the drift invariances
 	# this network hasn't been trained for as long, so I'll need to rewrite the discussion to accoutn for that
 	# and figure uot how to get good graphs from matplotlib, so I honestly do not know... argh!
-	test_generative_invariance('drift_model', 'drift_copy_model','results/drift_invariance')
+	#test_generative_invariance('drift_model', 'drift_copy_model','results/drift_invariance')
 
 	# so for some reason, even though the validation and test errors are barely different
 	# this is not the case for the error maps where there is a significantand consistent difference
@@ -285,6 +369,10 @@ if __name__ == '__main__':
 	# the other results work out vaguely okay, I think, so that is nice,
 	# I also obviously need the graphs of somethign else, so that is cool also,
 	#yay!
+
+
+	# okay, I'm going to try to actually plot some data see if anything useful comes up
+	# some exlporatory data analysis on what has already been done!
 
 
 
