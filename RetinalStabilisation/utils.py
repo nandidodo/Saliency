@@ -22,7 +22,7 @@ def median(data):
 		d1 = data[half]
 		d2 = data[half+1]
 		return (d1 + d2)/2
-	if N % 2 !==0:
+	if N % 2 !=0:
 		return data[(N//2)+1]
 
 def variance(data):
