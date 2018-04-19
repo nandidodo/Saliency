@@ -373,6 +373,7 @@ if __name__ == '__main__':
 
 	# okay, I'm going to try to actually plot some data see if anything useful comes up
 	# some exlporatory data analysis on what has already been done!
+	split_cross_validate_invariance_accuracies('model_mnist_augments','model_mnist_copy',num_splits=10, results_save='results/invariance_splits_test', plot=True)
 
 
 
