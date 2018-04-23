@@ -9,6 +9,8 @@
 
 from __future__ import division
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 def euclidean_distance(center, point):
 	if len(center)!=len(point):
@@ -42,19 +44,28 @@ def average_point(mat,center,px_radius, image_height, image_width):
 			ypoint = y - px_radius + j
 			#print euclidean_distance(center, (i,j))
 			#check it falls within bounds, then check euclidena distance
-			if xpoint >=0 and xpoint <= image_height:
-				if ypoint >=0 and ypoint + j <=image_width:
+			if xpoint >=0 and xpoint < image_height:
+				if ypoint >=0 and ypoint + j <image_width:
 					if euclidean_distance(center, (xpoint, ypoint)) <=px_radius:
 						#print "adding to average"
-						green_total+= mat[i][j][0]
-						red_total+= mat[i][j][1]
-						blue_total+=mat[i][j][2]
+						green_total+= mat[xpoint][ypoint][0]
+						print "green added: " + str(mat[i][j][0])
+						print "green total: " + str(green_total)
+						red_total+= mat[xpoint][ypoint][1]
+						blue_total+=mat[xpoint][ypoint][2]
 						number+=1
 
 	print "number: ", number
+	print "green: " + str(green_total/number)
 	return (green_total/number, red_total/number, blue_total/number)
 
-def matrix_average_step(mat, average_radius, copy=True):
+def create_random_mask(shape, multiplier):
+	if len(shape)!=3:
+		raise ValueError('Shape must be three dimensional for colour image')
+	height,width,channels = shape
+	return multiplier * np.random.randn(height, width, channels)
+
+def matrix_average_step(mat, average_radius, copy=True, random_multiplier=None):
 	if len(mat.shape)!=3 or mat.shape[2]!=3:
 		raise ValueError('Matrix must be 2d colour image with 3 channels in format h,w,ch')
 
@@ -67,13 +78,21 @@ def matrix_average_step(mat, average_radius, copy=True):
 	for i in xrange(height):
 		for j in xrange(width):
 			new_mat[i][j] = average_point(mat, (i,j), average_radius, height,width)
+	if random_multiplier is not None:
+		new_mat = new_mat + create_random_mask((height,width,channels), random_multiplier)
+	
 	return new_mat
 
 
+#I don't know why this changes so dramatically to be honest, because the averaging isn't that large
+
 def plot_image_changes(N=20, radius=5):
-	orig_mat = create_random_colour_matrix(400,400)
+	orig_mat = create_random_colour_matrix(50,50)
+	plt.imshow(orig_mat)
+	plt.show()
 	for i in xrange(N):
-		orig_mat = matrix_average_step(orig_mat, radius)
+		# this is a horrendously slow algoritm! which i sbad... dagnabbit!
+		orig_mat = matrix_average_step(orig_mat, radius,random_multiplier=None)
 		plt.imshow(orig_mat)
 		plt.show()
 	return orig_mat
