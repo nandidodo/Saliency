@@ -97,6 +97,89 @@ def plot_image_changes(N=20, radius=5):
 		plt.show()
 	return orig_mat
 
+#this isj ust stuff for the agent now - depending on gradients or whaat have you
+
+def select_random_point(mat):
+	h,w,ch = mat.shape
+	height = int(h * np.random.uniform(low=0, high=1))
+	width = int(w*np.random.uniform(low=0, high=1))
+	return height,width
+
+def select_target(mat):
+	#basicaly selects at random a point
+	height, width = select_random_point(mat)
+	return mat[height][width]
+
+def random_walk_step(initial_point, step_size):
+	# simulates an isotropic gaussian random walk step
+	# I can do this the rubbish way of 1-9 simulation!? but thsi seems like a poor choice
+	# there is also a sight range, so it coul work and be interesting to see the actual distribution
+	# of different calls in various ways!?
+	# and also theeffect of random canges. The psychedelic effects of those pictures
+	# are quite cool in a way, which is cool. I could send richard this!?
+	# do that tonight when I have power to run them as it's fairly straightforward
+	# I shuold just do this in the rubbish long and boring way!
+	sh,sw = initial_point
+	direction = int(8*np.random.uniform())
+	if direction == 0:
+		return sh+step_size, sw-step_size
+	if direction==1:
+		return sh+step_size, sw
+	if direction==2:
+		return sh+step_size, sw+step_size
+	if direction==4:
+		return sh, sw+step_size
+	if direction==5:
+		return sh-step_size, sw+step_size
+	if direction==6:
+		return sh-step_size, sw
+	if direction==7:
+		return sh-step_size, sw-step_size
+	if direction==8:
+		return sh, sw-step_size
+
+def check_proposed_points(points, height,width):
+	h,w = points
+	if h>0 and h<height:
+		if w> 0 and h<width:
+			return True
+	return False
+
+def absolute_diff(p1,p2):
+	if len(p1)!=len(p2):
+		raise ValueError('Points to be compared must be of same dimension')
+	total = 0
+	for i in xrange(len(p1)):
+		total += np.abs(p1[i] - p2[i])
+	return total/len(p1)
+
+def immediate_gradient_step(ideal, center, mat):
+	# so bascially aim is given ideal result, coordinates, and the matrix
+	# to move in the direction which is closest to the ideal
+	# the aim is to prove this is signifiacntly better than before
+	# which is cool. I do wonder if smoeone has done mathematical mdoelling of this before
+	# I would strongly suspect so!
+	best_diff = 99999 # a large number!
+	# calculate differences by euclidean differences here
+	ch,cw = center
+	best_coords = None
+
+	for i in xrange(2):
+		for j in xrange(2):
+			xpoint = ch+i -1
+			ypoint = cw + j -1
+			val = mat[xpoint][ypoint]
+			diff = euclidean_distance(ideal, val)
+			if diff<best_diff:
+				best_diff=diff
+				best_coords = (xpoint, ypoint)
+
+	return best_coords
+
+#so now the questio nis how to do the gradients?
+
 
 if __name__ == '__main__':
 	plot_image_changes()
+
+
