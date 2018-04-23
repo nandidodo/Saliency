@@ -15,14 +15,14 @@ def euclidean_distance(center, point):
 		raise ValueError('Point and center must have same dimensionality')
 	total = 0
 	for i in xrange(len(center)):
-		total += np.sqaure(center[i] - point[i])
+		total += (center[i] - point[i])**2
 	return np.sqrt(total)
 
 def create_random_colour_matrix(height, width):
-	mat = np.zeros((height, width))
+	mat = np.zeros((height, width,3))
 	for i in xrange(height):
 		for j in xrange(width):
-			mat[i][j][0] = np.random.uniform(low=0, high=1) * 255.
+			mat[i][j][0] = (np.random.uniform(low=0, high=1) * 255.)
 			mat[i][j][1] = np.random.uniform(low=0, high=1) * 255.
 			mat[i][j][2] = np.random.uniform(low=0, high=1) * 255.
 	return mat
@@ -35,15 +35,23 @@ def average_point(mat,center,px_radius, image_height, image_width):
 	number = 0
 	for i in xrange(px_radius*2):
 		for j in xrange(px_radius*2):
+			#print "going round loop: " + str(i) + " " + str(j) +" " + str(x) + " " + str(y)
+			#print x-px_radius+i 
+			#print y-px_radius +j
+			xpoint = x - px_radius + i
+			ypoint = y - px_radius + j
+			#print euclidean_distance(center, (i,j))
 			#check it falls within bounds, then check euclidena distance
-		if (x - px_radius) + i <0 or (x-px_radius) + i > image_height:
-			if (y-px_radius) + j <0 or (y-px_radius) + j >image_width:
-				if euclidean_distance(center, (i,j) <=px_radius):
-					green_total+= mat[i][j][0]
-					red_total+= mat[i][j][1]
-					blue_total+=mat[i][j][2]
-					number+=1
+			if xpoint >=0 and xpoint <= image_height:
+				if ypoint >=0 and ypoint + j <=image_width:
+					if euclidean_distance(center, (xpoint, ypoint)) <=px_radius:
+						#print "adding to average"
+						green_total+= mat[i][j][0]
+						red_total+= mat[i][j][1]
+						blue_total+=mat[i][j][2]
+						number+=1
 
+	print "number: ", number
 	return (green_total/number, red_total/number, blue_total/number)
 
 def matrix_average_step(mat, average_radius, copy=True):
@@ -62,3 +70,14 @@ def matrix_average_step(mat, average_radius, copy=True):
 	return new_mat
 
 
+def plot_image_changes(N=20, radius=5):
+	orig_mat = create_random_colour_matrix(400,400)
+	for i in xrange(N):
+		orig_mat = matrix_average_step(orig_mat, radius)
+		plt.imshow(orig_mat)
+		plt.show()
+	return orig_mat
+
+
+if __name__ == '__main__':
+	plot_image_changes()
