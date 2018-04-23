@@ -49,14 +49,16 @@ def average_point(mat,center,px_radius, image_height, image_width):
 					if euclidean_distance(center, (xpoint, ypoint)) <=px_radius:
 						#print "adding to average"
 						green_total+= mat[xpoint][ypoint][0]
-						print "green added: " + str(mat[i][j][0])
-						print "green total: " + str(green_total)
+						print "green added: " + str(mat[xpoint][ypoint][0])
+						#print "green total: " + str(green_total)
 						red_total+= mat[xpoint][ypoint][1]
+						print "red added: " + str(mat[xpoint][ypoint][1])
 						blue_total+=mat[xpoint][ypoint][2]
 						number+=1
 
 	print "number: ", number
 	print "green: " + str(green_total/number)
+	print "green total: " + str(green_total)
 	return (green_total/number, red_total/number, blue_total/number)
 
 def create_random_mask(shape, multiplier):
@@ -79,30 +81,51 @@ def matrix_average_step(mat, average_radius, copy=True, random_multiplier=None):
 		for j in xrange(width):
 			new_mat[i][j] = average_point(mat, (i,j), average_radius, height,width)
 	if random_multiplier is not None:
-		new_mat = new_mat + create_random_mask((height,width,channels), random_multiplier)
+		rand = create_random_mask((height,width,channels), random_multiplier)
+		print rand
+		print new_mat[40][20]
+		print rand[40][20]
+		new_mat = new_mat + rand
+		print new_mat[40][20]
+		print np.amax(rand)
+		# I don't udnerstand why adding a small random peturbation almost completely
+		# foils the random field at all. I really don't understand that and it confuses me
+		# like there seems to be no reason for it, and it confuses me so much!
+		# the randomisation seems much much much greater than I would think reasonable
+		# so Ihoenstly don't know!
+		#
 	
 	return new_mat
 
 
 #I don't know why this changes so dramatically to be honest, because the averaging isn't that large
 
-def plot_image_changes(N=20, radius=5):
+# worryingly it seems to change - I dont think it actally to be hoenst, whih is good
+# but it seems to have vastly more effect than I wuold think!?
+# it should just betiny peturbations, but it's not!
+def plot_image_changes(N=1000, radius=2, plot_after=10, multiplier=0):
 	orig_mat = create_random_colour_matrix(50,50)
 	plt.imshow(orig_mat)
 	plt.show()
 	for i in xrange(N):
 		# this is a horrendously slow algoritm! which i sbad... dagnabbit!
-		orig_mat = matrix_average_step(orig_mat, radius,random_multiplier=None)
-		plt.imshow(orig_mat)
-		plt.show()
+		orig_mat = matrix_average_step(orig_mat, radius,random_multiplier=multiplier)
+		print "plot: ", i
+		if i % plot_after ==0:
+			plt.imshow(orig_mat)
+			plt.show()
 	return orig_mat
 
 #this isj ust stuff for the agent now - depending on gradients or whaat have you
 
 def select_random_point(mat):
 	h,w,ch = mat.shape
-	height = int(h * np.random.uniform(low=0, high=1))
-	width = int(w*np.random.uniform(low=0, high=1))
+	selected = False
+	while selected != True:
+		height = int(h * np.random.uniform(low=0, high=1))
+		width = int(w*np.random.uniform(low=0, high=1))
+		if check_proposed_points((height, width), h,w):
+			selected=True
 	return height,width
 
 def select_target(mat):
@@ -175,6 +198,21 @@ def immediate_gradient_step(ideal, center, mat):
 				best_coords = (xpoint, ypoint)
 
 	return best_coords
+
+#clearly aim will beto stop if after a while
+
+def plot_path(coords, height, width,plot=True):
+	base = np.zeros((height,width))
+	x,y = coords
+	for i in xrange(len(coords)):
+		base[x][y] = 255.
+	if plot:
+		plt.imshow(base)
+		plt.show()
+	return base
+
+#def gradient_search_till_atop(mat):
+	#ideal = 
 
 #so now the questio nis how to do the gradients?
 
