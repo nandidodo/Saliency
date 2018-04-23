@@ -10,6 +10,7 @@
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
+import cPickle as pickle
 
 
 def euclidean_distance(center, point):
@@ -19,6 +20,13 @@ def euclidean_distance(center, point):
 	for i in xrange(len(center)):
 		total += (center[i] - point[i])**2
 	return np.sqrt(total)
+
+
+def save(obj, fname):
+	pickle.dump(obj, open(fname, 'wb'))
+
+def load(fname):
+	return pickle.load(open(fname, 'rb'))
 
 def create_random_colour_matrix(height, width):
 	mat = np.zeros((height, width,3))
@@ -116,6 +124,20 @@ def plot_image_changes(N=1000, radius=2, plot_after=10, multiplier=0):
 			plt.show()
 	return orig_mat
 
+def get_gradient_matrix(N=20, radius=2, plot=True, save_name=None):
+	orig_mat = create_random_colour_matrix(50,50)
+	for i in xrange(N):
+		orig_mat = matrix_average_step(orig_mat, radius)
+
+	if plot:
+		plt.imshow(orig_mat)
+		plt.show()
+
+	if save_name:
+		np.save(save_name, orig_mat)
+
+	return orig_mat
+
 #this isj ust stuff for the agent now - depending on gradients or whaat have you
 
 def select_random_point(mat):
@@ -197,7 +219,7 @@ def immediate_gradient_step(ideal, center, mat):
 				best_diff=diff
 				best_coords = (xpoint, ypoint)
 
-	return best_coords
+	return best_coords, best_diff
 
 #clearly aim will beto stop if after a while
 
@@ -211,13 +233,48 @@ def plot_path(coords, height, width,plot=True):
 		plt.show()
 	return base
 
-#def gradient_search_till_atop(mat):
-	#ideal = 
+def gradient_search_till_atop(mat, less_diff=1, save_name=None, plot=False):
+
+	if len(mat.shape)!=3 and mat.shape[2]!=3:
+		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
+	#initialise random point
+	ideal = select_random_point(mat)
+	#initialise position
+	position = select_random_point(mat)
+	#initialise to high value
+	diffs = []
+	coords = []
+
+	h,w,ch = mat.shape
+	diff = 100000
+
+	tries=0
+	max_tries = 1000
+
+	while diff < less_diff or tries >= max_tries:
+		new_coords, diff = immediate_gradient_step(ideal, position,mat)
+		diffs.append(diff)
+		coords.append(new_coords)
+		position = new_coords
+		tries +=1
+
+	if save_name is not None:
+		save((diffs, coords), save_name)
+
+	if plot:
+		plot_path(coords, h,w)
+	return diffs, coords
+
+
+
+
 
 #so now the questio nis how to do the gradients?
 
 
 if __name__ == '__main__':
-	plot_image_changes()
+	#plot_image_changes()
+	mat = get_gradient_matrix(save_name='gradient_matrix')
+	diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
 
 
