@@ -124,7 +124,7 @@ def plot_image_changes(N=1000, radius=2, plot_after=10, multiplier=0):
 			plt.show()
 	return orig_mat
 
-def get_gradient_matrix(N=20, radius=2, plot=True, save_name=None):
+def get_gradient_matrix(N=20, radius=5, plot=True, save_name=None):
 	orig_mat = create_random_colour_matrix(50,50)
 	for i in xrange(N):
 		orig_mat = matrix_average_step(orig_mat, radius)
@@ -155,7 +155,15 @@ def select_target(mat):
 	height, width = select_random_point(mat)
 	return mat[height][width]
 
-def random_walk_step(initial_point, step_size):
+def check_proposed_points(points, height,width):
+	h,w = points
+	if h>=0 and h<height:
+		if w>= 0 and w<width:
+			#print "in check: " + str(height) + " " + str(width) + " " + str(points)
+			return True
+	return False
+
+def random_walk_step(mat, initial_point, step_size):
 	# simulates an isotropic gaussian random walk step
 	# I can do this the rubbish way of 1-9 simulation!? but thsi seems like a poor choice
 	# there is also a sight range, so it coul work and be interesting to see the actual distribution
@@ -165,30 +173,34 @@ def random_walk_step(initial_point, step_size):
 	# do that tonight when I have power to run them as it's fairly straightforward
 	# I shuold just do this in the rubbish long and boring way!
 	sh,sw = initial_point
-	direction = int(8*np.random.uniform())
-	if direction == 0:
-		return sh+step_size, sw-step_size
-	if direction==1:
-		return sh+step_size, sw
-	if direction==2:
-		return sh+step_size, sw+step_size
-	if direction==4:
-		return sh, sw+step_size
-	if direction==5:
-		return sh-step_size, sw+step_size
-	if direction==6:
-		return sh-step_size, sw
-	if direction==7:
-		return sh-step_size, sw-step_size
-	if direction==8:
-		return sh, sw-step_size
+	h,w,ch = mat.shape
+	valid=False
+	#init coords to always be wrong
+	coords = (-5,-5)
+	while valid is False:
+		direction = int(8*np.random.uniform())
+		if direction == 0:
+			coords =  sh+step_size, sw-step_size
+		if direction==1:
+			coords =  sh+step_size, sw
+		if direction==2:
+			coords =  sh+step_size, sw+step_size
+		if direction==4:
+			coords =  sh, sw+step_size
+		if direction==5:
+			coords =  sh-step_size, sw+step_size
+		if direction==6:
+			coords =  sh-step_size, sw
+		if direction==7:
+			coords =  sh-step_size, sw-step_size
+		if direction==8:
+			coords =  sh, sw-step_size
 
-def check_proposed_points(points, height,width):
-	h,w = points
-	if h>0 and h<height:
-		if w> 0 and h<width:
-			return True
-	return False
+		if check_proposed_points(coords, h,w) is True:
+			valid=True
+
+	return coords
+
 
 def absolute_diff(p1,p2):
 	if len(p1)!=len(p2):
@@ -225,8 +237,8 @@ def immediate_gradient_step(ideal, center, mat):
 
 def plot_path(coords, height, width,plot=True):
 	base = np.zeros((height,width))
-	x,y = coords
 	for i in xrange(len(coords)):
+		x,y = coords[i]
 		base[x][y] = 255.
 	if plot:
 		plt.imshow(base)
@@ -238,7 +250,7 @@ def gradient_search_till_atop(mat, less_diff=1, save_name=None, plot=False):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
 	#initialise random point
-	ideal = select_random_point(mat)
+	ideal = mat[select_random_point(mat)]
 	#initialise position
 	position = select_random_point(mat)
 	#initialise to high value
@@ -251,12 +263,51 @@ def gradient_search_till_atop(mat, less_diff=1, save_name=None, plot=False):
 	tries=0
 	max_tries = 1000
 
-	while diff < less_diff or tries >= max_tries:
+	while diff > less_diff and tries <= max_tries:
+
 		new_coords, diff = immediate_gradient_step(ideal, position,mat)
 		diffs.append(diff)
 		coords.append(new_coords)
 		position = new_coords
 		tries +=1
+		print "num tries: " + str(tries)
+		print "diff: " + str(diff)
+
+	if save_name is not None:
+		save((diffs, coords), save_name)
+
+	if plot:
+		plot_path(coords, h,w)
+	return diffs, coords
+
+def random_walk_till_atop(mat, less_diff=1, step_size=1,save_name=None, plot=False):
+	if len(mat.shape)!=3 and mat.shape[2]!=3:
+		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
+	#initialise random point
+	ideal = mat[select_random_point(mat)]
+	#initialise position
+	position = select_random_point(mat)
+	#initialise to high value
+	diffs = []
+	coords = []
+
+	h,w,ch = mat.shape
+	diff = 100000
+
+	tries=0
+	max_tries = 1000
+
+	while diff > less_diff and tries <= max_tries:
+
+		new_coords = random_walk_step(mat,position, step_size=step_size)
+		print "coords: " + str(new_coords)
+		diff = euclidean_distance(mat[new_coords], ideal)
+		diffs.append(diff)
+		coords.append(new_coords)
+		position = new_coords
+		tries +=1
+		print "num tries: " + str(tries)
+		print "diff: " + str(diff)
 
 	if save_name is not None:
 		save((diffs, coords), save_name)
@@ -269,12 +320,14 @@ def gradient_search_till_atop(mat, less_diff=1, save_name=None, plot=False):
 
 
 
+
 #so now the questio nis how to do the gradients?
 
 
 if __name__ == '__main__':
 	#plot_image_changes()
-	mat = get_gradient_matrix(save_name='gradient_matrix')
-	diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
-
+	#mat = get_gradient_matrix(save_name='gradient_matrix')
+	mat = np.load('gradient_matrix.npy')
+	#diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
+	diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
 
