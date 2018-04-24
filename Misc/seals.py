@@ -230,6 +230,11 @@ def immediate_gradient_step(ideal, center, mat):
 			if diff<best_diff:
 				best_diff=diff
 				best_coords = (xpoint, ypoint)
+	#if gradient is the same do a random walk with a large step size
+	if best_coords == center:
+		coords = random_walk_step(mat, center,5)
+		diff = euclidean_distance(ideal, mat[coords])
+		return coords, diff
 
 	return best_coords, best_diff
 
@@ -314,7 +319,42 @@ def random_walk_till_atop(mat, less_diff=1, step_size=1,save_name=None, plot=Fal
 
 	if plot:
 		plot_path(coords, h,w)
+	print len(coords)
+	print len(diffs)
 	return diffs, coords
+
+def run_trial(N, step_fn, mat, less_diff=1, results_save=None, info=True):
+	if len(mat.shape)!=3 and mat.shape[2]!=3:
+		raise ValueError('Input matrix must be three dimensinoal and with three colour channels')
+	
+	h,w,ch = mat.shape
+	all_coords = []
+	all_diffs = []
+	successes = []
+	num_failures = 0
+	num_successes = 0
+	for i in xrange(N):
+		diffs, coords = step_fn(mat, less_diff=less_diff,plot=False)
+		n = len(diffs)
+		assert n==len(coords), 'Something wrong here: differences and coordinates different lengths'
+		if n<1000:
+			num_successes+=1
+		if n >=1000:
+			num_failures+=
+		all_coords.append(coords)
+		all_diffs.append(diffs)
+
+	if results_save is not None:
+		save_array(results_save+'_coords', all_coords)
+		save_array(results_save+'_diffs',all_diffs)
+
+	print "Number of failures = ", num_failures
+	print "Number of success = " , num_successes
+
+	return all_coords, all_diffs, num_successes,num_failures
+
+
+
 
 
 
