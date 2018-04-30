@@ -385,9 +385,9 @@ if __name__ == '__main__':
 	#run_mnist_model('data/mnist_dataset_train_copies.npy', 'data/mnist_dataset_test_copies.npy',save_name='results/drift_copy', epochs=10, batch_size=64, save_model_name='drift_copy_model')
 
 	#drift and microsaccades model
-	run_mnist_model('data/drift_and_microsaccades_train.npy', 'data/drift_and_microsacces_test.npy', save_name='results/drift_and_microsaccades_aug',epochs=20, batch_size=64, save_model_name='drift_and_microsaccades_model')
+	#run_mnist_model('data/drift_and_microsaccades_train.npy', 'data/drift_and_microsaccades_test.npy', save_name='results/drift_and_microsaccades_aug',epochs=30, batch_size=64, save_model_name='drift_and_microsaccades_model')
 	#copy model
-	run_mnist_model('data/mnist_dataset_train_copies.npy', 'data/mnist_dataset_test_copies.npy',save_name='results/drift_and_microsaccades_copy', epochs=20, batch_size=64, save_model_name='drift_and_microsaccades_copy_model')
+	run_mnist_model('data/mnist_dataset_train_copies.npy', 'data/mnist_dataset_test_copies.npy',save_name='results/drift_and_microsaccades_copy', epochs=30, batch_size=64, save_model_name='drift_and_microsaccades_copy_model')
 
 
 	#normalise data
