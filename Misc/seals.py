@@ -69,6 +69,20 @@ def average_point(mat,center,px_radius, image_height, image_width):
 	print "green total: " + str(green_total)
 	return (green_total/number, red_total/number, blue_total/number)
 
+
+#this allows me to update to some extent based on surrounding with the learning rate 
+# so they are based on their current value but then see what happens
+# when I alter thel earning rate parameter to see if that works so who knows
+#so I can test to see if there are any positive selection effects in favour
+# even though perhaps it might be a group selectional thing, so who knows?s
+def update_point(mat, center, px_radius, image_height, image_width, learning_rate=0.01):
+	x,y = center
+	currents = mat[x][y]
+	new_points = average_point(mat, center, px_radius, image_height, image_width)
+	diff = currents-new_points
+	currents = currents + (learning_rate*diff)
+	return currents
+
 def create_random_mask(shape, multiplier):
 	if len(shape)!=3:
 		raise ValueError('Shape must be three dimensional for colour image')
@@ -232,7 +246,7 @@ def immediate_gradient_step(ideal, center, mat):
 				best_coords = (xpoint, ypoint)
 	#if gradient is the same do a random walk with a large step size
 	if best_coords == center:
-		coords = random_walk_step(mat, center,5)
+		coords = random_walk_step(mat, center,1)
 		diff = euclidean_distance(ideal, mat[coords])
 		return coords, diff
 
@@ -277,6 +291,7 @@ def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False):
 		tries +=1
 		print "num tries: " + str(tries)
 		print "diff: " + str(diff)
+		print "coords: " + str(new_coords)
 
 	if save_name is not None:
 		save((diffs, coords), save_name)
@@ -322,6 +337,66 @@ def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=F
 	print len(coords)
 	print len(diffs)
 	return diffs, coords
+
+def power_law_sample(alpha):
+	#implement
+	return 2
+
+def levy_flight_till_atop(mat, less_diff=0.1, alpha=1.5, save_name=None, plot=False):
+	if len(mat.shape)!=3 and mat.shape[2]!=3:
+		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
+	#initialise random point
+	ideal = mat[select_random_point(mat)]
+	#initialise position
+	position = select_random_point(mat)
+	#initialise to high value
+	diffs = []
+	coords = []
+
+	h,w,ch = mat.shape
+	diff = 100000
+
+	tries=0
+	max_tries = 1000
+
+	curr_num_tries = 0
+	current_direction = None
+
+	while diff > less_diff and tries <= max_tries:
+		if curr_num_tries<=0 or current_direction is None:
+			step_size = power_law_sample(alpha)
+			curr_num_tries = step_size -1
+			new_coords = random_walk_step(mat, position,step_size=1)
+			diff = euclidean_distance(mat[new_coords], ideal)
+			diffs.append(diff)
+			coords.append(new_coords)
+			dirx = position[0] - new_coords[0]
+			diry = position[1] - new_coords[1]
+			position = new_coords
+			tries +=1
+			current_direction = (dirx, diry)
+			print "num tries: " + str(tries)
+			print "diff: " + str(diff)
+		if curr_num_tries>0:
+			new_coords, diff = step_in_direction(mat, current_position,current_direction,step_size=1)
+			diffs.append(diff)
+			coords.append(new_coords)
+			position = new_coords
+			curr_num_tries -=1
+			tries+=1
+			print "num tries: " + str(tries)
+			print "diff: " + str(diff)
+
+	if save_name is not None:
+		save((diffs, coords), save_name)
+
+	if plot:
+		plot_path(coords, h,w)
+	print len(coords)
+	print len(diffs)
+	return diffs, coords
+
+
 
 def run_trial(N, step_fn, mat, less_diff=0.1, results_save=None, info=True):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
@@ -370,6 +445,6 @@ if __name__ == '__main__':
 	mat = np.load('gradient_matrix.npy')
 	#plt.imshow(mat)
 	##plt.show()
-	#diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
-	diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
+	diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
+	#diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
 
