@@ -111,7 +111,7 @@ def matrix_average_step(mat, average_radius, copy=True, random_multiplier=None):
 # worryingly it seems to change - I dont think it actally to be hoenst, whih is good
 # but it seems to have vastly more effect than I wuold think!?
 # it should just betiny peturbations, but it's not!
-def plot_image_changes(N=1000, radius=2, plot_after=10, multiplier=0):
+def plot_image_changes(N=1000, radius=5, plot_after=5, multiplier=0):
 	orig_mat = create_random_colour_matrix(50,50)
 	plt.imshow(orig_mat)
 	plt.show()
@@ -250,7 +250,7 @@ def plot_path(coords, height, width,plot=True):
 		plt.show()
 	return base
 
-def gradient_search_till_atop(mat, less_diff=1, save_name=None, plot=False):
+def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False):
 
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
@@ -285,7 +285,7 @@ def gradient_search_till_atop(mat, less_diff=1, save_name=None, plot=False):
 		plot_path(coords, h,w)
 	return diffs, coords
 
-def random_walk_till_atop(mat, less_diff=1, step_size=1,save_name=None, plot=False):
+def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=False):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
 	#initialise random point
@@ -323,7 +323,7 @@ def random_walk_till_atop(mat, less_diff=1, step_size=1,save_name=None, plot=Fal
 	print len(diffs)
 	return diffs, coords
 
-def run_trial(N, step_fn, mat, less_diff=1, results_save=None, info=True):
+def run_trial(N, step_fn, mat, less_diff=0.1, results_save=None, info=True):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Input matrix must be three dimensinoal and with three colour channels')
 	
@@ -340,7 +340,7 @@ def run_trial(N, step_fn, mat, less_diff=1, results_save=None, info=True):
 		if n<1000:
 			num_successes+=1
 		if n >=1000:
-			num_failures+=
+			num_failures+=1
 		all_coords.append(coords)
 		all_diffs.append(diffs)
 
@@ -366,8 +366,10 @@ def run_trial(N, step_fn, mat, less_diff=1, results_save=None, info=True):
 
 if __name__ == '__main__':
 	#plot_image_changes()
-	#mat = get_gradient_matrix(save_name='gradient_matrix')
+	#mat = get_gradient_matrix(N=20, radius=10,save_name='gradient_matrix')
 	mat = np.load('gradient_matrix.npy')
+	#plt.imshow(mat)
+	##plt.show()
 	#diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
 	diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
 
