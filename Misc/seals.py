@@ -339,8 +339,8 @@ def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=F
 	return diffs, coords
 
 def power_law_sample(alpha):
-	#implement
-	return 2
+	samps = np.random.uniform(low=0, high=1, size=1)
+	return np.power((1-samps), (-1/alpha-1))
 
 def levy_flight_till_atop(mat, less_diff=0.1, alpha=1.5, save_name=None, plot=False):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
@@ -428,6 +428,18 @@ def run_trial(N, step_fn, mat, less_diff=0.1, results_save=None, info=True):
 
 	return all_coords, all_diffs, num_successes,num_failures
 
+
+def plot_random_vs_gradient(randoms, gradients):
+	rand_mu = np.mean(randoms)
+	rand_var = np.var(randoms)
+	gradient_mu = np.mean(gradients)
+	gradient_var = np.var(gradients)
+	# the variances are for possible error bars!
+	fig  = plt.figure()
+	plt.bar(rand_mu, label='Mean number of steps using a random walk')
+	plt.bar(gradient_mu, label='Mean number of steps using a gradient search')
+	fig.tight_layout()
+	plt.show()
 
 
 
