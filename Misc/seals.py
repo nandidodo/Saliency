@@ -11,7 +11,8 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 import cPickle as pickle
-
+import scipy
+import scipy.stats
 
 def euclidean_distance(center, point):
 	if len(center)!=len(point):
@@ -250,17 +251,21 @@ def immediate_gradient_step(ideal, center, mat):
 	# calculate differences by euclidean differences here
 	ch,cw = center
 	best_coords = None
+	h,w,channels = mat.shape
+
 
 	for i in xrange(2):
 		for j in xrange(2):
 			xpoint = ch+i -1
 			ypoint = cw + j -1
-			val = mat[xpoint][ypoint]
-			diff = euclidean_distance(ideal, val)
-			if diff<best_diff:
-				best_diff=diff
-				best_coords = (xpoint, ypoint)
-	#if gradient is the same do a random walk with a large step size
+			if xpoint >=0 and xpoint<=w:
+				if ypoint>=0 and xpoint<=h:
+					val = mat[xpoint][ypoint]
+					diff = euclidean_distance(ideal, val)
+					if diff<best_diff:
+						best_diff=diff
+						best_coords = (xpoint, ypoint)
+			#if gradiet is the same do a random walk with a large step size
 	if best_coords == center:
 		coords = random_walk_step(mat, center,1)
 		diff = euclidean_distance(ideal, mat[coords])
@@ -437,9 +442,9 @@ def run_trial(N, step_fn, mat, less_diff=0.1, results_save=None, info=True):
 			num_failures+=1
 		all_coords.append(coords)
 		all_diffs.append(diffs)
-		if n<1000:
-			assert len(coords) == len(diffs), 'Number of coordinates and differences is different'
-			nums_till_success.append(len(coords))
+		#if n<1000:
+		assert len(coords) == len(diffs), 'Number of coordinates and differences is different'
+		nums_till_success.append(len(coords))
 
 
 	if results_save is not None:
@@ -472,27 +477,45 @@ def plot_random_vs_gradient(randoms, gradients):
 
 #so now the questio nis how to do the gradients?
 
+def t_test(randoms, gradients):
+	t,prob = scipy.stats.ttest_ind(randoms, gradients, equal_var=False)
+	return t,prob
+
 
 if __name__ == '__main__':
 	#plot_image_changes()
-	#mat = get_gradient_matrix(N=20, radius=5,save_name='gradient_matrix')
+	#mat = get_gradient_matrix(N=30, radius=5,save_name='gradient_matrix')
 	mat = np.load('gradient_matrix.npy')
 	#np.save('matrix_1',mat)
 	#plt.imshow(mat)
 	#plt.show()
 	#diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
 	#diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
-	random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
-	gradient_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
-	np.save('trial_random', random_nums)
-	np.save('trial_gradient', gradient_nums)
-	print len(random_nums)
-	print len(gradient_nums)
-	print "mean random: ", np.mean(random_nums)
-	print "gradient nums: " , np.mean(gradient_nums)
-	print "random variance", np.var(random_nums)
-	print "gradient variance: ", np.var(gradient_nums)
+	#random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
+	#gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
+	#np.save('trial_random', random_nums)
+	#np.save('trial_gradient', gradient_nums)
+	#print len(random_nums)
+	#print len(gradient_nums)
+	#print "mean random: ", np.mean(random_nums)
+	#print "gradient nums: " , np.mean(gradient_nums)
+	#print "random variance", np.var(random_nums)
+	#print "gradient variance: ", np.var(gradient_nums)
 
+	rands = np.load('trial_random.npy')
+	gradients = np.load('trial_gradient.npy')
+	print np.mean(rands)
+	print np.mean(gradients)
+	t,prob = t_test(rands, gradients)
+	print t
+	print prob
+	#great, extremely significant p value, exactly as wanted!
+
+
+	#huh! surprisingly it doesn't seem to make much difference, which is weird1
+	#perfect!! that's why! the gradient one wasn't actually running as the gradient
+	# but just acopy of the random walk. that's really dumb! now it gives precisely the expected results!
+	# I could totally get these to richard to be hoenst tomorrow since writing them up will be trivial!
 #this doesn't seem to be working so well which is weird because in all the small scale
 # examples I'm doing it does... dagnabbit. I guess I'll have to look into this further!
 
