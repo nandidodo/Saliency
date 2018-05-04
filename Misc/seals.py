@@ -424,6 +424,9 @@ def run_trial(N, step_fn, mat, less_diff=0.1, results_save=None, info=True):
 	successes = []
 	num_failures = 0
 	num_successes = 0
+
+	nums_till_success = []
+
 	for i in xrange(N):
 		diffs, coords = step_fn(mat, less_diff=less_diff,plot=False)
 		n = len(diffs)
@@ -434,6 +437,10 @@ def run_trial(N, step_fn, mat, less_diff=0.1, results_save=None, info=True):
 			num_failures+=1
 		all_coords.append(coords)
 		all_diffs.append(diffs)
+		if n<1000:
+			assert len(coords) == len(diffs), 'Number of coordinates and differences is different'
+			nums_till_success.append(len(coords))
+
 
 	if results_save is not None:
 		save_array(results_save+'_coords', all_coords)
@@ -442,7 +449,9 @@ def run_trial(N, step_fn, mat, less_diff=0.1, results_save=None, info=True):
 	print "Number of failures = ", num_failures
 	print "Number of success = " , num_successes
 
-	return all_coords, all_diffs, num_successes,num_failures
+	nums_till_success = np.array(nums_till_success)
+
+	return nums_till_success
 
 
 def plot_random_vs_gradient(randoms, gradients):
@@ -466,14 +475,26 @@ def plot_random_vs_gradient(randoms, gradients):
 
 if __name__ == '__main__':
 	#plot_image_changes()
-	#mat = get_gradient_matrix(N=20, radius=10,save_name='gradient_matrix')
+	#mat = get_gradient_matrix(N=20, radius=5,save_name='gradient_matrix')
 	mat = np.load('gradient_matrix.npy')
+	#np.save('matrix_1',mat)
 	#plt.imshow(mat)
-	##plt.show()
-	diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
+	#plt.show()
+	#diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
 	#diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
+	random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
+	gradient_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
+	np.save('trial_random', random_nums)
+	np.save('trial_gradient', gradient_nums)
+	print len(random_nums)
+	print len(gradient_nums)
+	print "mean random: ", np.mean(random_nums)
+	print "gradient nums: " , np.mean(gradient_nums)
+	print "random variance", np.var(random_nums)
+	print "gradient variance: ", np.var(gradient_nums)
 
-
+#this doesn't seem to be working so well which is weird because in all the small scale
+# examples I'm doing it does... dagnabbit. I guess I'll have to look into this further!
 
 
 
