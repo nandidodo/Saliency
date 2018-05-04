@@ -119,6 +119,22 @@ def matrix_average_step(mat, average_radius, copy=True, random_multiplier=None):
 	
 	return new_mat
 
+def matrix_update_step(mat, radius, copy=True, learning_rate=0.1):
+
+	if len(mat.shape)!=3 or mat.shape[2]!=3:
+		raise ValueError('Matrix must be 2d colour image with 3 channels in format h,w,ch')
+
+	height,width, channels = mat.shape
+	if not copy:
+		new_mat = mat
+	if copy:
+		new_mat = np.copy(mat)
+	#copy so don't mutate on each run through - I can change this behaviour later if I want
+	for i in xrange(height):
+		for j in xrange(width):
+			new_mat[i][j] = update_point(mat, (i,j), radius, height,width,learning_rate=learning_rate)
+
+	return new_mat
 
 #I don't know why this changes so dramatically to be honest, because the averaging isn't that large
 
@@ -436,17 +452,14 @@ def plot_random_vs_gradient(randoms, gradients):
 	gradient_var = np.var(gradients)
 	# the variances are for possible error bars!
 	fig  = plt.figure()
+
 	plt.bar(rand_mu, label='Mean number of steps using a random walk')
 	plt.bar(gradient_mu, label='Mean number of steps using a gradient search')
+	fig.xlabel('Random walk or gradient search')
+	fig.ylabel('Mean number of steps to reach target')
+	plt.legend()
 	fig.tight_layout()
 	plt.show()
-
-
-
-
-
-
-
 
 #so now the questio nis how to do the gradients?
 
@@ -459,4 +472,9 @@ if __name__ == '__main__':
 	##plt.show()
 	diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
 	#diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
+
+
+
+
+
 
