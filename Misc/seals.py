@@ -308,6 +308,7 @@ def plot_path(coords, height, width,plot=True):
 	return base
 
 
+#yeah, thi sfunction needs a lot of work!
 def plot_example_gradient_and_random(random_base, gradient_base):
 	fig = plt.figure()
 	plt.title('Example Random and Gradient following paths through the colony')
@@ -323,10 +324,35 @@ def plot_example_gradient_and_random(random_base, gradient_base):
 	fig.tight_layout()
 	plt.show()
 
+def plot_example_random_levy_gradient(random_base, levy_base, gradient_base):
+	fig = plt.figure()
+
+	ax1 = plt.subplot(131)
+	plt.imshow(random_base)
+	ax1.set_title('Random walk path')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax2 = plt.subplot(132)
+	plt.imshow(levy_base)
+	ax2.set_title('Levy Flight path')
+	plt.xticks([])
+	plt.yticks([])
+
+	ax3 = plt.subplot(133)
+	plt.imshow(gradient_base)
+	ax3.set_title('Gradient path')
+	plt.xticks([])
+	plt.yticks([])
+
+	fig.tight_layout()
+	plt.show()
 
 
 
-def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False,return_base=False:
+
+
+def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False,return_base=False):
 
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
@@ -574,15 +600,18 @@ def t_test(randoms, gradients):
 
 
 if __name__ == '__main__':
-	#plot_image_changes()
+	plot_image_changes()
 	#mat = get_gradient_matrix(N=30, radius=5,save_name='gradient_matrix')
-	mat = np.load('gradient_matrix.npy')
+	#mat = np.load('gradient_matrix.npy')
 	#np.save('matrix_1',mat)
 	#plt.imshow(mat)
 	#plt.show()
-	#diffs, coords = levy_flight_till_atop(mat, save_name='levy_flight_search',plot=True)
-	#diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
-	#diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
+	#diffs, coords, base = levy_flight_till_atop(mat, save_name='levy_flight_search',plot=True,return_base=True)
+	#np.save('levy_flight_base', base)
+	#diffs, coords, base = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True,return_base=True)
+	#np.save('gradient_base',base)
+	#diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search', plot=True,return_base=True)
+	#np.save('random_walk_base', base)
 	#random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
 	#levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.1)
 	#gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
@@ -595,7 +624,8 @@ if __name__ == '__main__':
 	#print "gradient nums: " , np.mean(gradient_nums)
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
-
+	
+	"""
 	rands = np.load('trial_random.npy')
 	gradients = np.load('trial_gradient.npy')
 	levys = np.load('trial_levy.npy')
@@ -623,6 +653,15 @@ if __name__ == '__main__':
 
 	plot_random_gradient_levys(rands, gradients, levys)
 	#ificant p value, exactly as wanted!
+	"""
+	
+	#random_base = np.load('random_walk_base.npy')
+	#levy_base = np.load('levy_flight_base.npy')
+	#gradient_base = np.load('gradient_base.npy')
+	#plot_example_gradient_and_random(random_base, gradient_base)
+	#plot_example_random_levy_gradient(random_base, levy_base, gradient_base)
+	#plt.imshow(random_base)
+	#plt.show()
 
 
 	#huh! surprisingly it doesn't seem to make much difference, which is weird1
