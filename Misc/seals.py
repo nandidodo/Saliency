@@ -186,6 +186,26 @@ def select_target(mat):
 	height, width = select_random_point(mat)
 	return mat[height][width]
 
+def select_random_edge_point(mat):
+	h,w,ch = mat.shape
+	#four edges so essentially pick one randomly, then do up to shape
+	edge = 4*np.random.uniform(low=0, high=1)
+	if edge<=1:
+		rand = int(h*np.random.uniform(low=0, high=1))
+		return (rand,0)
+	if edge>1 and edge<=2:
+		rand = int(h*np.random.uniform(low=0, high=1))
+		return (rand, (w-1))
+	if edge>2 and edge<=3:
+		rand = int(w*np.random.uniform(low=0, high=1))
+		return (0, rand)
+	if edge>3 and edge<=4:
+		rand = int(w*np.random.uniform(low=0, high=1))
+		return ((w-1), rand)
+
+
+
+
 def check_proposed_points(points, height,width):
 	h,w = points
 	if h>=0 and h<height:
@@ -474,6 +494,7 @@ def plot_random_vs_gradient(randoms, gradients):
 	plt.legend()
 	fig.tight_layout()
 	plt.show()
+
 
 #so now the questio nis how to do the gradients?
 
