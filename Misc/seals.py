@@ -201,7 +201,7 @@ def select_random_edge_point(mat):
 		return (0, rand)
 	if edge>3 and edge<=4:
 		rand = int(w*np.random.uniform(low=0, high=1))
-		return ((w-1), rand)
+		return ((h-1), rand)
 
 
 
@@ -302,8 +302,29 @@ def plot_path(coords, height, width,plot=True):
 		base[x][y] = 255.
 	if plot:
 		plt.imshow(base)
+		plt.xticks([])
+		plt.yticks([])
 		plt.show()
 	return base
+
+
+def plot_example_gradient_and_random(random_base, gradient_base):
+	fig = plt.figure()
+	plt.title('Example Random and Gradient following paths through the colony')
+	ax1 = fig.add_subplot(121)
+	plt.imshow(random_base)
+	plt.xticks([])
+	plt.yticks([])
+	ax2 = fig.add_subplot(122)
+	plt.imshow(gradient_base)
+	plt.xticks([])
+	plt.yticks([])
+
+	fig.tight_layout()
+	plt.show()
+
+
+
 
 def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False):
 
@@ -312,7 +333,8 @@ def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False):
 	#initialise random point
 	ideal = mat[select_random_point(mat)]
 	#initialise position
-	position = select_random_point(mat)
+	#position = select_random_point(mat)
+	position = select_random_edge_point(mat)
 	#initialise to high value
 	diffs = []
 	coords = []
@@ -330,9 +352,9 @@ def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False):
 		coords.append(new_coords)
 		position = new_coords
 		tries +=1
-		print "num tries: " + str(tries)
-		print "diff: " + str(diff)
-		print "coords: " + str(new_coords)
+		#print "num tries: " + str(tries)
+		#print "diff: " + str(diff)
+		#print "coords: " + str(new_coords)
 
 	if save_name is not None:
 		save((diffs, coords), save_name)
@@ -347,7 +369,8 @@ def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=F
 	#initialise random point
 	ideal = mat[select_random_point(mat)]
 	#initialise position
-	position = select_random_point(mat)
+	#position = select_random_point(mat)
+	position = select_random_edge_point(mat)
 	#initialise to high value
 	diffs = []
 	coords = []
@@ -361,14 +384,14 @@ def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=F
 	while diff > less_diff and tries <= max_tries:
 
 		new_coords = random_walk_step(mat,position, step_size=step_size)
-		print "coords: " + str(new_coords)
+		#print "coords: " + str(new_coords)
 		diff = euclidean_distance(mat[new_coords], ideal)
 		diffs.append(diff)
 		coords.append(new_coords)
 		position = new_coords
 		tries +=1
-		print "num tries: " + str(tries)
-		print "diff: " + str(diff)
+		#print "num tries: " + str(tries)
+		#print "diff: " + str(diff)
 
 	if save_name is not None:
 		save((diffs, coords), save_name)
@@ -383,13 +406,29 @@ def power_law_sample(alpha):
 	samps = np.random.uniform(low=0, high=1, size=1)
 	return np.power((1-samps), (-1/alpha-1))
 
-def levy_flight_till_atop(mat, less_diff=0.1, alpha=1.5, save_name=None, plot=False):
+def step_in_direction(mat, position, current_direction,step_size=1):
+	#assumes step size is one really
+	dirh, dirw = current_direction
+	curh, curw = position
+	h,w,ch = mat.shape
+
+	coords = (curh+dirh, curw+dirw)
+	if check_proposed_points(coords, h,w) is True:
+		return coords
+	else:
+		coords = random_walk_step(mat, position, step_size=step_size)
+		return coords
+
+
+
+def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=False):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
 	#initialise random point
 	ideal = mat[select_random_point(mat)]
 	#initialise position
-	position = select_random_point(mat)
+	#position = select_random_point(mat)
+	position = select_random_edge_point(mat)
 	#initialise to high value
 	diffs = []
 	coords = []
@@ -404,8 +443,11 @@ def levy_flight_till_atop(mat, less_diff=0.1, alpha=1.5, save_name=None, plot=Fa
 	current_direction = None
 
 	while diff > less_diff and tries <= max_tries:
+		#print "curr num tries: " , curr_num_tries
 		if curr_num_tries<=0 or current_direction is None:
-			step_size = power_law_sample(alpha)
+			step_size = int(power_law_sample(alpha))
+			#print "STEP_SIZE:", step_size
+			#break
 			curr_num_tries = step_size -1
 			new_coords = random_walk_step(mat, position,step_size=1)
 			diff = euclidean_distance(mat[new_coords], ideal)
@@ -416,17 +458,19 @@ def levy_flight_till_atop(mat, less_diff=0.1, alpha=1.5, save_name=None, plot=Fa
 			position = new_coords
 			tries +=1
 			current_direction = (dirx, diry)
-			print "num tries: " + str(tries)
-			print "diff: " + str(diff)
+			#print "num tries: " + str(tries)
+			#print "diff: " + str(diff)
 		if curr_num_tries>0:
-			new_coords, diff = step_in_direction(mat, current_position,current_direction,step_size=1)
+			#print position, current_direction
+			new_coords = step_in_direction(mat, position,current_direction,step_size=1)
+			diff = euclidean_distance(mat[new_coords], ideal)
 			diffs.append(diff)
 			coords.append(new_coords)
 			position = new_coords
 			curr_num_tries -=1
 			tries+=1
-			print "num tries: " + str(tries)
-			print "diff: " + str(diff)
+			#print "num tries: " + str(tries)
+			#print "diff: " + str(diff)
 
 	if save_name is not None:
 		save((diffs, coords), save_name)
@@ -510,12 +554,15 @@ if __name__ == '__main__':
 	#np.save('matrix_1',mat)
 	#plt.imshow(mat)
 	#plt.show()
+	#diffs, coords = levy_flight_till_atop(mat, save_name='levy_flight_search',plot=True)
 	#diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
 	#diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
-	#random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
-	#gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
-	#np.save('trial_random', random_nums)
-	#np.save('trial_gradient', gradient_nums)
+	random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
+	levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_dif=0.1)
+	gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
+	np.save('trial_random', random_nums)
+	np.save('trial_gradient', gradient_nums)
+	np.save('trial_levy', levy_nums)
 	#print len(random_nums)
 	#print len(gradient_nums)
 	#print "mean random: ", np.mean(random_nums)
@@ -523,13 +570,13 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 
-	rands = np.load('trial_random.npy')
-	gradients = np.load('trial_gradient.npy')
-	print np.mean(rands)
-	print np.mean(gradients)
-	t,prob = t_test(rands, gradients)
-	print t
-	print prob
+	#rands = np.load('trial_random.npy')
+	#gradients = np.load('trial_gradient.npy')
+	#print np.mean(rands)
+	#print np.mean(gradients)
+	#t,prob = t_test(rands, gradients)
+	#print t
+	#print prob
 	#great, extremely significant p value, exactly as wanted!
 
 
