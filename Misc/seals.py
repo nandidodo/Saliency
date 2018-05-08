@@ -326,7 +326,7 @@ def plot_example_gradient_and_random(random_base, gradient_base):
 
 
 
-def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False):
+def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False,return_base=False:
 
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
@@ -359,11 +359,15 @@ def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False):
 	if save_name is not None:
 		save((diffs, coords), save_name)
 
+	base = None
 	if plot:
-		plot_path(coords, h,w)
+		base = plot_path(coords, h,w)
+
+	if return_base is True:
+		return diffs, coords ,base
 	return diffs, coords
 
-def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=False):
+def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=False, return_base=False):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
 	#initialise random point
@@ -396,10 +400,14 @@ def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=F
 	if save_name is not None:
 		save((diffs, coords), save_name)
 
+	base = None
 	if plot:
-		plot_path(coords, h,w)
+		base = plot_path(coords, h,w)
 	print len(coords)
 	print len(diffs)
+	if return_base is True:
+		return diffs, coords ,base
+
 	return diffs, coords
 
 def power_law_sample(alpha):
@@ -421,7 +429,7 @@ def step_in_direction(mat, position, current_direction,step_size=1):
 
 
 
-def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=False):
+def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=False, return_base=False):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
 	#initialise random point
@@ -475,10 +483,13 @@ def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=Fal
 	if save_name is not None:
 		save((diffs, coords), save_name)
 
+	base = None
 	if plot:
-		plot_path(coords, h,w)
+		base = plot_path(coords, h,w)
 	print len(coords)
 	print len(diffs)
+	if return_base is True:
+		return diffs, coords ,base
 	return diffs, coords
 
 
@@ -539,6 +550,21 @@ def plot_random_vs_gradient(randoms, gradients):
 	fig.tight_layout()
 	plt.show()
 
+def plot_random_gradient_levys(randoms, gradients, levys):
+	rand_mu = np.mean(randoms)
+	gradient_mu = np.mean(gradients)
+	levy_mu = np.mean(levys)
+	labels = ['Random', 'Levy','Gradient']
+	pos = [1,2,3]
+	res = [rand_mu, levy_mu, gradient_mu]
+	fig = plt.figure()
+	plt.bar(pos, res, width=0.6, tick_label=labels, align='center')
+	plt.xlabel('Search Strategy')
+	plt.ylabel('Mean number of steps to reach target')
+	plt.legend()
+	fig.tight_layout()
+	plt.show()
+
 
 #so now the questio nis how to do the gradients?
 
@@ -557,12 +583,12 @@ if __name__ == '__main__':
 	#diffs, coords = levy_flight_till_atop(mat, save_name='levy_flight_search',plot=True)
 	#diffs, coords = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True)
 	#diffs, coords = random_walk_till_atop(mat, save_name='random_walk_search', plot=True)
-	random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
-	levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_dif=0.1)
-	gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
-	np.save('trial_random', random_nums)
-	np.save('trial_gradient', gradient_nums)
-	np.save('trial_levy', levy_nums)
+	#random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
+	#levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.1)
+	#gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
+	#np.save('trial_random', random_nums)
+	#np.save('trial_gradient', gradient_nums)
+	#np.save('trial_levy', levy_nums)
 	#print len(random_nums)
 	#print len(gradient_nums)
 	#print "mean random: ", np.mean(random_nums)
@@ -570,14 +596,33 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 
-	#rands = np.load('trial_random.npy')
-	#gradients = np.load('trial_gradient.npy')
-	#print np.mean(rands)
-	#print np.mean(gradients)
-	#t,prob = t_test(rands, gradients)
-	#print t
-	#print prob
-	#great, extremely significant p value, exactly as wanted!
+	rands = np.load('trial_random.npy')
+	gradients = np.load('trial_gradient.npy')
+	levys = np.load('trial_levy.npy')
+	print "means"
+	print np.mean(rands)
+	print np.mean(gradients)
+	print np.mean(levys)
+	print "variances"
+	print np.var(rands)
+	print np.var(gradients)
+	print np.var(levys)
+
+	print "t-test rands gradients"
+	t,prob = t_test(rands, gradients)
+	print t 
+	print prob
+	print "t-test rands levys"
+	t,prob = t_test(rands, levys)
+	print t
+	print prob
+	print "t-test gradients levys"
+	t,prob = t_test(gradients, levys)
+	print t
+	print prob
+
+	plot_random_gradient_levys(rands, gradients, levys)
+	#ificant p value, exactly as wanted!
 
 
 	#huh! surprisingly it doesn't seem to make much difference, which is weird1
