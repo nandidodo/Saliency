@@ -152,6 +152,8 @@ def plot_image_changes(N=1000, radius=5, plot_after=5, multiplier=0):
 		print "plot: ", i
 		if i % plot_after ==0:
 			plt.imshow(orig_mat)
+			plt.xticks([])
+			plt.yticks([])
 			plt.show()
 	return orig_mat
 
@@ -600,7 +602,7 @@ def t_test(randoms, gradients):
 
 
 if __name__ == '__main__':
-	plot_image_changes()
+	#plot_image_changes()
 	#mat = get_gradient_matrix(N=30, radius=5,save_name='gradient_matrix')
 	#mat = np.load('gradient_matrix.npy')
 	#np.save('matrix_1',mat)
@@ -625,7 +627,7 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 	
-	"""
+	
 	rands = np.load('trial_random.npy')
 	gradients = np.load('trial_gradient.npy')
 	levys = np.load('trial_levy.npy')
@@ -653,7 +655,7 @@ if __name__ == '__main__':
 
 	plot_random_gradient_levys(rands, gradients, levys)
 	#ificant p value, exactly as wanted!
-	"""
+	
 	
 	#random_base = np.load('random_walk_base.npy')
 	#levy_base = np.load('levy_flight_base.npy')
