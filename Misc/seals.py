@@ -1,12 +1,3 @@
-# okay, this is the basic thing with richard about the seals and their calls finding others with somewhat rapidity
-# in amid the cacophany of other's calls. I don't know how it works or how they should find it
-#their child. basically richard argues that the seal calls being vocal imitators to some extent
-# is so that their parents can find them faster in a mass of corresponding calls
-# so that can see what is happening, but I don't know - i.e. the seal parents can follow the gradient
-# of their call. first things first is finding an algorithm for the gradient
-# so I honestly don't know how that will work
-# first we turn a numpy array into it and then iterate through it. it might be slow but could be cool
-
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
@@ -71,11 +62,6 @@ def average_point(mat,center,px_radius, image_height, image_width):
 	return (green_total/number, red_total/number, blue_total/number)
 
 
-#this allows me to update to some extent based on surrounding with the learning rate 
-# so they are based on their current value but then see what happens
-# when I alter thel earning rate parameter to see if that works so who knows
-#so I can test to see if there are any positive selection effects in favour
-# even though perhaps it might be a group selectional thing, so who knows?s
 def update_point(mat, center, px_radius, image_height, image_width, learning_rate=0.01):
 	x,y = center
 	currents = mat[x][y]
@@ -137,25 +123,33 @@ def matrix_update_step(mat, radius, copy=True, learning_rate=0.1):
 
 	return new_mat
 
-#I don't know why this changes so dramatically to be honest, because the averaging isn't that large
-
-# worryingly it seems to change - I dont think it actally to be hoenst, whih is good
-# but it seems to have vastly more effect than I wuold think!?
-# it should just betiny peturbations, but it's not!
-def plot_image_changes(N=1000, radius=5, plot_after=5, multiplier=0):
+def plot_image_changes(N=150, radius=5, plot_after=5, multiplier=0, save_after=1, save_name=None):
 	orig_mat = create_random_colour_matrix(50,50)
 	plt.imshow(orig_mat)
 	plt.show()
+	save_list = []
+	if save_name is not None:
+		#reshape the orig mat to form the base of the ultimate npmpy array
+		# or I could do it as a list and reshape - that's probably the best
+		save_list.append(orig_mat)
+
 	for i in xrange(N):
-		# this is a horrendously slow algoritm! which i sbad... dagnabbit!
 		orig_mat = matrix_average_step(orig_mat, radius,random_multiplier=multiplier)
 		print "plot: ", i
+		if save_name is not None and i % save_after ==0:
+			save_list.append(orig_mat)
 		if i % plot_after ==0:
 			plt.imshow(orig_mat)
 			plt.xticks([])
 			plt.yticks([])
 			plt.show()
+
+	if save_name is not None:
+		save_list = np.array(save_list)
+		print save_list.shape
+		np.save(save_name, save_list)
 	return orig_mat
+
 
 def get_gradient_matrix(N=20, radius=5, plot=True, save_name=None):
 	orig_mat = create_random_colour_matrix(50,50)
@@ -170,8 +164,6 @@ def get_gradient_matrix(N=20, radius=5, plot=True, save_name=None):
 		np.save(save_name, orig_mat)
 
 	return orig_mat
-
-#this isj ust stuff for the agent now - depending on gradients or whaat have you
 
 def select_random_point(mat):
 	h,w,ch = mat.shape
@@ -217,14 +209,6 @@ def check_proposed_points(points, height,width):
 	return False
 
 def random_walk_step(mat, initial_point, step_size):
-	# simulates an isotropic gaussian random walk step
-	# I can do this the rubbish way of 1-9 simulation!? but thsi seems like a poor choice
-	# there is also a sight range, so it coul work and be interesting to see the actual distribution
-	# of different calls in various ways!?
-	# and also theeffect of random canges. The psychedelic effects of those pictures
-	# are quite cool in a way, which is cool. I could send richard this!?
-	# do that tonight when I have power to run them as it's fairly straightforward
-	# I shuold just do this in the rubbish long and boring way!
 	sh,sw = initial_point
 	h,w,ch = mat.shape
 	valid=False
@@ -264,11 +248,7 @@ def absolute_diff(p1,p2):
 	return total/len(p1)
 
 def immediate_gradient_step(ideal, center, mat):
-	# so bascially aim is given ideal result, coordinates, and the matrix
-	# to move in the direction which is closest to the ideal
-	# the aim is to prove this is signifiacntly better than before
-	# which is cool. I do wonder if smoeone has done mathematical mdoelling of this before
-	# I would strongly suspect so!
+	
 	best_diff = 99999 # a large number!
 	# calculate differences by euclidean differences here
 	ch,cw = center
@@ -295,7 +275,6 @@ def immediate_gradient_step(ideal, center, mat):
 
 	return best_coords, best_diff
 
-#clearly aim will beto stop if after a while
 
 def plot_path(coords, height, width,plot=True):
 	base = np.zeros((height,width))
@@ -594,11 +573,14 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 	plt.show()
 
 
-#so now the questio nis how to do the gradients?
-
 def t_test(randoms, gradients):
 	t,prob = scipy.stats.ttest_ind(randoms, gradients, equal_var=False)
 	return t,prob
+
+# okay, let's try to do something actually productive by using the animations to figure 
+# out what's happening here!
+# basicaly, all I should theoretically have to do is to is to plot it reasonably here
+# I'm not sure if it's possible, but idealy it would be!
 
 
 if __name__ == '__main__':
@@ -627,7 +609,7 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 	
-	
+	"""
 	rands = np.load('trial_random.npy')
 	gradients = np.load('trial_gradient.npy')
 	levys = np.load('trial_levy.npy')
@@ -654,6 +636,7 @@ if __name__ == '__main__':
 	print prob
 
 	plot_random_gradient_levys(rands, gradients, levys)
+	"""
 	#ificant p value, exactly as wanted!
 	
 	
@@ -665,14 +648,5 @@ if __name__ == '__main__':
 	#plt.imshow(random_base)
 	#plt.show()
 
-
-	#huh! surprisingly it doesn't seem to make much difference, which is weird1
-	#perfect!! that's why! the gradient one wasn't actually running as the gradient
-	# but just acopy of the random walk. that's really dumb! now it gives precisely the expected results!
-	# I could totally get these to richard to be hoenst tomorrow since writing them up will be trivial!
-#this doesn't seem to be working so well which is weird because in all the small scale
-# examples I'm doing it does... dagnabbit. I guess I'll have to look into this further!
-
-
-
-
+	#plot the changes for animation purposes
+	plot_image_changes(N=150,plot_after=1000000, save_name='vocal_learning_development')
