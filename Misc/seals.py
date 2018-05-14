@@ -613,7 +613,7 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 	
-	
+	"""
 	rands = np.load('trial_random.npy')
 	gradients = np.load('trial_gradient.npy')
 	levys = np.load('trial_levy.npy')
@@ -640,7 +640,7 @@ if __name__ == '__main__':
 	print prob
 
 	plot_random_gradient_levys(rands, gradients, levys)
-	
+	"""
 	#ificant p value, exactly as wanted!
 	
 	
@@ -653,4 +653,4 @@ if __name__ == '__main__':
 	#plt.show()
 
 	#plot the changes for animation purposes
-	#plot_image_changes(N=150,plot_after=1000000, save_name='vocal_learning_development')
+	plot_image_changes(N=200,plot_after=1000000, save_name='vocal_learning_development_8')
