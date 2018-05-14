@@ -561,7 +561,11 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 	rand_mu = np.mean(randoms)
 	gradient_mu = np.mean(gradients)
 	levy_mu = np.mean(levys)
-	labels = ['Random', 'Levy','Gradient']
+	#labels = ['Random', 'Levy','Gradient']
+	#try with matplotlibs latex functionality
+	labels = [r'$Random$', r'$L\grave{e}vy$',r'$Gradient$']
+
+#plt.title(r'$\ddot{o}\acute{e}\grave{e}\hat{O}\breve{i}\bar{A}\tilde{n}\vec{q}$')
 	pos = [1,2,3]
 	res = [rand_mu, levy_mu, gradient_mu]
 	fig = plt.figure()
@@ -609,7 +613,7 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 	
-	"""
+	
 	rands = np.load('trial_random.npy')
 	gradients = np.load('trial_gradient.npy')
 	levys = np.load('trial_levy.npy')
@@ -636,7 +640,7 @@ if __name__ == '__main__':
 	print prob
 
 	plot_random_gradient_levys(rands, gradients, levys)
-	"""
+	
 	#ificant p value, exactly as wanted!
 	
 	
@@ -649,4 +653,4 @@ if __name__ == '__main__':
 	#plt.show()
 
 	#plot the changes for animation purposes
-	plot_image_changes(N=150,plot_after=1000000, save_name='vocal_learning_development')
+	#plot_image_changes(N=150,plot_after=1000000, save_name='vocal_learning_development')
