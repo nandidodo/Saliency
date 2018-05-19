@@ -682,5 +682,18 @@ if __name__ == '__main__':
 	#	print "completed version: " + str(i)
 
 	#I also need to simulate the noies properly. let's do that for a bit and generate the naimation ther
-	plot_image_changes(N=400, radius=5, plot_after=100000, save_name='vocal_learning_noise_1', multiplier=0.05)
+	plot_image_changes(N=400, radius=5, plot_after=100000, save_name='vocal_learning_noise_1', multiplier=0.1)
 	print "done!"
+
+	# If I want to do the extreme computational load, I can theoretically test the robustness in a lot of cases
+	# first I just need to check how robust it is relative to the r hyperparameter,
+	# which I haven't done that often. I'll really need to run a whole load of these simulations
+	# to get it to work well, or use julia instead because loops in python are REALLY slow
+	# and this isn't good!
+	# call the animations and make them directly - it's all in the same directory
+	# so this should work even though it's very hacky
+
+	#for i in range(3,20):
+	#	osstr = 'python animate_seals.py vocal_learning_radius_' + str(i)+'.npy'
+	#	os.system(osstr)
+	#	print "done!"
