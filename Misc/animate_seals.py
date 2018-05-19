@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib
 import sys
 import os
 
@@ -39,17 +40,22 @@ def updateFig(i):
 	return im,
 
 length = len(arr)
-
-anim = animation.FuncAnimation(fig, updateFig, interval=length, blit=True, save_count=150)
+print "length: ", length
+anim = animation.FuncAnimation(fig, updateFig, interval=30, blit=True, save_count=150)
 #plt.show()
 #save animation
-if sys.argv[1] is not None:
+"""
+if input_str is not None:
 	save_name = input_str.split('.')[0] + '_animation.mp4'
-
-	anim.save(save_name, writer="ffmpeg", fps=30, extra_args=['-vcodec, libx264'])
-else:
-	anim.save('vocal_learning_animation_7.mp4',writer="ffmpeg", fps=30, extra_args=['-vcodec', 'libx264'])
-
+	print save_name
+	anim.save('test_anim.mp4', writer="ffmpeg", fps=30, extra_args=['-vcodec, libx264'])
+if input_str is None:
+	print "in non input string branch"
+	anim.save('test_anim.mp4',writer="ffmpeg", fps=30, extra_args=['-vcodec', 'libx264'])
+"""
+if input_str is not None:
+	save_name =input_str.split('.')[0] + '_animation.mp4'
+	anim.save(save_name,writer="ffmpeg", fps=30, extra_args=['-vcodec', 'libx264'])
 # beware though, the save of the animation number and the number of the actual matrix file are opposites
 # so 7 is 1 and vice versa. because I did it in a silly way!
 
