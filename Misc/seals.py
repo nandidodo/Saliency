@@ -125,8 +125,8 @@ def matrix_update_step(mat, radius, copy=True, learning_rate=0.1):
 
 def plot_image_changes(N=150, radius=5, plot_after=5, multiplier=0, save_after=1, save_name=None):
 	orig_mat = create_random_colour_matrix(50,50)
-	plt.imshow(orig_mat)
-	plt.show()
+	#plt.imshow(orig_mat)
+	#plt.show()
 	save_list = []
 	if save_name is not None:
 		#reshape the orig mat to form the base of the ultimate npmpy array
@@ -653,4 +653,8 @@ if __name__ == '__main__':
 	#plt.show()
 
 	#plot the changes for animation purposes
-	plot_image_changes(N=200,plot_after=1000000, save_name='vocal_learning_development_8')
+	#plot_image_changes(N=200, radius=5,plot_after=1000000, save_name='vocal_learning_development_8')
+	#this is actually going to test the robustness of the method
+	for i in range(2,20):
+		save_name = 'vocal_learning_radius_' + str(i)
+		plot_image_changes(N=200, radius=i, plot_after=1000000, save_name=save_name)
