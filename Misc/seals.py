@@ -561,15 +561,31 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 	rand_mu = np.mean(randoms)
 	gradient_mu = np.mean(gradients)
 	levy_mu = np.mean(levys)
+	rand_stderr = np.sqrt(np.var(randoms))/np.sqrt(len(randoms))
+	gradient_stderr = np.sqrt(np.var(gradients))/np.sqrt(len(gradients))
+	levy_stderr = np.sqrt(np.var(levys))/np.sqrt(len(levys))
+
+	print "supposed standard deviations"
+	print rand_stderr
+	print gradient_stderr
+	print levy_stderr
+
+	print "confidence intervals"
+	print scipy.stats.norm.interval(0.95, loc=rand_mu, scale=np.sqrt(np.var(randoms))/np.sqrt(len(randoms)))
+	print scipy.stats.norm.interval(0.95, loc=gradient_mu, scale=np.sqrt(np.var(gradients))/np.sqrt(len(randoms)))
+	print scipy.stats.norm.interval(0.95, loc=levy_mu, scale=np.sqrt(np.var(levys))/np.sqrt(len(randoms)))
+
+	print len(randoms)
 	#labels = ['Random', 'Levy','Gradient']
 	#try with matplotlibs latex functionality
 	labels = [r'$Random$', r'$L\grave{e}vy$',r'$Gradient$']
+	errors = [rand_stderr, gradient_stderr, levy_stderr]
 
 #plt.title(r'$\ddot{o}\acute{e}\grave{e}\hat{O}\breve{i}\bar{A}\tilde{n}\vec{q}$')
 	pos = [1,2,3]
 	res = [rand_mu, levy_mu, gradient_mu]
 	fig = plt.figure()
-	plt.bar(pos, res, width=0.6, tick_label=labels, align='center')
+	plt.bar(pos, res, width=0.6, tick_label=labels, yerr=errors, align='center')
 	plt.xlabel('Search Strategy')
 	plt.ylabel('Mean number of steps to reach target')
 	plt.legend()
@@ -613,7 +629,7 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 	
-	"""
+	
 	rands = np.load('trial_random.npy')
 	gradients = np.load('trial_gradient.npy')
 	levys = np.load('trial_levy.npy')
@@ -640,7 +656,7 @@ if __name__ == '__main__':
 	print prob
 
 	plot_random_gradient_levys(rands, gradients, levys)
-	"""
+	
 	#ificant p value, exactly as wanted!
 	
 	
@@ -655,6 +671,6 @@ if __name__ == '__main__':
 	#plot the changes for animation purposes
 	#plot_image_changes(N=200, radius=5,plot_after=1000000, save_name='vocal_learning_development_8')
 	#this is actually going to test the robustness of the method
-	for i in range(2,20):
-		save_name = 'vocal_learning_radius_' + str(i)
-		plot_image_changes(N=200, radius=i, plot_after=1000000, save_name=save_name)
+	#for i in range(2,20):
+	#	save_name = 'vocal_learning_radius_' + str(i)
+	#	plot_image_changes(N=200, radius=i, plot_after=1000000, save_name=save_name)
