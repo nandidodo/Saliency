@@ -4,10 +4,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import sys
+import os
 
 
-save_name='vocal_learning_development.npy'
-arr = np.load(save_name)
+save_name='vocal_learning_development_1.npy'
+print sys.argv
+if sys.argv[1] is not None and type(sys.argv[1]) is str:
+	save_name = sys.argv[1]
+try:
+	arr = np.load(save_name)
+except ValueError:
+	raise ValueError('Inputted name does not correspond to a file')
 fig = plt.figure()
 #ax = fig.add_subplot(111)
 plt.xticks([])
@@ -33,8 +41,10 @@ def updateFig(i):
 anim = animation.FuncAnimation(fig, updateFig, interval=100, blit=True, save_count=150)
 #plt.show()
 #save animation
-anim.save('vocal_learning_animation_7.mp4',writer="ffmpeg")
+anim.save('vocal_learning_animation_7.mp4',writer="ffmpeg", fps=30, extra_args=['-vcodec', 'libx264'])
 
 # beware though, the save of the animation number and the number of the actual matrix file are opposites
 # so 7 is 1 and vice versa. because I did it in a silly way!
 
+# when rihard picks the one he wants, you might have to rerun it with the codec argument
+# in there so it can be added to html5. I currently havne't got that, but I should include it at some opint!
