@@ -277,8 +277,9 @@ def immediate_gradient_step(ideal, center, mat):
 	return best_coords, best_diff
 
 
-def plot_path(coords, height, width,plot=True):
-	base = np.zeros((height,width))
+def plot_path(coords, height, width,plot=True, base=None):
+	if base is None:
+		base = np.zeros((height,width))
 	for i in xrange(len(coords)):
 		x,y = coords[i]
 		base[x][y] = 255.
