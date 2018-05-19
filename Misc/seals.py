@@ -673,7 +673,11 @@ if __name__ == '__main__':
 	#plot the changes for animation purposes
 	#plot_image_changes(N=200, radius=5,plot_after=1000000, save_name='vocal_learning_development_8')
 	#this is actually going to test the robustness of the method
-	for i in range(5,20):
-		save_name = 'vocal_learning_radius_' + str(i)
-		plot_image_changes(N=200, radius=i, plot_after=1000000, save_name=save_name)
-		print "completed version: " + str(i)
+	#for i in range(5,20):
+	#	save_name = 'vocal_learning_radius_' + str(i)
+	#	plot_image_changes(N=200, radius=i, plot_after=1000000, save_name=save_name)
+	#	print "completed version: " + str(i)
+
+	#I also need to simulate the noies properly. let's do that for a bit and generate the naimation ther
+	plot_image_changes(N=400, radius=5, plot_after=100000, save_name='vocal_learning_noise_1', multiplier=0.05)
+	print "done!"
