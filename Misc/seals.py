@@ -328,6 +328,8 @@ def plot_example_random_levy_gradient(random_base, levy_base, gradient_base):
 	plt.xticks([])
 	plt.yticks([])
 
+	#make there be no space between subplots
+	plt.subplots_adjust(wspace=0, hspace=0)
 	fig.tight_layout()
 	plt.show()
 
