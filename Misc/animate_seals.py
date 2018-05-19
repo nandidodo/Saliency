@@ -10,8 +10,9 @@ import os
 
 save_name='vocal_learning_development_1.npy'
 print sys.argv
-if sys.argv[1] is not None and type(sys.argv[1]) is str:
-	save_name = sys.argv[1]
+input_str = sys.argv[1]
+if input_str is not None and type(input_str) is str:
+	save_name = input_str
 try:
 	arr = np.load(save_name)
 except ValueError:
@@ -37,11 +38,17 @@ def updateFig(i):
 	#print epoch_text
 	return im,
 
+length = len(arr)
 
-anim = animation.FuncAnimation(fig, updateFig, interval=100, blit=True, save_count=150)
+anim = animation.FuncAnimation(fig, updateFig, interval=length, blit=True, save_count=150)
 #plt.show()
 #save animation
-anim.save('vocal_learning_animation_7.mp4',writer="ffmpeg", fps=30, extra_args=['-vcodec', 'libx264'])
+if sys.argv[1] is not None:
+	save_name = input_str.split('.')[0] + '_animation.mp4'
+
+	anim.save(save_name, writer="ffmpeg", fps=30, extra_args=['-vcodec, libx264'])
+else:
+	anim.save('vocal_learning_animation_7.mp4',writer="ffmpeg", fps=30, extra_args=['-vcodec', 'libx264'])
 
 # beware though, the save of the animation number and the number of the actual matrix file are opposites
 # so 7 is 1 and vice versa. because I did it in a silly way!
