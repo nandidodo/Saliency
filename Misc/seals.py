@@ -49,16 +49,16 @@ def average_point(mat,center,px_radius, image_height, image_width):
 					if euclidean_distance(center, (xpoint, ypoint)) <=px_radius:
 						#print "adding to average"
 						green_total+= mat[xpoint][ypoint][0]
-						print "green added: " + str(mat[xpoint][ypoint][0])
+						#print "green added: " + str(mat[xpoint][ypoint][0])
 						#print "green total: " + str(green_total)
 						red_total+= mat[xpoint][ypoint][1]
-						print "red added: " + str(mat[xpoint][ypoint][1])
+						#print "red added: " + str(mat[xpoint][ypoint][1])
 						blue_total+=mat[xpoint][ypoint][2]
 						number+=1
 
-	print "number: ", number
-	print "green: " + str(green_total/number)
-	print "green total: " + str(green_total)
+	#print "number: ", number
+	#print "green: " + str(green_total/number)
+	#print "green total: " + str(green_total)
 	return (green_total/number, red_total/number, blue_total/number)
 
 
@@ -91,12 +91,12 @@ def matrix_average_step(mat, average_radius, copy=True, random_multiplier=None):
 			new_mat[i][j] = average_point(mat, (i,j), average_radius, height,width)
 	if random_multiplier is not None:
 		rand = create_random_mask((height,width,channels), random_multiplier)
-		print rand
-		print new_mat[40][20]
-		print rand[40][20]
+		#print rand
+		#print new_mat[40][20]
+		#print rand[40][20]
 		new_mat = new_mat + rand
-		print new_mat[40][20]
-		print np.amax(rand)
+		#print new_mat[40][20]
+		#print np.amax(rand)
 		# I don't udnerstand why adding a small random peturbation almost completely
 		# foils the random field at all. I really don't understand that and it confuses me
 		# like there seems to be no reason for it, and it confuses me so much!
@@ -128,6 +128,7 @@ def plot_image_changes(N=150, radius=5, plot_after=5, multiplier=0, save_after=1
 	#plt.imshow(orig_mat)
 	#plt.show()
 	save_list = []
+	print "updating with radius: " + str(radius)
 	if save_name is not None:
 		#reshape the orig mat to form the base of the ultimate npmpy array
 		# or I could do it as a list and reshape - that's probably the best
@@ -138,15 +139,15 @@ def plot_image_changes(N=150, radius=5, plot_after=5, multiplier=0, save_after=1
 		print "plot: ", i
 		if save_name is not None and i % save_after ==0:
 			save_list.append(orig_mat)
-		if i % plot_after ==0:
-			plt.imshow(orig_mat)
-			plt.xticks([])
-			plt.yticks([])
-			plt.show()
+		#if i % plot_after ==0:
+			#plt.imshow(orig_mat)
+			#plt.xticks([])
+			#plt.yticks([])
+			#plt.show()
 
 	if save_name is not None:
 		save_list = np.array(save_list)
-		print save_list.shape
+		#print save_list.shape
 		np.save(save_name, save_list)
 	return orig_mat
 
@@ -584,12 +585,13 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 #plt.title(r'$\ddot{o}\acute{e}\grave{e}\hat{O}\breve{i}\bar{A}\tilde{n}\vec{q}$')
 	pos = [1,2,3]
 	res = [rand_mu, levy_mu, gradient_mu]
-	fig = plt.figure()
-	plt.bar(pos, res, width=0.6, tick_label=labels, yerr=errors, align='center')
-	plt.xlabel('Search Strategy')
-	plt.ylabel('Mean number of steps to reach target')
+	fig, ax = plt.subplots()
+	ax.bar(pos, res, width=0.6, yerr=errors, align='center', alpha=0.8, ecolor='black', capsize=10)
+	ax.set_xlabel('Search Strategy')
+	ax.set_ylabel('Mean number of steps to reach target')
+	ax.yaxis.grid(True)
 	plt.legend()
-	fig.tight_layout()
+	plt.tight_layout()
 	plt.show()
 
 
@@ -629,7 +631,7 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 	
-	
+	"""
 	rands = np.load('trial_random.npy')
 	gradients = np.load('trial_gradient.npy')
 	levys = np.load('trial_levy.npy')
@@ -656,7 +658,7 @@ if __name__ == '__main__':
 	print prob
 
 	plot_random_gradient_levys(rands, gradients, levys)
-	
+	"""
 	#ificant p value, exactly as wanted!
 	
 	
@@ -671,6 +673,7 @@ if __name__ == '__main__':
 	#plot the changes for animation purposes
 	#plot_image_changes(N=200, radius=5,plot_after=1000000, save_name='vocal_learning_development_8')
 	#this is actually going to test the robustness of the method
-	#for i in range(2,20):
-	#	save_name = 'vocal_learning_radius_' + str(i)
-	#	plot_image_changes(N=200, radius=i, plot_after=1000000, save_name=save_name)
+	for i in range(5,20):
+		save_name = 'vocal_learning_radius_' + str(i)
+		plot_image_changes(N=200, radius=i, plot_after=1000000, save_name=save_name)
+		print "completed version: " + str(i)
