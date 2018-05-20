@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import cPickle as pickle
 import scipy
 import scipy.stats
+import os
 
 def euclidean_distance(center, point):
 	if len(center)!=len(point):
@@ -307,8 +308,25 @@ def plot_example_gradient_and_random(random_base, gradient_base):
 	fig.tight_layout()
 	plt.show()
 
-def plot_example_random_levy_gradient(random_base, levy_base, gradient_base):
+def position_base_on_path(path, base):
+	new_base = np.copy(base)
+	#if base.shape != path.shape:
+	#	raise ValueError('Base and path are not the same shape')
+	h,w = path.shape
+	for i in xrange(h):
+		for j in xrange(w):
+			if path[i][j] >1:
+				new_base[i][j] = 255.
+	return new_base
+
+
+def plot_example_random_levy_gradient(random_base, levy_base, gradient_base, base=None):
 	fig = plt.figure()
+
+	if base is not None:
+		random_base = position_base_on_path(random_base, base)
+		levy_base = position_base_on_path(levy_base, base)
+		gradient_base = position_base_on_path(gradient_base, base)
 
 	ax1 = plt.subplot(131)
 	plt.imshow(random_base)
@@ -612,9 +630,12 @@ if __name__ == '__main__':
 	#plot_image_changes()
 	#mat = get_gradient_matrix(N=30, radius=5,save_name='gradient_matrix')
 	#mat = np.load('gradient_matrix.npy')
-	#np.save('matrix_1',mat)
+	##np.save('matrix_1',mat)
+	#mat = np.load('matrix_1.npy')
 	#plt.imshow(mat)
 	#plt.show()
+	# the current one is not a bad one!
+	# let's try this again!
 	#diffs, coords, base = levy_flight_till_atop(mat, save_name='levy_flight_search',plot=True,return_base=True)
 	#np.save('levy_flight_base', base)
 	#diffs, coords, base = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True,return_base=True)
@@ -669,7 +690,7 @@ if __name__ == '__main__':
 	#levy_base = np.load('levy_flight_base.npy')
 	#gradient_base = np.load('gradient_base.npy')
 	#plot_example_gradient_and_random(random_base, gradient_base)
-	#plot_example_random_levy_gradient(random_base, levy_base, gradient_base)
+	#plot_example_random_levy_gradient(random_base, levy_base, gradient_base, base=mat)
 	#plt.imshow(random_base)
 	#plt.show()
 
@@ -682,8 +703,8 @@ if __name__ == '__main__':
 	#	print "completed version: " + str(i)
 
 	#I also need to simulate the noies properly. let's do that for a bit and generate the naimation ther
-	plot_image_changes(N=400, radius=5, plot_after=100000, save_name='vocal_learning_noise_1', multiplier=0.1)
-	print "done!"
+	#plot_image_changes(N=400, radius=5, plot_after=100000, save_name='vocal_learning_noise_0.17', multiplier=0.17)
+	#print "done!"
 
 	# If I want to do the extreme computational load, I can theoretically test the robustness in a lot of cases
 	# first I just need to check how robust it is relative to the r hyperparameter,
@@ -693,7 +714,22 @@ if __name__ == '__main__':
 	# call the animations and make them directly - it's all in the same directory
 	# so this should work even though it's very hacky
 
-	#for i in range(3,20):
-	#	osstr = 'python animate_seals.py vocal_learning_radius_' + str(i)+'.npy'
-	#	os.system(osstr)
-	#	print "done!"
+	for i in range(3,20):
+		osstr = 'python animate_seals.py vocal_learning_radius_' + str(i)+'.npy'
+		os.system(osstr)
+		print "done!"
+
+	# things that need to be done - check the robustness of the results for r - hopefully that will come through
+	# check on my claim of things for the randomness although I'm suspicious about this. hopefully at some point
+	# it will slow convergence, but I'm not sure... it doesn't seem to have with small values, but perhaps closer to criticality?!
+	# then what I will have to do is choose a point where gradients seem reasonably established
+	# and rerun all the actual running levy flights and the like till atop
+	# and see if that works or is reasonable at all
+	# and hopefully it will be
+	# and there are a multitude of other parameters I can test in the model
+	# and so provide it with the background on too, so that should be nice
+	# I forget what the base for this is! 
+	# it works butI dno't thin it's the correct base - I'm going to have to rerun all the levy tests
+	# which really isn't the end of the world. it doesn't take that long!
+	# yeah, I don' think this randomness is working... I wonder why I got it seemingly stuck
+	# that one time, having asserted this I'm now going to be in serious trouble... dagnabbit!

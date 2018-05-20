@@ -41,7 +41,7 @@ def updateFig(i):
 
 length = len(arr)
 print "length: ", length
-anim = animation.FuncAnimation(fig, updateFig, interval=30, blit=True, save_count=150)
+anim = animation.FuncAnimation(fig, updateFig, interval=30, blit=True, save_count=length)
 #plt.show()
 #save animation
 """
@@ -54,8 +54,16 @@ if input_str is None:
 	anim.save('test_anim.mp4',writer="ffmpeg", fps=30, extra_args=['-vcodec', 'libx264'])
 """
 if input_str is not None:
-	save_name =input_str.split('.')[0] + '_animation.mp4'
+	splits = input_str.split('.')
+	if len(splits) == 2:
+		save_name =input_str.split('.')[0] + '_animation.mp4'
+	if len(splits) >2:
+		save_name=""
+		for i in xrange(len(splits)-1):
+			save_name += splits[i] + '.'
+		save_name += '_animation.mp4'
 	anim.save(save_name,writer="ffmpeg", fps=30, extra_args=['-vcodec', 'libx264'])
+
 # beware though, the save of the animation number and the number of the actual matrix file are opposites
 # so 7 is 1 and vice versa. because I did it in a silly way!
 
