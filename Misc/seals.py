@@ -177,6 +177,22 @@ def select_random_point(mat):
 			selected=True
 	return height,width
 
+def swap_points(mat):
+	rand1 = select_random_point(mat)
+	rand2 = select_random_point(mat)
+	temp = mat[rand1]
+	mat[rand1] = mat[rand2]
+	mat[rand2] = temp
+	return mat
+
+def randomise_swap_points(mat, N):
+	new_mat = np.copy(mat)
+	for i in xrange(N):
+		new_mat = swap_points(new_mat)
+	return new_mat
+
+
+
 def select_target(mat):
 	#basicaly selects at random a point
 	height, width = select_random_point(mat)
@@ -714,10 +730,17 @@ if __name__ == '__main__':
 	# call the animations and make them directly - it's all in the same directory
 	# so this should work even though it's very hacky
 
-	for i in range(3,20):
-		osstr = 'python animate_seals.py vocal_learning_radius_' + str(i)+'.npy'
-		os.system(osstr)
-		print "done!"
+	#for i in range(3,20):
+	#	osstr = 'python animate_seals.py vocal_learning_radius_' + str(i)+'.npy'
+	#	os.system(osstr)
+	#	print "done!"
+
+	#plot one and two for longer
+	#plot_image_changes(N=400, radius=2, plot_after=100000, save_name='vocal_learning_radius_2')
+	#plot_image_changes(N=400, radius=1, plot_after=100000, save_name='vocal_learning_radius_1')
+	#os.system('python animate_seals.py vocal_learning_radius_2.npy')
+	#os.system('python animate_seals.py vocal_learning_radius_1.npy')
+
 
 	# things that need to be done - check the robustness of the results for r - hopefully that will come through
 	# check on my claim of things for the randomness although I'm suspicious about this. hopefully at some point
