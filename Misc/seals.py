@@ -21,6 +21,39 @@ def save(obj, fname):
 def load(fname):
 	return pickle.load(open(fname, 'rb'))
 
+
+def select_random_point(mat):
+	h,w,ch = mat.shape
+	selected = False
+	while selected != True:
+		height = int(h * np.random.uniform(low=0, high=1))
+		width = int(w*np.random.uniform(low=0, high=1))
+		if check_proposed_points((height, width), h,w):
+			selected=True
+	return height,width
+
+def swap_points(mat):
+	rand1 = select_random_point(mat)
+	rand2 = select_random_point(mat)
+	temp = mat[rand1]
+	mat[rand1] = mat[rand2]
+	mat[rand2] = temp
+	return mat
+
+def randomise_swap_points(mat, N):
+	new_mat = np.copy(mat)
+	for i in xrange(N):
+		new_mat = swap_points(new_mat)
+	return new_mat
+
+
+
+def select_target(mat):
+	#basicaly selects at random a point
+	height, width = select_random_point(mat)
+	return mat[height][width]
+
+
 def create_random_colour_matrix(height, width):
 	mat = np.zeros((height, width,3))
 	for i in xrange(height):
@@ -124,7 +157,7 @@ def matrix_update_step(mat, radius, copy=True, learning_rate=0.1):
 
 	return new_mat
 
-def plot_image_changes(N=150, radius=5, plot_after=5, multiplier=0, save_after=1, save_name=None):
+def plot_image_changes(N=150, radius=5, plot_after=5, multiplier=0, save_after=1, save_name=None, swap_number = None):
 	orig_mat = create_random_colour_matrix(50,50)
 	#plt.imshow(orig_mat)
 	#plt.show()
@@ -137,6 +170,9 @@ def plot_image_changes(N=150, radius=5, plot_after=5, multiplier=0, save_after=1
 
 	for i in xrange(N):
 		orig_mat = matrix_average_step(orig_mat, radius,random_multiplier=multiplier)
+		if swap_number is not None:
+			#do the swaps
+			orig_mat = randomise_swap_points(orig_mat, swap_number)
 		print "plot: ", i
 		if save_name is not None and i % save_after ==0:
 			save_list.append(orig_mat)
@@ -167,36 +203,7 @@ def get_gradient_matrix(N=20, radius=5, plot=True, save_name=None):
 
 	return orig_mat
 
-def select_random_point(mat):
-	h,w,ch = mat.shape
-	selected = False
-	while selected != True:
-		height = int(h * np.random.uniform(low=0, high=1))
-		width = int(w*np.random.uniform(low=0, high=1))
-		if check_proposed_points((height, width), h,w):
-			selected=True
-	return height,width
 
-def swap_points(mat):
-	rand1 = select_random_point(mat)
-	rand2 = select_random_point(mat)
-	temp = mat[rand1]
-	mat[rand1] = mat[rand2]
-	mat[rand2] = temp
-	return mat
-
-def randomise_swap_points(mat, N):
-	new_mat = np.copy(mat)
-	for i in xrange(N):
-		new_mat = swap_points(new_mat)
-	return new_mat
-
-
-
-def select_target(mat):
-	#basicaly selects at random a point
-	height, width = select_random_point(mat)
-	return mat[height][width]
 
 def select_random_edge_point(mat):
 	h,w,ch = mat.shape
@@ -307,6 +314,34 @@ def plot_path(coords, height, width,plot=True, base=None):
 		plt.show()
 	return base
 
+anim_slides = plot_anim_path(mat, coords, h,w,ideal, position)
+
+def plot_anim_path(coords, height, width, ideal, position, base=None, flicker_parent=True, init_num=10):
+	if base is None:
+		base = np.zeros((height, width))
+	slides = []
+	#initialise 
+	for i in xrange(init_num):
+		parent_save = base[ideal]
+		base[ideal] = 255.
+		base[position] = 255.
+		if flicker_parent and i%2==0:
+			base[ideal] = parent_save
+		slides.append(base)
+	for j in xrange(len(coords)):
+		x,y = coords[i]
+		parent_save = base[ideal]
+		base[ideal] = 255.
+		base[x][y] = 255.
+		if flicker_parent and i%2==0:
+			base[ideal] = parent_save
+		slides.append(base)
+
+	slides = np.array(slides)
+	return slides
+
+
+
 
 #yeah, thi sfunction needs a lot of work!
 def plot_example_gradient_and_random(random_base, gradient_base):
@@ -367,10 +402,6 @@ def plot_example_random_levy_gradient(random_base, levy_base, gradient_base, bas
 	fig.tight_layout()
 	plt.show()
 
-
-
-
-
 def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False,return_base=False):
 
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
@@ -412,7 +443,7 @@ def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False,re
 		return diffs, coords ,base
 	return diffs, coords
 
-def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=False, return_base=False):
+def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=False, plot_animation=False,return_base=False):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
 	#initialise random point
@@ -448,6 +479,8 @@ def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=F
 	base = None
 	if plot:
 		base = plot_path(coords, h,w)
+	if plot_animation is True:
+		anim_slides = plot_anim_path(mat, coords, h,w,ideal, position)
 	print len(coords)
 	print len(diffs)
 	if return_base is True:
@@ -471,7 +504,6 @@ def step_in_direction(mat, position, current_direction,step_size=1):
 	else:
 		coords = random_walk_step(mat, position, step_size=step_size)
 		return coords
-
 
 
 def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=False, return_base=False):
@@ -671,7 +703,7 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 	
-	"""
+	
 	rands = np.load('trial_random.npy')
 	gradients = np.load('trial_gradient.npy')
 	levys = np.load('trial_levy.npy')
@@ -698,7 +730,7 @@ if __name__ == '__main__':
 	print prob
 
 	plot_random_gradient_levys(rands, gradients, levys)
-	"""
+	
 	#ificant p value, exactly as wanted!
 	
 	
@@ -740,6 +772,10 @@ if __name__ == '__main__':
 	#plot_image_changes(N=400, radius=1, plot_after=100000, save_name='vocal_learning_radius_1')
 	#os.system('python animate_seals.py vocal_learning_radius_2.npy')
 	#os.system('python animate_seals.py vocal_learning_radius_1.npy')
+
+	#test it with the random swapping to see if it helps
+	#plot_image_changes(N=400, radius=3, plot_after=100000, save_name='vocal_learning_swap_test', swap_number=200)
+	#os.system('python animate_seals.py vocal_learning_swap_test.npy')
 
 
 	# things that need to be done - check the robustness of the results for r - hopefully that will come through
