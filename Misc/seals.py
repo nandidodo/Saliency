@@ -320,23 +320,27 @@ def plot_anim_path(coords, height, width, ideal, position, base=None, flicker_pa
 		base = np.zeros((height, width))
 	slides = []
 	#initialise 
-	for i in xrange(init_num):
-		parent_save = base[ideal]
-		base[ideal] = 255.
-		base[position] = 255.
-		if flicker_parent and i%2==0:
-			base[ideal] = parent_save
-		slides.append(base)
+	#for i in xrange(init_num):
+	#	new_base =np.copy(base)
+	#	parent_save = base[ideal]
+	#	new_base[ideal] = (255, 255, 255)
+	#	new_base[position] = (255, 255, 255)
+	#	if flicker_parent and i%2==0:
+	#		new_base[ideal] = parent_save
+	#	slides.append(new_base)
 	for j in xrange(len(coords)):
-		x,y = coords[i]
-		parent_save = base[ideal]
-		base[ideal] = 255.
-		base[x][y] = 255.
-		if flicker_parent and i%2==0:
-			base[ideal] = parent_save
-		slides.append(base)
+		new_base = np.copy(base)
+		x,y = coords[j]
+		print x, y
+		parent_save = new_base[ideal]
+		new_base[ideal] = (255, 255, 255)
+		new_base[x][y] = (255, 255,255)
+		if flicker_parent and j%2==0:
+			new_base[ideal] = parent_save
+		slides.append(new_base)
 
 	slides = np.array(slides)
+	print slides.shape
 	return slides
 
 
@@ -401,12 +405,14 @@ def plot_example_random_levy_gradient(random_base, levy_base, gradient_base, bas
 	fig.tight_layout()
 	plt.show()
 
-def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False,return_base=False):
+def gradient_search_till_atop(mat, less_diff=0.01, save_name=None, plot=False,return_base=False, gradient_anim=True):
 
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
 	#initialise random point
-	ideal = mat[select_random_point(mat)]
+	ideal_coords = select_random_point(mat)
+	ideal = mat[ideal_coords]
+	#ideal = mat[select_random_point(mat)]
 	#initialise position
 	#position = select_random_point(mat)
 	position = select_random_edge_point(mat)
@@ -434,9 +440,14 @@ def gradient_search_till_atop(mat, less_diff=0.11, save_name=None, plot=False,re
 	if save_name is not None:
 		save((diffs, coords), save_name)
 
+	if gradient_anim:
+		slides = plot_anim_path(coords, h, w, ideal_coords, position, base=mat)
+		sname = save_name + '_animation_slides'
+		np.save(sname, slides)
+
 	base = None
 	if plot:
-		base = plot_path(coords, h,w)
+		base = plot_path(coords, h,w, base=mat)
 
 	if return_base is True:
 		return diffs, coords ,base
@@ -477,7 +488,7 @@ def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=F
 
 	base = None
 	if plot:
-		base = plot_path(coords, h,w)
+		base = plot_path(coords, h,w, base=mat)
 	if plot_animation is True:
 		anim_slides = plot_anim_path(mat, coords, h,w,ideal, position)
 	print len(coords)
@@ -561,7 +572,7 @@ def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=Fal
 
 	base = None
 	if plot:
-		base = plot_path(coords, h,w)
+		base = plot_path(coords, h,w, base=mat)
 	print len(coords)
 	print len(diffs)
 	if return_base is True:
@@ -679,22 +690,23 @@ if __name__ == '__main__':
 	#mat = np.load('gradient_matrix.npy')
 	##np.save('matrix_1',mat)
 	mat = np.load('matrix_1.npy')
-	plt.imshow(mat)
-	plt.show()
+	#plt.imshow(mat)
+	#plt.show()
 	# the current one is not a bad one!
 	# let's try this again!
 	#diffs, coords, base = levy_flight_till_atop(mat, save_name='levy_flight_search',plot=True,return_base=True)
-	#np.save('levy_flight_base', base)
-	#diffs, coords, base = gradient_search_till_atop(mat,save_name='gradient_search_path', plot=True,return_base=True)
-	#np.save('gradient_base',base)
-	#diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search', plot=True,return_base=True)
-	#np.save('random_walk_base', base)
-	random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
-	levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.1)
-	gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
-	np.save('trial_random_proper', random_nums)
-	np.save('trial_gradient_proper', gradient_nums)
-	np.save('trial_levy_proper', levy_nums)
+	#np.save('levy_flight_base_proper', base)
+	#diffs, coords, base = gradient_search_till_atop(mat,save_name='gradient_search_path_4', plot=True,return_base=True)
+	#np.save('gradient_base_proper_4',base)
+	##diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search', plot=True,return_base=True)
+	#np.save('random_walk_base_proper', base)
+
+	#random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
+	#levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.1)
+	#gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
+	#np.save('trial_random_proper', random_nums)
+	#np.save('trial_gradient_proper', gradient_nums)
+	#np.save('trial_levy_proper', levy_nums)
 	#print len(random_nums)
 	#print len(gradient_nums)
 	#print "mean random: ", np.mean(random_nums)
@@ -730,12 +742,13 @@ if __name__ == '__main__':
 
 	plot_random_gradient_levys(rands, gradients, levys)
 	
-	#ificant p value, exactly as wanted!
+	#ifant p value, exactly as wanted!
 	
 	
 	#random_base = np.load('random_walk_base.npy')
 	#levy_base = np.load('levy_flight_base.npy')
 	#gradient_base = np.load('gradient_base.npy')
+	
 	#plot_example_gradient_and_random(random_base, gradient_base)
 	#plot_example_random_levy_gradient(random_base, levy_base, gradient_base, base=mat)
 	#plt.imshow(random_base)
