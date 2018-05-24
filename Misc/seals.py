@@ -314,7 +314,6 @@ def plot_path(coords, height, width,plot=True, base=None):
 		plt.show()
 	return base
 
-anim_slides = plot_anim_path(mat, coords, h,w,ideal, position)
 
 def plot_anim_path(coords, height, width, ideal, position, base=None, flicker_parent=True, init_num=10):
 	if base is None:
@@ -679,9 +678,9 @@ if __name__ == '__main__':
 	#mat = get_gradient_matrix(N=30, radius=5,save_name='gradient_matrix')
 	#mat = np.load('gradient_matrix.npy')
 	##np.save('matrix_1',mat)
-	#mat = np.load('matrix_1.npy')
-	#plt.imshow(mat)
-	#plt.show()
+	mat = np.load('matrix_1.npy')
+	plt.imshow(mat)
+	plt.show()
 	# the current one is not a bad one!
 	# let's try this again!
 	#diffs, coords, base = levy_flight_till_atop(mat, save_name='levy_flight_search',plot=True,return_base=True)
@@ -690,12 +689,12 @@ if __name__ == '__main__':
 	#np.save('gradient_base',base)
 	#diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search', plot=True,return_base=True)
 	#np.save('random_walk_base', base)
-	#random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
-	#levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.1)
-	#gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
-	#np.save('trial_random', random_nums)
-	#np.save('trial_gradient', gradient_nums)
-	#np.save('trial_levy', levy_nums)
+	random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
+	levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.1)
+	gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
+	np.save('trial_random_proper', random_nums)
+	np.save('trial_gradient_proper', gradient_nums)
+	np.save('trial_levy_proper', levy_nums)
 	#print len(random_nums)
 	#print len(gradient_nums)
 	#print "mean random: ", np.mean(random_nums)
@@ -704,9 +703,9 @@ if __name__ == '__main__':
 	#print "gradient variance: ", np.var(gradient_nums)
 	
 	
-	rands = np.load('trial_random.npy')
-	gradients = np.load('trial_gradient.npy')
-	levys = np.load('trial_levy.npy')
+	rands = np.load('trial_random_proper.npy')
+	gradients = np.load('trial_gradient_proper.npy')
+	levys = np.load('trial_levy_proper.npy')
 	print "means"
 	print np.mean(rands)
 	print np.mean(gradients)
@@ -792,3 +791,5 @@ if __name__ == '__main__':
 	# which really isn't the end of the world. it doesn't take that long!
 	# yeah, I don' think this randomness is working... I wonder why I got it seemingly stuck
 	# that one time, having asserted this I'm now going to be in serious trouble... dagnabbit!
+	# obviously I should test both... apart from that I think it's fairl reasonable, almost everything
+	# I need will need to be redone obvously but I'm not sure how it is going to work... ugh!?
