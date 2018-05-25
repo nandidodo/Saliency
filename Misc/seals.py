@@ -686,18 +686,20 @@ def plot_attractor_devlopment_robustness(begin,end, save_name, show=True):
 		levys = np.load(lname)
 		rand_means.append(np.mean(randoms))
 		gradient_means.append(np.mean(gradients))
-		levy_mans.append(np.mean(levys))
+		levy_means.append(np.mean(levys))
 
 	rand_means = np.array(rand_means)
 	gradient_means = np.array(gradient_means)
 	levy_means = np.array(levy_means)
 
-	nums = np.linspace(begin, end)
+	nums = np.array(xrange(begin, end))*10
 
 	fig = plt.figure()
 	plt.plot(nums, rand_means, label='Random Walk')
 	plt.plot(nums, gradient_means, label='Gradient Walk')
 	plt.plot(nums, levy_means, label='Levy Flight')
+	plt.xlabel('Number of epochs of nest development')
+	plt.ylabel('Mean number of steps to reach child')
 	plt.legend()
 	plt.tight_layout()
 	if show:
@@ -826,7 +828,7 @@ if __name__ == '__main__':
 	#os.system('python animate_seals.py vocal_learning_swap_test.npy')
 
 	#next step is chec the robustness for different Ns - i.e. how developed the field is
-
+	"""
 	for i in xrange(1,20):
 		mat = get_gradient_matrix(N=i*10, radius=5,save_name='gradient_matrix')
 	#mat = np.load('gradient_matrix.npy')
@@ -865,7 +867,8 @@ if __name__ == '__main__':
 		#print prob
 
 		plot_random_gradient_levys(random_nums, gradient_nums, levy_nums)
-
+		"""
+	plot_attractor_devlopment_robustness(1,20,'trial_')
 
 
 	# things that need to be done - check the robustness of the results for r - hopefully that will come through
