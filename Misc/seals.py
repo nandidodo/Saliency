@@ -665,7 +665,7 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 	pos = [1,2,3]
 	res = [rand_mu, levy_mu, gradient_mu]
 	fig, ax = plt.subplots()
-	ax.bar(pos, res, width=0.6, yerr=errors, align='center', alpha=0.8, ecolor='black', capsize=10)
+	ax.bar(pos, res, width=0.6, yerr=errors, tick_label=labels, align='center', alpha=0.8, ecolor='black', capsize=10)
 	ax.set_xlabel('Search Strategy')
 	ax.set_ylabel('Mean number of steps to reach target')
 	ax.yaxis.grid(True)
@@ -686,18 +686,20 @@ def t_test(randoms, gradients):
 
 if __name__ == '__main__':
 	#plot_image_changes()
-	#mat = get_gradient_matrix(N=30, radius=5,save_name='gradient_matrix')
+	#mat = get_gradient_matrix(N=50, radius=5,save_name='gradient_matrix')
 	#mat = np.load('gradient_matrix.npy')
-	##np.save('matrix_1',mat)
-	mat = np.load('matrix_1.npy')
+	#np.save('base_matrix_50',mat)
+	#mat = np.load('matrix_1.npy')
+	#mat = np.load('base_matrix_50')
+	# might be interesting to try to create a bunch of different ones
 	#plt.imshow(mat)
 	#plt.show()
 	# the current one is not a bad one!
 	# let's try this again!
 	#diffs, coords, base = levy_flight_till_atop(mat, save_name='levy_flight_search',plot=True,return_base=True)
 	#np.save('levy_flight_base_proper', base)
-	#diffs, coords, base = gradient_search_till_atop(mat,save_name='gradient_search_path_4', plot=True,return_base=True)
-	#np.save('gradient_base_proper_4',base)
+	#diffs, coords, base = gradient_search_till_atop(mat,save_name='gradient_search_path_5', plot=True,return_base=True)
+	#np.save('gradient_base_proper_5',base)
 	##diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search', plot=True,return_base=True)
 	#np.save('random_walk_base_proper', base)
 
@@ -714,7 +716,7 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 	
-	
+	"""
 	rands = np.load('trial_random_proper.npy')
 	gradients = np.load('trial_gradient_proper.npy')
 	levys = np.load('trial_levy_proper.npy')
@@ -741,7 +743,7 @@ if __name__ == '__main__':
 	print prob
 
 	plot_random_gradient_levys(rands, gradients, levys)
-	
+	"""
 	#ifant p value, exactly as wanted!
 	
 	
@@ -788,6 +790,48 @@ if __name__ == '__main__':
 	#test it with the random swapping to see if it helps
 	#plot_image_changes(N=400, radius=3, plot_after=100000, save_name='vocal_learning_swap_test', swap_number=200)
 	#os.system('python animate_seals.py vocal_learning_swap_test.npy')
+
+	#next step is chec the robustness for different Ns - i.e. how developed the field is
+
+	for i in xrange(1,20):
+		mat = get_gradient_matrix(N=i*10, radius=5,save_name='gradient_matrix')
+	#mat = np.load('gradient_matrix.npy')
+		sname = 'base_matrix_' + str(i*10)
+		np.save(sname,mat)
+		random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
+		levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.1)
+		gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
+		np.save('trial_random_' + str(i*10), random_nums)
+		np.save('trial_gradient_' + str(i*10), gradient_nums)
+		np.save('trial_levy_' + str(i*10), levy_nums)
+
+		#rands = np.load('trial_random_proper.npy')
+		#gradients = np.load('trial_gradient_proper.npy')
+		#levys = np.load('trial_levy_proper.npy')
+		#print "means"
+		#print np.mean(rands)
+		#print np.mean(gradients)
+		#print np.mean(levys)
+		#print "variances"
+		#print np.var(rands)
+		#print np.var(gradients)
+		#print np.var(levys)
+
+		#print "t-test rands gradients"
+		#t,prob = t_test(rands, gradients)
+		#print t 
+		#print prob
+		#print "t-test rands levys"
+		#t,prob = t_test(rands, levys)
+		#print t
+		#print prob
+		#print "t-test gradients levys"
+		#t,prob = t_test(gradients, levys)
+		#print t
+		#print prob
+
+		plot_random_gradient_levys(random_nums, gradient_nums, levy_nums)
+
 
 
 	# things that need to be done - check the robustness of the results for r - hopefully that will come through
