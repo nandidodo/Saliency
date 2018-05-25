@@ -440,7 +440,7 @@ def gradient_search_till_atop(mat, less_diff=0.01, save_name=None, plot=False,re
 	if save_name is not None:
 		save((diffs, coords), save_name)
 
-	if gradient_anim:
+	if gradient_anim and save_name is not None:
 		slides = plot_anim_path(coords, h, w, ideal_coords, position, base=mat)
 		sname = save_name + '_animation_slides'
 		np.save(sname, slides)
@@ -672,6 +672,40 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 	plt.legend()
 	plt.tight_layout()
 	plt.show()
+
+def plot_attractor_devlopment_robustness(begin,end, save_name, show=True):
+	rand_means = []
+	gradient_means = []
+	levy_means = []
+	for i in xrange(begin, end):
+		rname = save_name + 'random_' + str(i*10) + '.npy'
+		gname = save_name + 'gradient_' + str(i*10) + '.npy'
+		lname = save_name + 'levy_' + str(i*10) + '.npy'
+		randoms = np.load(rname)
+		gradients = np.load(gname)
+		levys = np.load(lname)
+		rand_means.append(np.mean(randoms))
+		gradient_means.append(np.mean(gradients))
+		levy_mans.append(np.mean(levys))
+
+	rand_means = np.array(rand_means)
+	gradient_means = np.array(gradient_means)
+	levy_means = np.array(levy_means)
+
+	nums = np.linspace(begin, end)
+
+	fig = plt.figure()
+	plt.plot(nums, rand_means, label='Random Walk')
+	plt.plot(nums, gradient_means, label='Gradient Walk')
+	plt.plot(nums, levy_means, label='Levy Flight')
+	plt.legend()
+	plt.tight_layout()
+	if show:
+		plt.show()
+	return fig
+
+	#now plot
+
 
 
 def t_test(randoms, gradients):
