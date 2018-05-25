@@ -453,11 +453,12 @@ def gradient_search_till_atop(mat, less_diff=0.01, save_name=None, plot=False,re
 		return diffs, coords ,base
 	return diffs, coords
 
-def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=False, plot_animation=False,return_base=False):
+def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=False, plot_animation=False,return_base=False, gradient_anim=False):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
 	#initialise random point
-	ideal = mat[select_random_point(mat)]
+	ideal_coords = select_random_point(mat)
+	ideal = mat[ideal_coords]
 	#initialise position
 	#position = select_random_point(mat)
 	position = select_random_edge_point(mat)
@@ -485,6 +486,11 @@ def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=F
 
 	if save_name is not None:
 		save((diffs, coords), save_name)
+
+	if gradient_anim and save_name is not None:
+		slides = plot_anim_path(coords, h, w, ideal_coords, position, base=mat)
+		sname = save_name + 'animation_slides'
+		np.save(sname, slides)
 
 	base = None
 	if plot:
@@ -516,12 +522,12 @@ def step_in_direction(mat, position, current_direction,step_size=1):
 		return coords
 
 
-def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=False, return_base=False):
+def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=False, return_base=False, gradient_anim=False):
 	if len(mat.shape)!=3 and mat.shape[2]!=3:
 		raise ValueError('Matrix must be a colour image 3dimensional with 3rd dimension 3 colour channels')
 	#initialise random point
-	ideal = mat[select_random_point(mat)]
-	#initialise position
+	ideal_coords = select_random_point(mat)
+	ideal = mat[ideal_coords]
 	#position = select_random_point(mat)
 	position = select_random_edge_point(mat)
 	#initialise to high value
@@ -569,6 +575,11 @@ def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=Fal
 
 	if save_name is not None:
 		save((diffs, coords), save_name)
+
+	if gradient_anim and save_name is not None:
+		slides = plot_anim_path(coords, h, w, ideal_coords, position, base=mat)
+		sname = save_name + 'animation_slides'
+		np.save(sname, slides)
 
 	base = None
 	if plot:
@@ -714,29 +725,26 @@ def t_test(randoms, gradients):
 	t,prob = scipy.stats.ttest_ind(randoms, gradients, equal_var=False)
 	return t,prob
 
-# okay, let's try to do something actually productive by using the animations to figure 
-# out what's happening here!
-# basicaly, all I should theoretically have to do is to is to plot it reasonably here
-# I'm not sure if it's possible, but idealy it would be!
-
 
 if __name__ == '__main__':
 	#plot_image_changes()
 	#mat = get_gradient_matrix(N=50, radius=5,save_name='gradient_matrix')
 	#mat = np.load('gradient_matrix.npy')
 	#np.save('base_matrix_50',mat)
-	#mat = np.load('matrix_1.npy')
+	mat = np.load('matrix_1.npy')
+	#plt.imshow(mat)
+	#plt.show()
 	#mat = np.load('base_matrix_50')
 	# might be interesting to try to create a bunch of different ones
 	#plt.imshow(mat)
 	#plt.show()
 	# the current one is not a bad one!
 	# let's try this again!
-	#diffs, coords, base = levy_flight_till_atop(mat, save_name='levy_flight_search',plot=True,return_base=True)
+	#diffs, coords, base = levy_flight_till_atop(mat, save_name='levy_flight_search_3',plot=True,return_base=True, gradient_anim=True)
 	#np.save('levy_flight_base_proper', base)
 	#diffs, coords, base = gradient_search_till_atop(mat,save_name='gradient_search_path_5', plot=True,return_base=True)
 	#np.save('gradient_base_proper_5',base)
-	##diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search', plot=True,return_base=True)
+	diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search_3', plot=True,return_base=True, gradient_anim=True)
 	#np.save('random_walk_base_proper', base)
 
 	#random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
@@ -868,7 +876,7 @@ if __name__ == '__main__':
 
 		plot_random_gradient_levys(random_nums, gradient_nums, levy_nums)
 		"""
-	plot_attractor_devlopment_robustness(1,20,'trial_')
+	#plot_attractor_devlopment_robustness(1,20,'trial_')
 
 
 	# things that need to be done - check the robustness of the results for r - hopefully that will come through
