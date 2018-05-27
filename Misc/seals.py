@@ -687,6 +687,50 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 	plt.tight_layout()
 	plt.show()
 
+
+def get_attractor_development_robustness(begin, end, save_base):
+	mat = get_gradient_matrix(N=300, radius=5, save_name=save_base, save_after=10)
+	for i in xrange(begin, end):
+		#mat = get_gradient_matrix(N=i*10, radius=5,save_name='gradient_matrix')
+		mat = np.load(save_base + '_' + str(i*10) + '.npy')
+		#sname = 'base_matrix_' + str(i*10)
+		#np.save(sname,mat)
+		random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.001)
+		levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.001)
+		gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.001)
+		np.save('proper_trial_random_' + str(i*10), random_nums)
+		np.save('proper_trial_gradient_' + str(i*10), gradient_nums)
+		np.save('proper_trial_levy_' + str(i*10), levy_nums)
+
+		#rands = np.load('trial_random_proper.npy')
+		#gradients = np.load('trial_gradient_proper.npy')
+		#levys = np.load('trial_levy_proper.npy')
+		#print "means"
+		#print np.mean(rands)
+		#print np.mean(gradients)
+		#print np.mean(levys)
+		#print "variances"
+		#print np.var(rands)
+		#print np.var(gradients)
+		#print np.var(levys)
+
+		#print "t-test rands gradients"
+		#t,prob = t_test(rands, gradients)
+		#print t 
+		#print prob
+		#print "t-test rands levys"
+		#t,prob = t_test(rands, levys)
+		#print t
+		#print prob
+		#print "t-test gradients levys"
+		#t,prob = t_test(gradients, levys)
+		#print t
+		#print prob
+
+	plot_attractor_devlopment_robustness(begin, end, save_name='proper_trial')
+
+
+
 def plot_attractor_devlopment_robustness(begin,end, save_name, show=True):
 	rand_means = []
 	gradient_means = []
@@ -734,7 +778,7 @@ if __name__ == '__main__':
 	#mat = get_gradient_matrix(N=50, radius=5,save_name='gradient_matrix')
 	#mat = np.load('gradient_matrix.npy')
 	#np.save('base_matrix_50',mat)
-	mat = np.load('matrix_1.npy')
+	#mat = np.load('matrix_1.npy')
 	#plt.imshow(mat)
 	#plt.show()
 	#mat = np.load('base_matrix_50')
@@ -747,7 +791,7 @@ if __name__ == '__main__':
 	#np.save('levy_flight_base_proper', base)
 	#diffs, coords, base = gradient_search_till_atop(mat,save_name='gradient_search_path_5', plot=True,return_base=True)
 	#np.save('gradient_base_proper_5',base)
-	diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search_3', plot=True,return_base=True, gradient_anim=True)
+	#diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search_3', plot=True,return_base=True, gradient_anim=True)
 	#np.save('random_walk_base_proper', base)
 
 	#random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
