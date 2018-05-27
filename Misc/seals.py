@@ -189,10 +189,13 @@ def plot_image_changes(N=150, radius=5, plot_after=5, multiplier=0, save_after=1
 	return orig_mat
 
 
-def get_gradient_matrix(N=20, radius=5, plot=True, save_name=None):
+def get_gradient_matrix(N=20, radius=5, plot=True, save_name=None,save_after=None):
 	orig_mat = create_random_colour_matrix(50,50)
 	for i in xrange(N):
 		orig_mat = matrix_average_step(orig_mat, radius)
+		if save_after is not None:
+			if i % save_after ==0:
+				np.save(save_name+ '_' + str(i), orig_mat)
 
 	if plot:
 		plt.imshow(orig_mat)
@@ -874,9 +877,13 @@ if __name__ == '__main__':
 		#print t
 		#print prob
 
-		plot_random_gradient_levys(random_nums, gradient_nums, levy_nums)
-		"""
-	#plot_attractor_devlopment_robustness(1,20,'trial_')
+		#plot_random_gradient_levys(random_nums, gradient_nums, levy_nums)
+	"""
+
+	# okay, I need to do this thign right actually
+
+		
+	#plot_attractor_devlopment_robustness(1,20,'proper_trial_')
 
 
 	# things that need to be done - check the robustness of the results for r - hopefully that will come through
