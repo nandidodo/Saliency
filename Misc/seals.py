@@ -672,7 +672,7 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 	print len(randoms)
 	#labels = ['Random', 'Levy','Gradient']
 	#try with matplotlibs latex functionality
-	labels = [r'$Random$', r'$L\grave{e}vy$',r'$Gradient$']
+	labels = [r'$Random$', r'$L\acute{e}vy$',r'$Gradient$']
 	errors = [rand_stderr, gradient_stderr, levy_stderr]
 
 #plt.title(r'$\ddot{o}\acute{e}\grave{e}\hat{O}\breve{i}\bar{A}\tilde{n}\vec{q}$')
@@ -757,7 +757,7 @@ def plot_attractor_devlopment_robustness(begin,end, save_name, show=True):
 	plt.plot(nums, gradient_means, label='Gradient Walk')
 	plt.plot(nums, levy_means, label='Levy Flight')
 	plt.xlabel('Number of epochs of nest development')
-	plt.ylabel('Mean number of steps to reach child')
+	plt.ylabel('Mean number of steps to reach infant')
 	plt.legend()
 	plt.tight_layout()
 	if show:
