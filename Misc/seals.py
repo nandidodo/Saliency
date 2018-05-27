@@ -688,19 +688,19 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 	plt.show()
 
 
-def get_attractor_development_robustness(begin, end, save_base):
-	mat = get_gradient_matrix(N=300, radius=5, save_name=save_base, save_after=10)
+def get_attractor_development_robustness(begin, end, save_base, save_after):
+	mat = get_gradient_matrix(N=300, radius=5, save_name=save_base + '_matrix', save_after=save_after)
 	for i in xrange(begin, end):
 		#mat = get_gradient_matrix(N=i*10, radius=5,save_name='gradient_matrix')
-		mat = np.load(save_base + '_' + str(i*10) + '.npy')
+		mat = np.load(save_base +'_matrix' + '_' + str(i*10) + '.npy')
 		#sname = 'base_matrix_' + str(i*10)
 		#np.save(sname,mat)
 		random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.001)
 		levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.001)
 		gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.001)
-		np.save('proper_trial_random_' + str(i*10), random_nums)
-		np.save('proper_trial_gradient_' + str(i*10), gradient_nums)
-		np.save('proper_trial_levy_' + str(i*10), levy_nums)
+		np.save(save_base + '_random_' + str(i*10), random_nums)
+		np.save(save_base + '_gradient_' + str(i*10), gradient_nums)
+		np.save(save_base + '_levy_' + str(i*10), levy_nums)
 
 		#rands = np.load('trial_random_proper.npy')
 		#gradients = np.load('trial_gradient_proper.npy')
@@ -727,7 +727,7 @@ def get_attractor_development_robustness(begin, end, save_base):
 		#print t
 		#print prob
 
-	plot_attractor_devlopment_robustness(begin, end, save_name='proper_trial')
+	plot_attractor_devlopment_robustness(begin, end, save_name=save_base)
 
 
 
@@ -927,7 +927,8 @@ if __name__ == '__main__':
 	# okay, I need to do this thign right actually
 
 		
-	#plot_attractor_devlopment_robustness(1,20,'proper_trial_')
+	#plot_attractor_devlopment_robustness(1,20,'trial_')
+	get_attractor_development_robustness(1,30,'trial_proper', 10)
 
 
 	# things that need to be done - check the robustness of the results for r - hopefully that will come through
