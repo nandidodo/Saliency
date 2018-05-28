@@ -781,10 +781,10 @@ if __name__ == '__main__':
 	#mat = np.load('matrix_1.npy')
 	#plt.imshow(mat)
 	#plt.show()
-	#mat = np.load('base_matrix_50')
+	mat = np.load('base_matrix_50')
 	# might be interesting to try to create a bunch of different ones
-	#plt.imshow(mat)
-	#plt.show()
+	plt.imshow(mat)
+	plt.show()
 	# the current one is not a bad one!
 	# let's try this again!
 	#diffs, coords, base = levy_flight_till_atop(mat, save_name='levy_flight_search_3',plot=True,return_base=True, gradient_anim=True)
@@ -794,12 +794,12 @@ if __name__ == '__main__':
 	#diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search_3', plot=True,return_base=True, gradient_anim=True)
 	#np.save('random_walk_base_proper', base)
 
-	#random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.1)
-	#levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.1)
-	#gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.1)
-	#np.save('trial_random_proper', random_nums)
-	#np.save('trial_gradient_proper', gradient_nums)
-	#np.save('trial_levy_proper', levy_nums)
+	random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.0001)
+	levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.0001)
+	gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.0001)
+	np.save('trial_random_actual_child', random_nums)
+	np.save('trial_gradient_actual_child', gradient_nums)
+	np.save('trial_levy_actual_child', levy_nums)
 	#print len(random_nums)
 	#print len(gradient_nums)
 	#print "mean random: ", np.mean(random_nums)
@@ -807,10 +807,10 @@ if __name__ == '__main__':
 	#print "random variance", np.var(random_nums)
 	#print "gradient variance: ", np.var(gradient_nums)
 	
-	"""
-	rands = np.load('trial_random_proper.npy')
-	gradients = np.load('trial_gradient_proper.npy')
-	levys = np.load('trial_levy_proper.npy')
+	
+	rands = np.load('trial_random_actual_child.npy')
+	gradients = np.load('trial_gradient_actual_child.npy')
+	levys = np.load('trial_levy_actual_child.npy')
 	print "means"
 	print np.mean(rands)
 	print np.mean(gradients)
@@ -834,7 +834,7 @@ if __name__ == '__main__':
 	print prob
 
 	plot_random_gradient_levys(rands, gradients, levys)
-	"""
+	
 	#ifant p value, exactly as wanted!
 	
 	
@@ -929,7 +929,10 @@ if __name__ == '__main__':
 		
 	#plot_attractor_devlopment_robustness(1,20,'trial_')
 	#get_attractor_development_robustness(1,30,'trial_proper', 10)
-	plot_attractor_devlopment_robustness(1,30, 'trial_proper_')
+	#plot_attractor_devlopment_robustness(1,30, 'trial_proper_')
+
+	# so that graph isn't ideal to be honest! - the key issue is that the levy flight doesn't work properly
+	# so that is bad. I should probably redo that to make sure it's actually okay overall!
 
 
 	# things that need to be done - check the robustness of the results for r - hopefully that will come through
