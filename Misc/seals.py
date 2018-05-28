@@ -928,7 +928,8 @@ if __name__ == '__main__':
 
 		
 	#plot_attractor_devlopment_robustness(1,20,'trial_')
-	get_attractor_development_robustness(1,30,'trial_proper', 10)
+	#get_attractor_development_robustness(1,30,'trial_proper', 10)
+	plot_attractor_devlopment_robustness(1,30, 'trial_proper_')
 
 
 	# things that need to be done - check the robustness of the results for r - hopefully that will come through
