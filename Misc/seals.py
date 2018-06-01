@@ -429,8 +429,8 @@ def gradient_search_till_atop(mat, less_diff=0.01, save_name=None, plot=False,re
 	tries=0
 	max_tries = 1000
 
-	while diff > less_diff and tries <= max_tries:
-
+	#while diff > less_diff and tries <= max_tries:
+	while coords != ideal_coords and tries <= max_tries:
 		new_coords, diff = immediate_gradient_step(ideal, position,mat)
 		diffs.append(diff)
 		coords.append(new_coords)
@@ -475,7 +475,8 @@ def random_walk_till_atop(mat, less_diff=0.1, step_size=1,save_name=None, plot=F
 	tries=0
 	max_tries = 1000
 
-	while diff > less_diff and tries <= max_tries:
+	#while diff > less_diff and tries <= max_tries:
+	while coords != ideal_coords and tries <= max_tries:
 
 		new_coords = random_walk_step(mat,position, step_size=step_size)
 		#print "coords: " + str(new_coords)
@@ -546,7 +547,9 @@ def levy_flight_till_atop(mat, less_diff=0.1, alpha=50, save_name=None, plot=Fal
 	curr_num_tries = 0
 	current_direction = None
 
-	while diff > less_diff and tries <= max_tries:
+	#while diff > less_diff and tries <= max_tries:
+	while coords != ideal_coords and tries <= max_tries:
+
 		#print "curr num tries: " , curr_num_tries
 		if curr_num_tries<=0 or current_direction is None:
 			step_size = int(power_law_sample(alpha))
@@ -681,7 +684,7 @@ def plot_random_gradient_levys(randoms, gradients, levys):
 	fig, ax = plt.subplots()
 	ax.bar(pos, res, width=0.6, yerr=errors, tick_label=labels, align='center', alpha=0.8, ecolor='black', capsize=10)
 	ax.set_xlabel('Search Strategy')
-	ax.set_ylabel('Mean number of steps to reach target')
+	ax.set_ylabel('Mean number of steps to reach infant')
 	ax.yaxis.grid(True)
 	plt.legend()
 	plt.tight_layout()
@@ -695,6 +698,7 @@ def get_attractor_development_robustness(begin, end, save_base, save_after):
 		mat = np.load(save_base +'_matrix' + '_' + str(i*10) + '.npy')
 		#sname = 'base_matrix_' + str(i*10)
 		#np.save(sname,mat)
+		# I need to rerun this with significantly fewer less diffs t oget it to work with absolute certainty - i.e. less_diff = 0.0000001 or something!
 		random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.001)
 		levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.001)
 		gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.001)
@@ -731,7 +735,7 @@ def get_attractor_development_robustness(begin, end, save_base, save_after):
 
 
 
-def plot_attractor_devlopment_robustness(begin,end, save_name, show=True):
+def plot_attractor_devlopment_robustness(begin,end, save_name, show=True, plot_individuals=False):
 	rand_means = []
 	gradient_means = []
 	levy_means = []
@@ -745,6 +749,9 @@ def plot_attractor_devlopment_robustness(begin,end, save_name, show=True):
 		rand_means.append(np.mean(randoms))
 		gradient_means.append(np.mean(gradients))
 		levy_means.append(np.mean(levys))
+		if plot_individuals:
+			t_test_results(randoms, gradients, levys)
+			plot_random_gradient_levys(randoms, gradients, levys)
 
 	rand_means = np.array(rand_means)
 	gradient_means = np.array(gradient_means)
@@ -755,7 +762,7 @@ def plot_attractor_devlopment_robustness(begin,end, save_name, show=True):
 	fig = plt.figure()
 	plt.plot(nums, rand_means, label='Random Walk')
 	plt.plot(nums, gradient_means, label='Gradient Walk')
-	plt.plot(nums, levy_means, label='Levy Flight')
+	plt.plot(nums, levy_means, label=r'L$\acute{e}$vy Flight')
 	plt.xlabel('Number of epochs of nest development')
 	plt.ylabel('Mean number of steps to reach infant')
 	plt.legend()
@@ -772,6 +779,20 @@ def t_test(randoms, gradients):
 	t,prob = scipy.stats.ttest_ind(randoms, gradients, equal_var=False)
 	return t,prob
 
+def t_test_results(rands,gradients,levys):
+	print "t-test rands gradients"
+	t,prob = t_test(rands, gradients)
+	print t 
+	print prob
+	print "t-test rands levys"
+	t,prob = t_test(rands, levys)
+	print t
+	print prob
+	print "t-test gradients levys"
+	t,prob = t_test(gradients, levys)
+	print t
+	print prob
+
 
 if __name__ == '__main__':
 	#plot_image_changes()
@@ -781,10 +802,10 @@ if __name__ == '__main__':
 	#mat = np.load('matrix_1.npy')
 	#plt.imshow(mat)
 	#plt.show()
-	mat = np.load('base_matrix_50')
+	#mat = np.load('base_matrix_50')
 	# might be interesting to try to create a bunch of different ones
-	plt.imshow(mat)
-	plt.show()
+	#plt.imshow(mat)
+	#plt.show()
 	# the current one is not a bad one!
 	# let's try this again!
 	#diffs, coords, base = levy_flight_till_atop(mat, save_name='levy_flight_search_3',plot=True,return_base=True, gradient_anim=True)
@@ -794,6 +815,7 @@ if __name__ == '__main__':
 	#diffs, coords, base = random_walk_till_atop(mat, save_name='random_walk_search_3', plot=True,return_base=True, gradient_anim=True)
 	#np.save('random_walk_base_proper', base)
 
+	"""
 	random_nums = run_trial(10000, random_walk_till_atop, mat, less_diff=0.0001)
 	levy_nums = run_trial(10000, levy_flight_till_atop,mat, less_diff=0.0001)
 	gradient_nums = run_trial(10000, gradient_search_till_atop, mat, less_diff=0.0001)
@@ -834,9 +856,12 @@ if __name__ == '__main__':
 	print prob
 
 	plot_random_gradient_levys(rands, gradients, levys)
-	
+	"""
 	#ifant p value, exactly as wanted!
 	
+	# oh dear... random walk does not appear to be superior to levy flight here. dagnabbit!
+	# although it stays more when things are working.. .that's a serious error. not sure what I'm going to do about this
+	# why is it getting more similar across time. that is seriously problematic... ugh... dagnabbit!
 	
 	#random_base = np.load('random_walk_base.npy')
 	#levy_base = np.load('levy_flight_base.npy')
@@ -929,7 +954,7 @@ if __name__ == '__main__':
 		
 	#plot_attractor_devlopment_robustness(1,20,'trial_')
 	#get_attractor_development_robustness(1,30,'trial_proper', 10)
-	#plot_attractor_devlopment_robustness(1,30, 'trial_proper_')
+	plot_attractor_devlopment_robustness(1,30, 'trial_proper_', plot_individuals=True)
 
 	# so that graph isn't ideal to be honest! - the key issue is that the levy flight doesn't work properly
 	# so that is bad. I should probably redo that to make sure it's actually okay overall!
@@ -951,3 +976,7 @@ if __name__ == '__main__':
 	# that one time, having asserted this I'm now going to be in serious trouble... dagnabbit!
 	# obviously I should test both... apart from that I think it's fairl reasonable, almost everything
 	# I need will need to be redone obvously but I'm not sure how it is going to work... ugh!?
+
+	#I'll rerun the experiments tonight when I have access to the battery power and see i fthe results
+	# change at all - hopefully the straight line will be preserved and then I'll write it up tonightI think
+	# I effectively know what I'm going to say so I'll write the planned email first...
